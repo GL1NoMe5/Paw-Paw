@@ -1,4 +1,5 @@
-import { differenceInMonths, parseISO } from 'date-fns';
+import { differenceInMonths, format, parseISO } from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import type { DistractionLevel, Dog, DogFilter, DogSkill, SkillCategory } from '../types';
 
 /**
@@ -80,6 +81,52 @@ export const SCORE_BASE_PERCENT: Record<number, number> = {
   5: 100,
 };
 
+export const SCORE_COMPLETION_LABELS: Record<
+  number,
+  { short: string; label: string; percent: number }
+> = {
+  1: { short: 'Срыв', label: 'Не выполнено / Срыв', percent: 20 },
+  2: { short: 'Слабо', label: 'Слабо / Ошибки', percent: 40 },
+  3: { short: 'С подсказкой', label: 'С подсказкой / Частично', percent: 65 },
+  4: { short: 'Хорошо', label: 'Хорошо', percent: 85 },
+  5: { short: 'Идеально', label: 'Идеально', percent: 100 },
+};
+
+/**
+ * Formats training duration in natural Russian (e.g. "45 мин", "1 час 30 мин", "2 часа").
+ */
+export function formatDurationRussian(minutes: number): string {
+  if (!Number.isFinite(minutes) || minutes <= 0) return '0 мин';
+  const totalMinutes = Math.round(minutes);
+  if (totalMinutes < 60) {
+    return `${totalMinutes} мин`;
+  }
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = totalMinutes % 60;
+  const hourWord = getRussianPlural(hours, 'час', 'часа', 'часов');
+  if (remainingMinutes === 0) {
+    return `${hours} ${hourWord}`;
+  }
+  return `${hours} ${hourWord} ${remainingMinutes} мин`;
+}
+
+/**
+ * Formats an ISO session date in natural Russian (e.g. "5 ноября", or "5 ноября 2025" if year differs).
+ */
+export function formatSessionDateRussian(isoDate: string): string {
+  if (!isoDate) return '—';
+  try {
+    const parsed = parseISO(isoDate);
+    const date = Number.isNaN(parsed.getTime()) ? new Date(isoDate) : parsed;
+    if (Number.isNaN(date.getTime())) return '—';
+    const currentYear = new Date().getFullYear();
+    const pattern = date.getFullYear() === currentYear ? 'd MMMM' : 'd MMMM yyyy';
+    return format(date, pattern, { locale: ru });
+  } catch {
+    return '—';
+  }
+}
+
 /**
  * Recalculate skill mastery (0-100%) based on previous mastery, score (1-5), and distraction level.
  */
@@ -113,36 +160,43 @@ export function calculateCategoryProgress(skills: DogSkill[], category: SkillCat
 
 /**
  * Calculate overall "Ideal / Working Dog" Index (0-100%).
- * 60% OKD + 40% Behavior Correction when both exist.
+ * Preserves 60% training + 40% Behavior Correction when behavior skills exist,
+ * while supporting OKD, ZKS, Sport, and custom training categories.
  */
 export function calculateOverallDogIndex(skills: DogSkill[]): {
   overallIndex: number;
   okdIndex: number;
   behaviorIndex: number;
+  zksIndex: number;
+  sportIndex: number;
 } {
-  const okdSkills = skills.filter((s) => s.category === 'okd');
+  const okdIndex = calculateCategoryProgress(skills, 'okd');
+  const behaviorIndex = calculateCategoryProgress(skills, 'behavior');
+  const zksIndex = calculateCategoryProgress(skills, 'zks');
+  const sportIndex = calculateCategoryProgress(skills, 'sport');
+
   const behSkills = skills.filter((s) => s.category === 'behavior');
-
-  const okdIndex =
-    okdSkills.length > 0
-      ? Math.round(okdSkills.reduce((a, b) => a + b.mastery, 0) / okdSkills.length)
-      : 0;
-
-  const behaviorIndex =
-    behSkills.length > 0
-      ? Math.round(behSkills.reduce((a, b) => a + b.mastery, 0) / behSkills.length)
-      : 0;
+  const trainingCategories = Array.from(
+    new Set(skills.filter((s) => s.category !== 'behavior').map((s) => s.category))
+  );
+  const activeTrainingIndices = trainingCategories.map((cat) =>
+    calculateCategoryProgress(skills, cat)
+  );
 
   let overallIndex = 0;
-  if (okdSkills.length > 0 && behSkills.length > 0) {
-    overallIndex = Math.round(okdIndex * 0.6 + behaviorIndex * 0.4);
-  } else if (okdSkills.length > 0) {
-    overallIndex = okdIndex;
+  if (activeTrainingIndices.length > 0 && behSkills.length > 0) {
+    const trainingAvg =
+      activeTrainingIndices.reduce((acc, val) => acc + val, 0) / activeTrainingIndices.length;
+    overallIndex = Math.round(trainingAvg * 0.6 + behaviorIndex * 0.4);
+  } else if (activeTrainingIndices.length > 0) {
+    const trainingAvg =
+      activeTrainingIndices.reduce((acc, val) => acc + val, 0) / activeTrainingIndices.length;
+    overallIndex = Math.round(trainingAvg);
   } else if (behSkills.length > 0) {
     overallIndex = behaviorIndex;
   }
 
-  return { overallIndex, okdIndex, behaviorIndex };
+  return { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex };
 }
 
 export interface DogRank {
@@ -217,6 +271,12 @@ export function filterDogByCategory(dog: Dog, activeFilter: DogFilter): boolean 
   if (activeFilter === 'active_okd') {
     const okdSkills = dog.skills.filter((s) => s.category === 'okd');
     return !dog.certificateIssued && okdSkills.some((s) => s.mastery < 100);
+  }
+  if (activeFilter === 'zks') {
+    return dog.skills.some((s) => s.category === 'zks');
+  }
+  if (activeFilter === 'sport') {
+    return dog.skills.some((s) => s.category === 'sport');
   }
   if (activeFilter === 'behavior') {
     const behSkills = dog.skills.filter((s) => s.category === 'behavior');

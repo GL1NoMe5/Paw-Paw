@@ -2,9 +2,28 @@ export type Gender = 'male' | 'female';
 
 export type MotivationType = 'food' | 'play' | 'social' | 'mixed';
 
-export type SkillCategory = 'okd' | 'behavior';
+export type BuiltinDisciplineId = 'okd' | 'zks' | 'sport' | 'behavior';
+
+export type SkillCategory = BuiltinDisciplineId | (string & {});
 
 export type DistractionLevel = 'home' | 'quiet_yard' | 'city_street' | 'dog_park';
+
+export interface DisciplineCommandTemplate {
+  id: string;
+  name: string;
+  category: SkillCategory;
+  description: string;
+  isCustom?: boolean;
+}
+
+export interface DisciplineInfo {
+  id: SkillCategory;
+  title: string;
+  shortTitle: string;
+  subtitle: string;
+  description: string;
+  normsSummary: string;
+}
 
 export interface SkillScoreRecord {
   skillId: string;
@@ -78,7 +97,9 @@ export interface TrainingSession {
   id: string;
   dogId: string;
   date: string; // ISO datetime
-  durationMinutes: number; // 15, 30, 45, 60
+  durationMinutes: number; // custom or preset (e.g. 15, 30, 45, 60, 90, 120)
+  timeEntryMode?: 'stopwatch' | 'manual';
+  title?: string;
   distractionLevel: DistractionLevel;
   timerData?: {
     stayDurationSeconds: number; // record stay time in seconds
@@ -88,6 +109,8 @@ export interface TrainingSession {
   overallIndexSnapshot: number; // index at the end of session
   okdIndexSnapshot: number;
   behaviorIndexSnapshot: number;
+  zksIndexSnapshot?: number;
+  sportIndexSnapshot?: number;
   homework: GeneratedHomework;
   nextSessionPlan: NextSessionPlan;
   trainerNotes: string;
@@ -100,7 +123,7 @@ export interface TrainerProfile {
   telegram?: string;
 }
 
-export type DogFilter = 'all' | 'active_okd' | 'behavior' | 'graduates';
+export type DogFilter = 'all' | 'active_okd' | 'zks' | 'sport' | 'behavior' | 'graduates';
 
 export interface AppExportData {
   version: '1.0.0';
@@ -109,9 +132,11 @@ export interface AppExportData {
   trainerProfile: TrainerProfile;
   dogs: Dog[];
   sessions: TrainingSession[];
+  disciplines?: DisciplineInfo[];
+  disciplineCommands?: Record<string, DisciplineCommandTemplate[]>;
 }
 
-export const OKD_PRESETS: Omit<DogSkill, 'mastery' | 'lastScore' | 'lastUpdated'>[] = [
+export const OKD_PRESETS: DisciplineCommandTemplate[] = [
   {
     id: 'okd_sit',
     name: 'Сидеть',
@@ -177,7 +202,104 @@ export const OKD_PRESETS: Omit<DogSkill, 'mastery' | 'lastScore' | 'lastUpdated'
   },
 ];
 
-export const BEHAVIOR_PRESETS: Omit<DogSkill, 'mastery' | 'lastScore' | 'lastUpdated'>[] = [
+export const ZKS_PRESETS: DisciplineCommandTemplate[] = [
+  {
+    id: 'zks_apprehension',
+    name: 'Задержание нарушителя',
+    category: 'zks',
+    description: 'Стремительный пуск, уверенный перехват уходящего или сопротивляющегося фигуранта и плотное удержание',
+    isCustom: false,
+  },
+  {
+    id: 'zks_object_guard',
+    name: 'Охрана вещи',
+    category: 'zks',
+    description: 'Устойчивая охрана оставленной вещи на месте без отвлечения на приманку и без смены позиции',
+    isCustom: false,
+  },
+  {
+    id: 'zks_scent_selection',
+    name: 'Выборка вещи и человека',
+    category: 'zks',
+    description: 'Распознавание и чёткое обозначение целевой вещи или фигуранта по индивидуальному запаху среди контрольных образцов',
+    isCustom: false,
+  },
+  {
+    id: 'zks_escort',
+    name: 'Конвоирование задержанного',
+    category: 'zks',
+    description: 'Сопровождение задержанного в заданной позиции с мгновенным пресечением попытки побега или нападения',
+    isCustom: false,
+  },
+  {
+    id: 'zks_courage_grip',
+    name: 'Проверка на смелость и хватку',
+    category: 'zks',
+    description: 'Уверенная работа под психологическим давлением, замахом и шумом с полной глубокой хваткой в рукав или костюм',
+    isCustom: false,
+  },
+  {
+    id: 'zks_gunshot',
+    name: 'Отношение к выстрелу',
+    category: 'zks',
+    description: 'Ровная собранная реакция на резкие звуки выстрела без испуга, потери контакта и отказа от задания',
+    isCustom: false,
+  },
+  {
+    id: 'zks_out_release',
+    name: 'Прекращение хватки по команде «Дай»',
+    category: 'zks',
+    description: 'Мгновенный отпуск рукава по первой команде проводника и переход в фазу внимательной охраны',
+    isCustom: false,
+  },
+];
+
+export const SPORT_PRESETS: DisciplineCommandTemplate[] = [
+  {
+    id: 'sport_agility_jumps_slalom',
+    name: 'Аджилити: барьеры и слалом',
+    category: 'sport',
+    description: 'Скоростное и безошибочное прохождение барьеров и 12-стоечного слалома по жестовому и голосовому управлению',
+    isCustom: false,
+  },
+  {
+    id: 'sport_agility_tunnel_boom',
+    name: 'Аджилити: туннель и бум',
+    category: 'sport',
+    description: 'Смелый вход в жёсткие и мягкие туннели и точное прохождение контактных зон на буме и горке',
+    isCustom: false,
+  },
+  {
+    id: 'sport_nosework',
+    name: 'Ноузворк: поиск целевого запаха',
+    category: 'sport',
+    description: 'Методичный обыск предметов, помещений и транспорта с ясным замиранием и обозначением закладки',
+    isCustom: false,
+  },
+  {
+    id: 'sport_rally_obedience',
+    name: 'Ралли-обидиенс: связка команд в движении',
+    category: 'sport',
+    description: 'Слаженное прохождение трассы по станциям с поворотами, сменой темпа и фиксацией позиций без натяжения поводка',
+    isCustom: false,
+  },
+  {
+    id: 'sport_frisbee_speed_fetch',
+    name: 'Дог-фризби / Скоростной апорт',
+    category: 'sport',
+    description: 'Ловля диска в прыжке или скоростной поднос снаряда с чистой отдачей в руку для следующего броска',
+    isCustom: false,
+  },
+  {
+    id: 'sport_balance_fitness',
+    name: 'Баланс и физическая подготовка',
+    category: 'sport',
+    description: 'Координационные упражнения на балансировочных подушках, кавалетти и фитнес-снарядах без перегрузки суставов',
+    isCustom: false,
+  },
+];
+
+export const BEHAVIOR_PRESETS: DisciplineCommandTemplate[] = [
   {
     id: 'beh_dog_aggression',
     name: 'Агрессия на других собак',
@@ -233,5 +355,48 @@ export const BEHAVIOR_PRESETS: Omit<DogSkill, 'mastery' | 'lastScore' | 'lastUpd
     category: 'behavior',
     description: 'Полное отсутствие бытовой дисциплины и маркеров внимания',
     isCustom: false,
+  },
+];
+
+export const DEFAULT_DISCIPLINES: DisciplineInfo[] = [
+  {
+    id: 'okd',
+    title: 'Общий курс дрессировки (ОКД)',
+    shortTitle: 'ОКД',
+    subtitle: 'Базовое послушание и нормативная управляемость',
+    description:
+      'Фундаментальный отечественный курс управляемости собаки в городе и на площадке: посадка, укладка, подзыв, движение рядом, выдержка и запрещающие команды.',
+    normsSummary:
+      '9 базовых нормативов · Управление голосом и жестом на дистанции до 15 м, выдержка, апортировка и осмотр прикуса.',
+  },
+  {
+    id: 'zks',
+    title: 'Защитно-караульная служба (ЗКС)',
+    shortTitle: 'ЗКС',
+    subtitle: 'Защитная работа, выборка запаха и управляемая хватка',
+    description:
+      'Специальная подготовка служебных и рабочих собак: задержание и конвоирование нарушителя, охрана вещи, запаховая выборка, выдержка при выстреле и мгновенный отпуск по команде «Дай».',
+    normsSummary:
+      '7 прикладных упражнений · Допуск на базе ОКД: баланс возбуждения и торможения, глубокая хватка и безотказный отпуск.',
+  },
+  {
+    id: 'sport',
+    title: 'Активный спорт и ноузворк',
+    shortTitle: 'Спорт',
+    subtitle: 'Аджилити, ноузворк, ралли-обидиенс, дог-фризби и ОФП',
+    description:
+      'Спортивные кинологические дисциплины для развития скорости, координации, обонятельного поиска и точного контакта проводника с собакой.',
+    normsSummary:
+      '6 направлений · Чистота прохождения трассы и контактных зон, чёткое обозначение запаха и контроль нагрузок.',
+  },
+  {
+    id: 'behavior',
+    title: 'Коррекция поведения',
+    shortTitle: 'Поведение',
+    subtitle: 'Бытовая адаптация, импульсный контроль и снятие триггеров',
+    description:
+      'Системная работа с нежелательными реакциями в быту и на прогулке: натяжение поводка, реактивность на сородичей, подбор с земли, прыжки на людей, шумовые фобии и тревога расставания.',
+    normsSummary:
+      '8 ключевых паттернов · Снижение реактивности при плавном повышении уровня раздражителей среды.',
   },
 ];

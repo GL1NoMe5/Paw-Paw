@@ -3,28 +3,37 @@ import { Toaster, toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import { Plus, RotateCcw, FolderOpen } from 'lucide-react';
 import { WorkstationLayout } from './components/layout/WorkstationLayout';
+import type { AppSection } from './components/layout/Sidebar';
 import { CommandPalette } from './components/layout/CommandPalette';
+import { HomeDisciplinesView } from './components/home/HomeDisciplinesView';
+import { DisciplineCommandBuilderModal } from './components/home/DisciplineCommandBuilderModal';
+import { StudentsDirectoryView } from './components/crm/StudentsDirectoryView';
 import { DogDossier } from './components/crm/DogDossier';
 import { DogModal } from './components/crm/DogModal';
 import { SkillManagerModal } from './components/crm/SkillManagerModal';
 import { ImportExportModal } from './components/crm/ImportExportModal';
 import { TrainingSessionPanel } from './components/training/TrainingSessionPanel';
 import { AnalyticsPanel } from './components/analytics/AnalyticsPanel';
+import { AchievementsView } from './components/certificate/AchievementsView';
 import { CertificateModal } from './components/certificate/CertificateModal';
 import { useDogStore } from './store/useDogStore';
-import type { Dog, TrainingSession } from './types';
+import type { Dog, DogFilter, SkillCategory, TrainingSession } from './types';
+
+type StudentSubView = 'directory' | 'dossier' | 'training' | 'analytics';
 
 export function App() {
   const dogs = useDogStore((s) => s.dogs);
   const activeDogId = useDogStore((s) => s.activeDogId);
   const setActiveDog = useDogStore((s) => s.setActiveDog);
+  const setFilter = useDogStore((s) => s.setFilter);
   const resetToDemoData = useDogStore((s) => s.resetToDemoData);
 
-  // Active dog resolution
   const activeDog = dogs.find((d) => d.id === activeDogId) || dogs[0] || null;
 
-  // View state: 'dossier' | 'training' | 'analytics'
-  const [activeView, setActiveView] = useState<'dossier' | 'training' | 'analytics'>('dossier');
+  // Top-level navigation: 'home' | 'students' | 'achievements'
+  const [activeSection, setActiveSection] = useState<AppSection>('home');
+  const [studentSubView, setStudentSubView] = useState<StudentSubView>('directory');
+  const [achievementDogId, setAchievementDogId] = useState<string | null>(null);
 
   // Modal Dialog States
   const [isDogModalOpen, setIsDogModalOpen] = useState(false);
@@ -33,6 +42,8 @@ export function App() {
   const [isImportExportOpen, setIsImportExportOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
+  const [isCommandBuilderOpen, setIsCommandBuilderOpen] = useState(false);
+  const [commandBuilderCategory, setCommandBuilderCategory] = useState<SkillCategory>('okd');
 
   // Global keyboard shortcut: Ctrl+K / Cmd+K
   useEffect(() => {
@@ -45,6 +56,13 @@ export function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const handleSectionChange = (section: AppSection) => {
+    setActiveSection(section);
+    if (section === 'students') {
+      setStudentSubView('directory');
+    }
+  };
 
   const handleOpenAddDog = () => {
     setDogToEdit(null);
@@ -64,12 +82,23 @@ export function App() {
     }
   };
 
-  const handleOpenCertificate = () => {
-    if (activeDog) {
-      setIsCertificateOpen(true);
-    } else {
-      toast.error('Выберите карточку ученика для оформления диплома');
+  const handleOpenAchievementsForDog = (dogId: string | null) => {
+    if (dogId) {
+      setActiveDog(dogId);
+      setAchievementDogId(dogId);
     }
+    setActiveSection('achievements');
+  };
+
+  const handleOpenCommandBuilder = (category?: SkillCategory) => {
+    setCommandBuilderCategory(category ?? 'okd');
+    setIsCommandBuilderOpen(true);
+  };
+
+  const handleOpenStudentsWithFilter = (filter: DogFilter) => {
+    setFilter(filter);
+    setActiveSection('students');
+    setStudentSubView('directory');
   };
 
   const handleSessionCompleted = (session: TrainingSession) => {
@@ -83,7 +112,7 @@ export function App() {
         description: `Индекс подготовки достиг ${session.overallIndexSnapshot}%. Доступно оформление архивного диплома А4`,
         action: {
           label: 'Диплом А4',
-          onClick: () => setIsCertificateOpen(true),
+          onClick: () => handleOpenAchievementsForDog(session.dogId),
         },
       });
       if (session.overallIndexSnapshot >= 100 || session.okdIndexSnapshot >= 100) {
@@ -92,78 +121,134 @@ export function App() {
     }
   };
 
+  const renderStudentsSection = () => {
+    if (studentSubView === 'directory') {
+      return (
+        <StudentsDirectoryView
+          onSelectDog={(dogId) => {
+            setActiveDog(dogId);
+            setStudentSubView('dossier');
+          }}
+          onStartTrainingForDog={(dogId) => {
+            setActiveDog(dogId);
+            setStudentSubView('training');
+          }}
+          onAddDog={handleOpenAddDog}
+          onEditDog={(dog) => {
+            setActiveDog(dog.id);
+            setDogToEdit(dog);
+            setIsDogModalOpen(true);
+          }}
+        />
+      );
+    }
+
+    if (!activeDog) {
+      return (
+        <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-[#1f1b16]/10 bg-[#fdfbf7] my-8 max-w-2xl mx-auto">
+          <div className="size-12 rounded-lg bg-[#efe9df] border border-[#1f1b16]/10 flex items-center justify-center text-[#7b7266] mb-4">
+            <FolderOpen className="size-5 text-[#5e554a]" strokeWidth={1.5} />
+          </div>
+
+          <h2 className="font-serif text-lg font-medium text-[#1f1b16] mb-1">
+            Картотека учеников пуста
+          </h2>
+          <p className="text-xs text-[#5e554a] max-w-md leading-relaxed mb-6">
+            Заведите первую карточку собаки с кинологическим паспортом или загрузите три демонстрационных профиля: Рекс (<span className="font-mono tabular-nums">96%</span>), Булочка (<span className="font-mono tabular-nums">64%</span>) и Юта (<span className="font-mono tabular-nums">100%</span>)
+          </p>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleOpenAddDog}
+              className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+            >
+              <Plus className="size-4" strokeWidth={1.5} />
+              <span>Завести карточку</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                resetToDemoData();
+                setStudentSubView('directory');
+                toast.success('Демонстрационные карточки загружены');
+              }}
+              className="h-9 px-4 rounded-lg border border-[#1f1b16]/15 bg-[#efe9df] hover:bg-[#e5dec9] text-[#1f1b16] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+            >
+              <RotateCcw className="size-3.5 text-[#5e554a]" strokeWidth={1.5} />
+              <span>Загрузить демо-данные</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (studentSubView === 'training') {
+      return (
+        <TrainingSessionPanel
+          dog={activeDog}
+          onClose={() => setStudentSubView('dossier')}
+          onSessionCompleted={handleSessionCompleted}
+          className="px-7 sm:px-11 py-8"
+        />
+      );
+    }
+
+    if (studentSubView === 'analytics') {
+      return (
+        <AnalyticsPanel
+          dog={activeDog}
+          onBack={() => setStudentSubView('dossier')}
+          onStartTraining={() => setStudentSubView('training')}
+          className="px-7 sm:px-11 py-8"
+        />
+      );
+    }
+
+    return (
+      <DogDossier
+        dog={activeDog}
+        onBackToStudents={() => setStudentSubView('directory')}
+        onStartTraining={() => setStudentSubView('training')}
+        onOpenAnalytics={() => setStudentSubView('analytics')}
+        onOpenCertificate={() => handleOpenAchievementsForDog(activeDog.id)}
+        onEditDog={handleOpenEditDog}
+        onAddSkill={handleOpenAddSkill}
+      />
+    );
+  };
+
   return (
     <>
       <WorkstationLayout
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
         onAddDogClick={handleOpenAddDog}
         onOpenDatabaseModal={() => setIsImportExportOpen(true)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-        onOpenCertificate={handleOpenCertificate}
       >
         <div className="w-full">
-          {activeDog ? (
-            activeView === 'training' ? (
-              <TrainingSessionPanel
-                dog={activeDog}
-                onClose={() => setActiveView('dossier')}
-                onSessionCompleted={handleSessionCompleted}
-                className="px-7 sm:px-11 py-8"
-              />
-            ) : activeView === 'analytics' ? (
-              <AnalyticsPanel
-                dog={activeDog}
-                onBack={() => setActiveView('dossier')}
-                onStartTraining={() => setActiveView('training')}
-                className="px-7 sm:px-11 py-8"
-              />
-            ) : (
-              <DogDossier
-                dog={activeDog}
-                onStartTraining={() => setActiveView('training')}
-                onOpenAnalytics={() => setActiveView('analytics')}
-                onOpenCertificate={handleOpenCertificate}
-                onEditDog={handleOpenEditDog}
-                onAddSkill={handleOpenAddSkill}
-              />
-            )
-          ) : (
-            /* Empty State when no dogs exist — Warm Paper & Graphite unslop aesthetic */
-            <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-[#1f1b16]/10 bg-[#fdfbf7] my-8 max-w-2xl mx-auto">
-              <div className="size-12 rounded-lg bg-[#efe9df] border border-[#1f1b16]/10 flex items-center justify-center text-[#7b7266] mb-4">
-                <FolderOpen className="size-5 text-[#5e554a]" strokeWidth={1.5} />
-              </div>
+          {activeSection === 'home' && (
+            <HomeDisciplinesView
+              onOpenCommandBuilder={handleOpenCommandBuilder}
+              onOpenStudents={handleOpenStudentsWithFilter}
+              onAddDog={handleOpenAddDog}
+            />
+          )}
 
-              <h2 className="font-serif text-lg font-medium text-[#1f1b16] mb-1">
-                Картотека учеников пуста
-              </h2>
-              <p className="text-xs text-[#5e554a] max-w-md leading-relaxed mb-6">
-                Заведите первую карточку собаки с кинологическим паспортом или загрузите три демонстрационных профиля: Рекс (<span className="font-mono tabular-nums">96%</span>), Булочка (<span className="font-mono tabular-nums">64%</span>) и Юта (<span className="font-mono tabular-nums">100%</span>)
-              </p>
+          {activeSection === 'students' && renderStudentsSection()}
 
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleOpenAddDog}
-                  className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] text-xs font-medium inline-flex items-center gap-2 transition-colors"
-                >
-                  <Plus className="size-4" strokeWidth={1.5} />
-                  <span>Завести карточку</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetToDemoData();
-                    setActiveView('dossier');
-                    toast.success('Демонстрационные карточки загружены');
-                  }}
-                  className="h-9 px-4 rounded-lg border border-[#1f1b16]/15 bg-[#efe9df] hover:bg-[#e5dec9] text-[#1f1b16] text-xs font-medium inline-flex items-center gap-2 transition-colors"
-                >
-                  <RotateCcw className="size-3.5 text-[#5e554a]" strokeWidth={1.5} />
-                  <span>Загрузить демо-данные</span>
-                </button>
-              </div>
-            </div>
+          {activeSection === 'achievements' && (
+            <AchievementsView
+              initialDogId={achievementDogId ?? activeDog?.id ?? null}
+              onOpenStudent={(dogId) => {
+                setActiveDog(dogId);
+                setActiveSection('students');
+                setStudentSubView('dossier');
+              }}
+              className="px-6 sm:px-10 py-8"
+            />
           )}
         </div>
       </WorkstationLayout>
@@ -183,6 +268,12 @@ export function App() {
         />
       )}
 
+      <DisciplineCommandBuilderModal
+        open={isCommandBuilderOpen}
+        onOpenChange={setIsCommandBuilderOpen}
+        initialCategory={commandBuilderCategory}
+      />
+
       <ImportExportModal
         open={isImportExportOpen}
         onOpenChange={setIsImportExportOpen}
@@ -199,16 +290,37 @@ export function App() {
       <CommandPalette
         open={isCommandPaletteOpen}
         onOpenChange={setIsCommandPaletteOpen}
+        onNavigateSection={handleSectionChange}
         onSelectDog={(dogId) => {
           setActiveDog(dogId);
-          setActiveView('dossier');
+          setActiveSection('students');
+          setStudentSubView('dossier');
         }}
-        onOpenDossier={() => setActiveView('dossier')}
-        onStartTraining={() => setActiveView('training')}
-        onOpenAnalytics={() => setActiveView('analytics')}
-        onOpenCertificate={handleOpenCertificate}
+        onOpenDossier={() => {
+          setActiveSection('students');
+          setStudentSubView('dossier');
+        }}
+        onStartTraining={() => {
+          if (activeDog) {
+            setActiveSection('students');
+            setStudentSubView('training');
+          } else {
+            handleOpenAddDog();
+          }
+        }}
+        onOpenAnalytics={() => {
+          if (activeDog) {
+            setActiveSection('students');
+            setStudentSubView('analytics');
+          } else {
+            setActiveSection('students');
+            setStudentSubView('directory');
+          }
+        }}
+        onOpenCertificate={() => handleOpenAchievementsForDog(activeDog?.id ?? null)}
         onAddDog={handleOpenAddDog}
         onOpenDatabase={() => setIsImportExportOpen(true)}
+        onOpenCommandBuilder={handleOpenCommandBuilder}
       />
 
       <Toaster

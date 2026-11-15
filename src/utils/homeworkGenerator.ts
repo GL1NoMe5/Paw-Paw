@@ -6,6 +6,7 @@ import type {
   NextSessionPlan,
   SkillScoreRecord,
 } from '../types';
+import { formatDurationRussian, getRussianPlural } from './calculations';
 
 export const SKILL_METHOD_TIPS: Record<string, string> = {
   okd_stay:
@@ -24,35 +25,81 @@ export const SKILL_METHOD_TIPS: Record<string, string> = {
     'Упражнение «Внимание на имя»: на прогулке в тихом месте произнесите кличку один раз. Взгляд в глаза — мгновенный щелчок маркера и двойная порция любимого лакомства.',
   beh_ground_scavenging:
     'Отработка запрета на безопасных приманках дома. Если пытается схватить — наступите ногой на кусочек. Уступила — супер-награда из кармана.',
+  zks_apprehension:
+    'Отрабатывайте пуск на рукав только после устойчивой посадки у ноги и зрительного контакта. Не допускайте срыва с места до команды.',
+  zks_object_guard:
+    'Начинайте с короткой выдержки у вещи (15–20 с) при спокойном подходе помощника по дуге, поощряя уверенное облаивание без отхода от предмета.',
+  zks_scent_selection:
+    'Закладывайте простые линейки из 3–4 предметов без лишних запаховых следов, чётко подкрепляя спокойное обозначение целевой вещи укладкой или посадкой.',
+  zks_escort:
+    'Контролируйте дистанцию и плотность посадки при остановках; чередуйте спокойное движение рядом с внимательной фиксацией на фигуранте.',
+  zks_courage_grip:
+    'Развивайте глубокую полную хватку через игровую добычу на мягкой подушке, постепенно добавляя лёгкий замах без давления на психику.',
+  zks_gunshot:
+    'Знакомьте со звуком с большой дистанции (40–50 м) в момент позитивной игры или кормления, постепенно сокращая расстояние только при спокойной реакции.',
+  zks_out_release:
+    'Отрабатывайте «Дай» через обмен на лакомство или второй мяч: хватка замирает, прозвучала команда — мгновенный отпуск и новый игровой пуск.',
+  sport_agility_jumps_slalom:
+    'Работайте над отдельными связками из 2–3 барьеров и входом в слалом под разными углами, поддерживая скорость чистыми своевременными жестами.',
+  sport_agility_tunnel_boom:
+    'Чётко фиксируйте зоны контакта (два задних внизу трапа), поощряя прямо из конечной позиции без преждевременного схода.',
+  sport_nosework:
+    'Давайте собаке время самостоятельно проработать конус запаха; отмечайте момент замирания носа у источника сразу, до появления неуверенности.',
+  sport_rally_obedience:
+    'Проходите по 3–4 знака за один короткий подход, сохраняя бодрый контакт у левой ноги и чистые переходы между позициями.',
+  sport_frisbee_speed_fetch:
+    'Отрабатывайте ровные короткие роллы и броски на удобной высоте; меняйте диск на второй сразу при подносе для поддержания азарта.',
+  sport_balance_fitness:
+    'Следите за ровной спиной и симметрией лап: 3–4 коротких удержания по 10–15 секунд лучше, чем усталость и потеря техники.',
   default:
     'Короткие повторения по 3–5 минут перед кормлением. Хвалите искренне и энергично, заканчивайте упражнение на успешном выполнении!',
 };
 
 export function generateSmartHomework(dog: Dog, scores: SkillScoreRecord[]): GeneratedHomework {
-  // 1. Calculate daily sets summary
-  const dailyTime = dog.dailyTrainingTime || 30;
-  let setsSummary = '';
-  let setDuration = '10 минут';
-  let setsCount = 3;
+  // 1. Calculate daily sets summary for any custom duration (5 to 300+ minutes)
+  const rawTime = Number(dog.dailyTrainingTime);
+  const dailyTime = Number.isFinite(rawTime) && rawTime > 0 ? Math.round(rawTime) : 30;
 
-  if (dailyTime <= 15) {
+  let setsCount = 3;
+  let setMinutes = 10;
+
+  if (dailyTime === 15) {
     setsCount = 2;
-    setDuration = '7 минут';
-  } else if (dailyTime <= 20) {
+    setMinutes = 7;
+  } else if (dailyTime === 20) {
     setsCount = 2;
-    setDuration = '10 минут';
-  } else if (dailyTime <= 30) {
+    setMinutes = 10;
+  } else if (dailyTime === 30) {
     setsCount = 3;
-    setDuration = '10 минут';
-  } else if (dailyTime <= 45) {
+    setMinutes = 10;
+  } else if (dailyTime === 45) {
     setsCount = 3;
-    setDuration = '15 минут';
-  } else {
+    setMinutes = 15;
+  } else if (dailyTime === 60) {
     setsCount = 4;
-    setDuration = '15 минут';
+    setMinutes = 15;
+  } else if (dailyTime < 10) {
+    setsCount = 1;
+    setMinutes = dailyTime;
+  } else if (dailyTime < 20) {
+    setsCount = 2;
+    setMinutes = Math.max(5, Math.round(dailyTime / 2));
+  } else if (dailyTime < 45) {
+    setsCount = 3;
+    setMinutes = Math.round(dailyTime / 3);
+  } else if (dailyTime < 60) {
+    setsCount = 4;
+    setMinutes = Math.round(dailyTime / 4);
+  } else {
+    setsCount = Math.min(12, Math.max(4, Math.round(dailyTime / 20)));
+    setMinutes = Math.max(15, Math.round(dailyTime / setsCount));
   }
 
-  setsSummary = `${setsCount} подхода по ${setDuration} в день (всего ${dailyTime} мин)`;
+  const setsWord = getRussianPlural(setsCount, 'подход', 'подхода', 'подходов');
+  const minWordAfterPo = getRussianPlural(setMinutes, 'минуте', 'минуты', 'минут');
+  const setDuration = `${setMinutes} ${minWordAfterPo}`;
+  const totalSummary = dailyTime > 60 ? formatDurationRussian(dailyTime) : `${dailyTime} мин`;
+  const setsSummary = `${setsCount} ${setsWord} по ${setDuration} в день (всего ${totalSummary})`;
 
   // 2. Select priority exercises: scores 1 to 3
   const lowScored = scores.filter((s) => s.score <= 3);
@@ -60,13 +107,15 @@ export function generateSmartHomework(dog: Dog, scores: SkillScoreRecord[]): Gen
 
   const exercises: HomeworkExercise[] = targetExercises.map((s) => {
     const tip = SKILL_METHOD_TIPS[s.skillId] || SKILL_METHOD_TIPS.default;
+    const perExerciseSets = Math.max(1, Math.floor(setsCount / (targetExercises.length || 1)));
+    const exSetsWord = getRussianPlural(perExerciseSets, 'подход', 'подхода', 'подходов');
     return {
       skillId: s.skillId,
       skillName: s.skillName,
       category: s.category,
       score: s.score,
       instruction: tip,
-      recommendedSets: `${Math.max(1, Math.floor(setsCount / (targetExercises.length || 1)))} подход(а) по ${setDuration}`,
+      recommendedSets: `${perExerciseSets} ${exSetsWord} по ${setDuration}`,
     };
   });
 

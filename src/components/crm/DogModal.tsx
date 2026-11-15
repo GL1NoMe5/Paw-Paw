@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, Upload, Camera, Check } from 'lucide-react';
+import {
+  X,
+  Upload,
+  Camera,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Minus,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import type { Dog, Gender, MotivationType, DogSkill } from '../../types';
-import { OKD_PRESETS } from '../../types';
+import type {
+  DisciplineCommandTemplate,
+  Dog,
+  DogSkill,
+  Gender,
+  MotivationType,
+} from '../../types';
 import { useDogStore } from '../../store/useDogStore';
+import { suggestBreeds } from '../../data/dogBreeds';
+import { formatDurationRussian } from '../../utils/calculations';
 import { cn } from '../../utils/cn';
 
 interface DogModalProps {
@@ -32,6 +47,8 @@ const AVATAR_PRESETS = [
   },
 ];
 
+const DAILY_TIME_PRESETS = [15, 20, 30, 45, 60, 90, 120] as const;
+
 interface DogFormProps {
   dogToEdit?: Dog | null;
   onClose: () => void;
@@ -40,6 +57,8 @@ interface DogFormProps {
 const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
   const addDog = useDogStore((s) => s.addDog);
   const updateDog = useDogStore((s) => s.updateDog);
+  const disciplines = useDogStore((s) => s.disciplines);
+  const disciplineCommands = useDogStore((s) => s.disciplineCommands);
 
   const [name, setName] = useState(dogToEdit ? dogToEdit.name : '');
   const [gender, setGender] = useState<Gender>(dogToEdit ? dogToEdit.gender : 'male');
@@ -47,11 +66,15 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
     dogToEdit ? dogToEdit.birthDate.slice(0, 10) : '2024-06-01'
   );
   const [breed, setBreed] = useState(dogToEdit ? dogToEdit.breed : '');
+  const [isBreedOpen, setIsBreedOpen] = useState(false);
+  const [activeBreedIdx, setActiveBreedIdx] = useState<number>(-1);
+  const breedWrapperRef = useRef<HTMLDivElement | null>(null);
+
   const [weight, setWeight] = useState<number>(dogToEdit ? dogToEdit.weight : 15);
   const [avatar, setAvatar] = useState(dogToEdit ? dogToEdit.avatar : AVATAR_PRESETS[0].url);
   const [imgError, setImgError] = useState(false);
-  const [dailyTrainingTime, setDailyTrainingTime] = useState<number>(
-    dogToEdit ? dogToEdit.dailyTrainingTime : 30
+  const [dailyTimeInput, setDailyTimeInput] = useState<string>(
+    String(dogToEdit ? dogToEdit.dailyTrainingTime : 30)
   );
   const [motivationType, setMotivationType] = useState<MotivationType>(
     dogToEdit ? dogToEdit.motivationType : 'food'
@@ -65,7 +88,104 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
   const [ownerPhone, setOwnerPhone] = useState(dogToEdit?.ownerPhone ?? '');
   const [ownerTelegram, setOwnerTelegram] = useState(dogToEdit?.ownerTelegram ?? '');
   const [notes, setNotes] = useState(dogToEdit?.notes ?? '');
-  const [initOkdSkills, setInitOkdSkills] = useState(!dogToEdit);
+
+  // Initial command sets selection for new dogs (defaults to OKD commands)
+  const [selectedCommandIds, setSelectedCommandIds] = useState<Set<string>>(() => {
+    if (dogToEdit) return new Set<string>();
+    const okdCmds = disciplineCommands.okd ?? [];
+    return new Set(okdCmds.map((c) => c.id));
+  });
+  const [expandedDisciplines, setExpandedDisciplines] = useState<Record<string, boolean>>({});
+
+  const breedSuggestions = useMemo(() => suggestBreeds(breed, 8), [breed]);
+
+  const parsedDailyTime = useMemo(() => {
+    const n = Number(dailyTimeInput);
+    if (!Number.isFinite(n) || n <= 0) return 0;
+    return Math.round(n);
+  }, [dailyTimeInput]);
+
+  const selectBreed = (selected: string) => {
+    setBreed(selected);
+    setIsBreedOpen(false);
+    setActiveBreedIdx(-1);
+  };
+
+  const handleBreedKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isBreedOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      if (breedSuggestions.length > 0) {
+        e.preventDefault();
+        setIsBreedOpen(true);
+        setActiveBreedIdx(0);
+      }
+      return;
+    }
+
+    if (!isBreedOpen) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (breedSuggestions.length > 0) {
+        setActiveBreedIdx((prev) => (prev + 1) % breedSuggestions.length);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (breedSuggestions.length > 0) {
+        setActiveBreedIdx((prev) =>
+          prev <= 0 ? breedSuggestions.length - 1 : prev - 1
+        );
+      }
+    } else if (e.key === 'Enter') {
+      if (activeBreedIdx >= 0 && activeBreedIdx < breedSuggestions.length) {
+        e.preventDefault();
+        selectBreed(breedSuggestions[activeBreedIdx]);
+      } else {
+        setIsBreedOpen(false);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsBreedOpen(false);
+      setActiveBreedIdx(-1);
+    }
+  };
+
+  const toggleDisciplineSet = (commands: DisciplineCommandTemplate[]) => {
+    if (commands.length === 0) return;
+    setSelectedCommandIds((prev) => {
+      const next = new Set(prev);
+      const anySelected = commands.some((c) => next.has(c.id));
+      if (anySelected) {
+        for (const c of commands) next.delete(c.id);
+      } else {
+        for (const c of commands) next.add(c.id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSingleCommand = (cmdId: string) => {
+    setSelectedCommandIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(cmdId)) {
+        next.delete(cmdId);
+      } else {
+        next.add(cmdId);
+      }
+      return next;
+    });
+  };
+
+  const selectAllForDiscipline = (commands: DisciplineCommandTemplate[], select: boolean) => {
+    setSelectedCommandIds((prev) => {
+      const next = new Set(prev);
+      for (const c of commands) {
+        if (select) next.add(c.id);
+        else next.delete(c.id);
+      }
+      return next;
+    });
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,6 +222,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
       return;
     }
 
+    const safeDailyTime = Math.max(5, Math.min(360, parsedDailyTime || 30));
+
     if (dogToEdit) {
       updateDog(dogToEdit.id, {
         name: name.trim(),
@@ -110,7 +232,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         breed: breed.trim(),
         weight: Number(weight) || 10,
         avatar,
-        dailyTrainingTime: Number(dailyTrainingTime) || 30,
+        dailyTrainingTime: safeDailyTime,
         motivationType,
         favoriteTreats: favoriteTreats.trim(),
         allergies: allergies.trim(),
@@ -122,12 +244,24 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
       });
       toast.success(`Карточка собаки «${name.trim()}» обновлена`);
     } else {
-      let initialSkills: DogSkill[] = [];
-      if (initOkdSkills) {
-        initialSkills = OKD_PRESETS.map((p) => ({
-          ...p,
-          mastery: 0,
-        }));
+      const initialSkills: DogSkill[] = [];
+      const addedIds = new Set<string>();
+
+      for (const disc of disciplines) {
+        const cmds = disciplineCommands[String(disc.id)] ?? [];
+        for (const cmd of cmds) {
+          if (selectedCommandIds.has(cmd.id) && !addedIds.has(cmd.id)) {
+            addedIds.add(cmd.id);
+            initialSkills.push({
+              id: cmd.id,
+              name: cmd.name,
+              category: cmd.category,
+              description: cmd.description,
+              isCustom: Boolean(cmd.isCustom),
+              mastery: 0,
+            });
+          }
+        }
       }
 
       addDog({
@@ -137,7 +271,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         breed: breed.trim(),
         weight: Number(weight) || 10,
         avatar: avatar || AVATAR_PRESETS[0].url,
-        dailyTrainingTime: Number(dailyTrainingTime) || 30,
+        dailyTrainingTime: safeDailyTime,
         motivationType,
         favoriteTreats: favoriteTreats.trim(),
         allergies: allergies.trim(),
@@ -286,18 +420,82 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
           </div>
         </div>
 
-        <div>
+        {/* Breed Autocomplete */}
+        <div ref={breedWrapperRef} className="relative">
           <label className="block font-medium text-[#5e554a] mb-1">
             Порода <span className="text-[#b93829]">*</span>
           </label>
           <input
             type="text"
             required
-            placeholder="Немецкая овчарка"
+            autoComplete="off"
+            placeholder="Начните ввод (напр., фран, корги)"
             value={breed}
-            onChange={(e) => setBreed(e.target.value)}
+            onFocus={() => {
+              if (breed.trim().length > 0 || breedSuggestions.length > 0) {
+                setIsBreedOpen(true);
+              }
+            }}
+            onBlur={() => {
+              setIsBreedOpen(false);
+              setActiveBreedIdx(-1);
+            }}
+            onChange={(e) => {
+              setBreed(e.target.value);
+              setIsBreedOpen(true);
+              setActiveBreedIdx(0);
+            }}
+            onKeyDown={handleBreedKeyDown}
+            role="combobox"
+            aria-expanded={isBreedOpen && breedSuggestions.length > 0}
+            aria-autocomplete="list"
             className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
           />
+
+          {isBreedOpen && (
+            <div
+              role="listbox"
+              className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-xl border border-[#1f1b16]/15 bg-[#fdfbf7] shadow-[0_12px_28px_rgba(31,27,22,0.12)] overflow-hidden max-h-56 overflow-y-auto"
+            >
+              {breedSuggestions.length > 0 ? (
+                <div className="p-1">
+                  {breedSuggestions.map((suggestion, idx) => {
+                    const isHighlighted = idx === activeBreedIdx;
+                    const isExact =
+                      suggestion.toLowerCase() === breed.trim().toLowerCase();
+                    return (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        role="option"
+                        aria-selected={isHighlighted}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          selectBreed(suggestion);
+                        }}
+                        onMouseEnter={() => setActiveBreedIdx(idx)}
+                        className={cn(
+                          'w-full text-left px-2.5 py-2 rounded-lg text-xs flex items-center justify-between gap-2 transition-colors',
+                          isHighlighted
+                            ? 'bg-[#efe9df] text-[#1f1b16] font-medium'
+                            : 'text-[#5e554a] hover:bg-[#efe9df]/60 hover:text-[#1f1b16]'
+                        )}
+                      >
+                        <span className="truncate">{suggestion}</span>
+                        {isExact && (
+                          <Check className="size-3.5 text-[#1f5c3a] flex-shrink-0" strokeWidth={1.75} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="px-3 py-2.5 text-[11.5px] text-[#7b7266]">
+                  Нет в справочнике — будет сохранена своя порода «{breed.trim()}»
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
@@ -328,21 +526,64 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
           />
         </div>
 
-        <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
-            Дневной норматив (мин/день)
-          </label>
-          <select
-            value={dailyTrainingTime}
-            onChange={(e) => setDailyTrainingTime(Number(e.target.value))}
-            className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
-          >
-            <option value={15}>15 минут (2 подхода по 7 мин)</option>
-            <option value={20}>20 минут (2 подхода по 10 мин)</option>
-            <option value={30}>30 минут (3 подхода по 10 мин)</option>
-            <option value={45}>45 минут (3 подхода по 15 мин)</option>
-            <option value={60}>60 минут (4 подхода по 15 мин)</option>
-          </select>
+        {/* Free Daily Training Time + Presets */}
+        <div className="sm:col-span-2">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <label className="font-medium text-[#5e554a]">
+              Дневной норматив (мин/день)
+            </label>
+            <span className="font-mono text-[11px] tabular-nums text-[#1f5c3a]">
+              {parsedDailyTime > 0 ? formatDurationRussian(parsedDailyTime) : '—'}
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <div className="relative w-full sm:w-40 flex-shrink-0">
+              <input
+                type="number"
+                min={5}
+                max={360}
+                step={1}
+                value={dailyTimeInput}
+                onChange={(e) => setDailyTimeInput(e.target.value)}
+                onBlur={() => {
+                  if (!parsedDailyTime || parsedDailyTime < 5) {
+                    setDailyTimeInput('5');
+                  } else if (parsedDailyTime > 360) {
+                    setDailyTimeInput('360');
+                  } else {
+                    setDailyTimeInput(String(parsedDailyTime));
+                  }
+                }}
+                aria-label="Дневной норматив (мин/день)"
+                className="w-full h-9 pl-3 pr-16 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#7b7266] pointer-events-none">
+                мин/день
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {DAILY_TIME_PRESETS.map((presetMin) => {
+                const isSelected = parsedDailyTime === presetMin;
+                return (
+                  <button
+                    key={presetMin}
+                    type="button"
+                    onClick={() => setDailyTimeInput(String(presetMin))}
+                    className={cn(
+                      'h-8 px-2.5 rounded-lg border font-mono text-[11.5px] tabular-nums transition-colors',
+                      isSelected
+                        ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7] font-medium'
+                        : 'bg-[#efe9df]/55 border-[#1f1b16]/15 text-[#5e554a] hover:bg-[#efe9df] hover:text-[#1f1b16]'
+                    )}
+                  >
+                    {presetMin} мин
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -475,20 +716,158 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         </div>
       </div>
 
-      {/* 5. Initial OKD Skills checkbox for new dogs */}
+      {/* 5. Dynamic Discipline Command Set Picker for new dogs */}
       {!dogToEdit && (
-        <div className="pt-3 border-t border-[#1f1b16]/10">
-          <label className="flex items-center gap-2.5 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={initOkdSkills}
-              onChange={(e) => setInitOkdSkills(e.target.checked)}
-              className="size-4 rounded border-[#1f1b16]/25 text-[#1f5c3a] focus:ring-[#1f5c3a]"
-            />
-            <span className="font-medium text-[#1f1b16]">
-              Подключить 9 базовых нормативов курса ОКД (Сидеть, Лежать, Рядом, Выдержка и др.)
+        <div className="pt-3 border-t border-[#1f1b16]/10 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <span className="block font-medium text-[#1f1b16]">
+                Стартовые наборы команд и дисциплин
+              </span>
+              <span className="text-[11.5px] text-[#7b7266]">
+                Выберите курсы целиком или раскройте список для точечной настройки команд
+              </span>
+            </div>
+            <span className="font-mono text-[11.5px] tabular-nums px-2 py-0.5 rounded-[5px] bg-[#efe9df] border border-[#1f1b16]/10 text-[#1f5c3a] font-medium flex-shrink-0">
+              Выбрано: {selectedCommandIds.size}
             </span>
-          </label>
+          </div>
+
+          <div className="space-y-2">
+            {disciplines.map((disc) => {
+              const discId = String(disc.id);
+              const commands = disciplineCommands[discId] ?? [];
+              const selectedCount = commands.filter((c) =>
+                selectedCommandIds.has(c.id)
+              ).length;
+              const allSelected =
+                commands.length > 0 && selectedCount === commands.length;
+              const someSelected = selectedCount > 0 && !allSelected;
+              const isExpanded = Boolean(expandedDisciplines[discId]);
+
+              return (
+                <div
+                  key={discId}
+                  className={cn(
+                    'rounded-xl border transition-colors',
+                    selectedCount > 0
+                      ? 'border-[#1f5c3a]/30 bg-[#efe9df]/35'
+                      : 'border-[#1f1b16]/10 bg-[#fdfbf7]'
+                  )}
+                >
+                  <div className="px-3 py-2.5 flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleDisciplineSet(commands)}
+                      className="flex items-center gap-2.5 text-left min-w-0 flex-1"
+                    >
+                      <span
+                        className={cn(
+                          'size-4 rounded-[4px] border flex items-center justify-center flex-shrink-0 transition-colors',
+                          allSelected
+                            ? 'bg-[#1f5c3a] border-[#1f5c3a] text-[#fdfbf7]'
+                            : someSelected
+                            ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7]'
+                            : 'bg-[#fdfbf7] border-[#1f1b16]/25 text-transparent'
+                        )}
+                      >
+                        {allSelected ? (
+                          <Check className="size-3 stroke-[2.2]" />
+                        ) : someSelected ? (
+                          <Minus className="size-3 stroke-[2.2]" />
+                        ) : null}
+                      </span>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-[#1f1b16] truncate">
+                            {disc.title}
+                          </span>
+                          <span className="font-mono text-[11px] tabular-nums text-[#7b7266] flex-shrink-0">
+                            {selectedCount}/{commands.length}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#7b7266] truncate">
+                          {disc.subtitle}
+                        </p>
+                      </div>
+                    </button>
+
+                    {commands.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedDisciplines((prev) => ({
+                            ...prev,
+                            [discId]: !prev[discId],
+                          }))
+                        }
+                        className="h-7 px-2 rounded-lg border border-[#1f1b16]/10 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#5e554a] text-[11px] inline-flex items-center gap-1 flex-shrink-0 transition-colors"
+                      >
+                        <span>{isExpanded ? 'Свернуть' : 'Команды'}</span>
+                        {isExpanded ? (
+                          <ChevronUp className="size-3.5" strokeWidth={1.5} />
+                        ) : (
+                          <ChevronDown className="size-3.5" strokeWidth={1.5} />
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  {isExpanded && commands.length > 0 && (
+                    <div className="px-3 pb-3 pt-2 border-t border-[#1f1b16]/10 space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-[#7b7266]">
+                        <span>Отметьте нужные команды из набора:</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => selectAllForDiscipline(commands, true)}
+                            className="text-[#1f5c3a] hover:underline font-medium"
+                          >
+                            Выбрать все
+                          </button>
+                          <span>·</span>
+                          <button
+                            type="button"
+                            onClick={() => selectAllForDiscipline(commands, false)}
+                            className="text-[#5e554a] hover:underline"
+                          >
+                            Снять все
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {commands.map((cmd) => {
+                          const checked = selectedCommandIds.has(cmd.id);
+                          return (
+                            <label
+                              key={cmd.id}
+                              title={cmd.description}
+                              className={cn(
+                                'flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none transition-colors text-[11.5px]',
+                                checked
+                                  ? 'bg-[#fdfbf7] border-[#1f5c3a]/35 text-[#1f1b16]'
+                                  : 'bg-[#efe9df]/35 border-[#1f1b16]/10 text-[#5e554a] hover:bg-[#efe9df]/70'
+                              )}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleSingleCommand(cmd.id)}
+                                className="size-3.5 rounded border-[#1f1b16]/25 text-[#1f5c3a] focus:ring-[#1f5c3a]"
+                              />
+                              <span className="truncate font-medium">{cmd.name}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

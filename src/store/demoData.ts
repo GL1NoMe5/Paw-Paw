@@ -246,7 +246,9 @@ export const DEMO_SESSIONS: TrainingSession[] = [
     id: 'sess_rex_5',
     dogId: 'dog_rex',
     date: '2026-11-10T11:00:00.000Z',
-    durationMinutes: 45,
+    durationMinutes: 90,
+    timeEntryMode: 'stopwatch',
+    title: 'Генеральная репетиция норматива ОКД',
     distractionLevel: 'dog_park',
     timerData: { stayDurationSeconds: 180 },
     scores: [
@@ -573,7 +575,9 @@ export const DEMO_SESSIONS: TrainingSession[] = [
     id: 'sess_yuta_6',
     dogId: 'dog_yuta',
     date: '2026-11-05T10:00:00.000Z',
-    durationMinutes: 60,
+    durationMinutes: 120,
+    timeEntryMode: 'manual',
+    title: 'Итоговая аттестация по курсу ОКД',
     distractionLevel: 'dog_park',
     timerData: { stayDurationSeconds: 300 },
     scores: [

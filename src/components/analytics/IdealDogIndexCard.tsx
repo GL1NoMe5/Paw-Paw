@@ -1,7 +1,12 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { Dog } from '../../types';
-import { calculateOverallDogIndex, getDogRank, DOG_RANKS, type DogRank } from '../../utils/calculations';
+import {
+  calculateOverallDogIndex,
+  getDogRank,
+  DOG_RANKS,
+  type DogRank,
+} from '../../utils/calculations';
 import { cn } from '../../utils/cn';
 
 export interface IdealDogIndexCardProps {
@@ -23,7 +28,8 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
   className,
   onNavigateToAnalytics,
 }) => {
-  const { overallIndex, okdIndex, behaviorIndex } = calculateOverallDogIndex(dog.skills);
+  const { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex } =
+    calculateOverallDogIndex(dog.skills);
   const currentRank = getDogRank(overallIndex);
 
   const currentRankIndex = DOG_RANKS.findIndex((r) => r.title === currentRank.title);
@@ -35,52 +41,82 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
   const pointsToNext = nextRank ? Math.max(0, nextRank.minPercent - overallIndex) : 0;
   const pointsToHundred = Math.max(0, 100 - overallIndex);
 
-  const okdCount = dog.skills.filter((s) => s.category === 'okd').length;
-  const behaviorCount = dog.skills.filter((s) => s.category === 'behavior').length;
+  const allDisciplineMetrics = [
+    {
+      id: 'okd',
+      label: 'Курс ОКД',
+      count: dog.skills.filter((s) => s.category === 'okd').length,
+      value: okdIndex,
+    },
+    {
+      id: 'zks',
+      label: 'ЗКС',
+      count: dog.skills.filter((s) => s.category === 'zks').length,
+      value: zksIndex,
+    },
+    {
+      id: 'sport',
+      label: 'Активный спорт',
+      count: dog.skills.filter((s) => s.category === 'sport').length,
+      value: sportIndex,
+    },
+    {
+      id: 'behavior',
+      label: 'Поведение',
+      count: dog.skills.filter((s) => s.category === 'behavior').length,
+      value: behaviorIndex,
+    },
+  ];
+
+  const activeDisciplineMetrics = allDisciplineMetrics.filter((m) => m.count > 0);
+  const visibleMetrics =
+    activeDisciplineMetrics.length > 0
+      ? activeDisciplineMetrics
+      : [allDisciplineMetrics[0], allDisciplineMetrics[3]];
 
   return (
     <div
       className={cn(
-        'bg-[#fdfbf7] rounded-xl border border-[#1f1b16]/10 p-5 space-y-5 text-[#1f1b16]',
+        'bg-[#fffcf8] rounded-2xl border border-[#221c15]/10 p-5 space-y-5 text-[#221c15]',
         className
       )}
     >
       {/* 1. Header & Figures */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#1f1b16]/10">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#221c15]/10">
         <div>
-          <div className="flex items-center gap-2.5 text-xs text-[#7b7266] mb-1">
+          <div className="flex items-center gap-2.5 text-xs text-[#94897a] mb-1">
             <span>Квалификационный индекс</span>
             <span>·</span>
-            <span className="text-[#1f5c3a] font-medium">{currentRank.title}</span>
+            <span className="text-[#286144] font-medium">{currentRank.title}</span>
           </div>
-          <h2 className="font-serif text-xl font-medium text-[#1f1b16]">
+          <h2 className="font-serif text-xl font-medium text-[#221c15]">
             Индекс «Идеальная собака»
           </h2>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-5 sm:gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+            {visibleMetrics.map((metric) => (
+              <React.Fragment key={metric.id}>
+                <div>
+                  <span className="block text-xs text-[#655b4e]">
+                    {metric.label} ({metric.count})
+                  </span>
+                  <span className="font-mono text-lg font-medium tabular-nums text-[#221c15]">
+                    {metric.value}%
+                  </span>
+                </div>
+                <div className="h-7 w-px bg-[#221c15]/10" />
+              </React.Fragment>
+            ))}
+
             <div>
-              <span className="block text-xs text-[#7b7266]">Курс ОКД ({okdCount})</span>
-              <span className="font-mono text-lg font-medium tabular-nums text-[#1f1b16]">
-                {okdIndex}%
-              </span>
-            </div>
-            <div className="h-7 w-px bg-[#1f1b16]/10" />
-            <div>
-              <span className="block text-xs text-[#7b7266]">Поведение ({behaviorCount})</span>
-              <span className="font-mono text-lg font-medium tabular-nums text-[#1f1b16]">
-                {behaviorIndex}%
-              </span>
-            </div>
-            <div className="h-7 w-px bg-[#1f1b16]/10" />
-            <div>
-              <span className="block text-xs text-[#7b7266]">Общий индекс</span>
+              <span className="block text-xs text-[#655b4e]">Общий индекс</span>
               <div className="flex items-baseline gap-1.5">
-                <span className="font-mono text-3xl font-medium tabular-nums text-[#1f5c3a]">
+                <span className="font-mono text-3xl font-medium tabular-nums text-[#286144]">
                   {overallIndex}%
                 </span>
-                <span className="font-mono text-xs tabular-nums text-[#7b7266]">/ 100%</span>
+                <span className="font-mono text-xs tabular-nums text-[#94897a]">/ 100%</span>
               </div>
             </div>
           </div>
@@ -89,10 +125,10 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
             <button
               type="button"
               onClick={onNavigateToAnalytics}
-              className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/15 bg-[#efe9df] hover:bg-[#e5dec9] text-[#1f1b16] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+              className="h-9 px-3.5 rounded-lg border border-[#221c15]/15 bg-[#f8f3eb] hover:bg-[#ebe3d6] text-[#221c15] text-xs font-medium inline-flex items-center gap-2 transition-colors"
             >
               <span>График и сводка</span>
-              <ArrowRight className="size-4 text-[#7b7266]" strokeWidth={1.5} />
+              <ArrowRight className="size-4 text-[#655b4e]" strokeWidth={1.5} />
             </button>
           )}
         </div>
@@ -100,14 +136,14 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
 
       {/* 2. Single Horizontal Precision Instrument Scale */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs text-[#5e554a]">
+        <div className="flex items-center justify-between text-xs text-[#655b4e]">
           <span>Шкала квалификационных нормативов</span>
           {nextRank ? (
-            <span className="font-mono tabular-nums text-[#7b7266]">
+            <span className="font-mono tabular-nums text-[#94897a]">
               До ранга «{nextRank.title}» ({nextRank.minPercent}%): +{pointsToNext}%
             </span>
           ) : (
-            <span className="font-mono tabular-nums text-[#1f5c3a]">
+            <span className="font-mono tabular-nums text-[#286144]">
               {overallIndex === 100
                 ? 'Максимальный норматив выполнен (100%)'
                 : `Высший ранг достигнут (до 100% осталось +${pointsToHundred}%)`}
@@ -117,9 +153,9 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
 
         {/* Instrument Bar with 10% / 20% Graduations */}
         <div className="relative pt-1 pb-1">
-          <div className="relative h-3 w-full rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/15 overflow-hidden">
+          <div className="relative h-3 w-full rounded-[4px] bg-[#f2ece4] border border-[#221c15]/15 overflow-hidden">
             <div
-              className="h-full w-full bg-[#1f5c3a] transition-transform duration-300"
+              className="h-full w-full bg-[#286144] transition-transform duration-300"
               style={{
                 transform: `translateX(-${100 - Math.max(0, Math.min(100, overallIndex))}%)`,
               }}
@@ -130,7 +166,7 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
                 <span
                   key={tick}
                   className={cn(
-                    'w-px bg-[#1f1b16]',
+                    'w-px bg-[#221c15]',
                     tick === 0 || tick === 100
                       ? 'opacity-0'
                       : tick % 20 === 0
@@ -150,7 +186,7 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
                 style={{ left: `${item.percent}%` }}
                 className={cn(
                   'absolute top-0 h-2 w-px -translate-x-1/2',
-                  overallIndex >= item.percent ? 'bg-[#1f5c3a]' : 'bg-[#1f1b16]/25'
+                  overallIndex >= item.percent ? 'bg-[#286144]' : 'bg-[#221c15]/25'
                 )}
               />
             ))}
@@ -158,7 +194,7 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
         </div>
 
         {/* 5 Rank Threshold Labels */}
-        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 pt-1 border-t border-[#1f1b16]/10">
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 pt-1 border-t border-[#221c15]/10">
           {SCALE_THRESHOLDS.map((item, idx) => {
             const nextThreshold = SCALE_THRESHOLDS[idx + 1]?.percent ?? 101;
             const isCurrent =
@@ -171,10 +207,10 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
                 className={cn(
                   'flex items-baseline gap-1.5 text-xs',
                   isCurrent
-                    ? 'text-[#1f5c3a] font-medium'
+                    ? 'text-[#286144] font-medium'
                     : isPassed
-                    ? 'text-[#1f1b16]'
-                    : 'text-[#7b7266]'
+                    ? 'text-[#221c15]'
+                    : 'text-[#94897a]'
                 )}
               >
                 <span className="font-mono tabular-nums text-[11px] flex-shrink-0">

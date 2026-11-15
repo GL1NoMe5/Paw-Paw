@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Check } from 'lucide-react';
 import type { DistractionLevel, DogSkill, SkillCategory } from '../../types';
-import { calculateNewMastery, SCORE_BASE_PERCENT } from '../../utils/calculations';
+import {
+  calculateNewMastery,
+  SCORE_BASE_PERCENT,
+  SCORE_COMPLETION_LABELS,
+} from '../../utils/calculations';
 import { cn } from '../../utils/cn';
+
+export type RapidGradingMode = 'keys' | 'percent' | 'degree';
 
 export interface RapidScoringGridProps {
   skills: DogSkill[];
@@ -12,17 +18,32 @@ export interface RapidScoringGridProps {
   onTogglePracticed: (skillId: string) => void;
   onSetAllPracticed?: (practiced: boolean) => void;
   distractionLevel?: DistractionLevel;
+  activeCategory?: 'all' | SkillCategory;
+  onActiveCategoryChange?: (category: 'all' | SkillCategory) => void;
+  focusedSkillId?: string | null;
+  onFocusedSkillIdChange?: (skillId: string) => void;
   className?: string;
 }
 
-const SCORE_LABELS: Record<number, { title: string; desc: string }> = {
-  1: { title: '1 балл (Срыв)', desc: 'Отказ выполнять, срыв команды' },
-  2: { title: '2 балла (Слабо)', desc: 'Грубые ошибки, повторные команды' },
-  3: { title: '3 балла (Удовл.)', desc: 'С задержкой, помощь проводника' },
-  4: { title: '4 балла (Хорошо)', desc: 'Быстро, мелкие погрешности' },
-  5: { title: '5 баллов (Эталон)', desc: 'Безупречно по первой команде' },
+const BUILTIN_CATEGORY_TABS: ReadonlyArray<{
+  id: SkillCategory;
+  tabLabel: string;
+  badgeLabel: string;
+}> = [
+  { id: 'okd', tabLabel: 'ОКД', badgeLabel: 'ОКД' },
+  { id: 'zks', tabLabel: 'ЗКС', badgeLabel: 'ЗКС' },
+  { id: 'sport', tabLabel: 'Спорт', badgeLabel: 'Спорт' },
+  { id: 'behavior', tabLabel: 'Коррекция', badgeLabel: 'Коррекция' },
+];
+
+const CATEGORY_BADGE_MAP: Record<string, string> = {
+  okd: 'ОКД',
+  zks: 'ЗКС',
+  sport: 'Спорт',
+  behavior: 'Коррекция',
 };
 
+const SCORE_LEVELS = [1, 2, 3, 4, 5] as const;
 const RULER_TICKS = [20, 40, 60, 80] as const;
 
 export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
@@ -33,23 +54,70 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
   onTogglePracticed,
   onSetAllPracticed,
   distractionLevel = 'quiet_yard',
+  activeCategory: controlledCategory,
+  onActiveCategoryChange,
+  focusedSkillId,
+  onFocusedSkillIdChange,
   className,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<'all' | SkillCategory>('all');
-  const [gradingMode, setGradingMode] = useState<'keys' | 'percent'>('keys');
+  const [internalCategory, setInternalCategory] = useState<'all' | SkillCategory>('all');
+  const [gradingMode, setGradingMode] = useState<RapidGradingMode>('keys');
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const filteredSkills = skills.filter((s) => {
-    if (activeCategory === 'all') return true;
-    return s.category === activeCategory;
-  });
+  const activeCategory = controlledCategory ?? internalCategory;
+  const setActiveCategory = useCallback(
+    (category: 'all' | SkillCategory) => {
+      if (controlledCategory === undefined) {
+        setInternalCategory(category);
+      }
+      onActiveCategoryChange?.(category);
+    },
+    [controlledCategory, onActiveCategoryChange]
+  );
 
-  const okdCount = skills.filter((s) => s.category === 'okd').length;
-  const behCount = skills.filter((s) => s.category === 'behavior').length;
+  const categoryTabs = useMemo(() => {
+    const builtinIds = new Set(BUILTIN_CATEGORY_TABS.map((t) => String(t.id)));
+    const extraCategories = Array.from(
+      new Set(skills.map((s) => s.category).filter((cat) => !builtinIds.has(String(cat))))
+    ).map((cat) => ({
+      id: cat,
+      tabLabel: String(cat),
+      badgeLabel: String(cat),
+    }));
+    return [...BUILTIN_CATEGORY_TABS, ...extraCategories];
+  }, [skills]);
+
+  const filteredSkills = useMemo(() => {
+    if (activeCategory === 'all') return skills;
+    return skills.filter((s) => s.category === activeCategory);
+  }, [skills, activeCategory]);
+
+  const matchedFocusedIndex = focusedSkillId
+    ? filteredSkills.findIndex((s) => s.id === focusedSkillId)
+    : -1;
 
   const clampedIndex =
-    filteredSkills.length > 0 ? Math.min(Math.max(0, focusedIndex), filteredSkills.length - 1) : 0;
+    matchedFocusedIndex >= 0
+      ? matchedFocusedIndex
+      : filteredSkills.length > 0
+      ? Math.min(Math.max(0, focusedIndex), filteredSkills.length - 1)
+      : 0;
+
+  const selectIndex = useCallback(
+    (nextIndex: number) => {
+      const clamped =
+        filteredSkills.length > 0
+          ? Math.min(Math.max(0, nextIndex), filteredSkills.length - 1)
+          : 0;
+      setFocusedIndex(clamped);
+      const targetSkill = filteredSkills[clamped];
+      if (targetSkill) {
+        onFocusedSkillIdChange?.(targetSkill.id);
+      }
+    },
+    [filteredSkills, onFocusedSkillIdChange]
+  );
 
   useEffect(() => {
     const cardEl = cardRefs.current[clampedIndex];
@@ -58,12 +126,19 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
     }
   }, [clampedIndex]);
 
+  const cycleGradingMode = useCallback(() => {
+    setGradingMode((prev) =>
+      prev === 'keys' ? 'percent' : prev === 'percent' ? 'degree' : 'keys'
+    );
+  }, []);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (
         target?.tagName === 'INPUT' ||
         target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
         target?.isContentEditable ||
         target?.getAttribute('aria-label') === 'Секундомер выдержки'
       ) {
@@ -72,7 +147,7 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
 
       if (e.key === '%') {
         e.preventDefault();
-        setGradingMode((prev) => (prev === 'keys' ? 'percent' : 'keys'));
+        cycleGradingMode();
         return;
       }
 
@@ -91,17 +166,25 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
 
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setFocusedIndex((prev) => Math.min(filteredSkills.length - 1, prev + 1));
+        selectIndex(clampedIndex + 1);
         return;
       }
 
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setFocusedIndex((prev) => Math.max(0, prev - 1));
+        selectIndex(clampedIndex - 1);
         return;
       }
     },
-    [clampedIndex, filteredSkills, onScoreChange, onTogglePracticed, practicedSkills]
+    [
+      clampedIndex,
+      cycleGradingMode,
+      filteredSkills,
+      onScoreChange,
+      onTogglePracticed,
+      practicedSkills,
+      selectIndex,
+    ]
   );
 
   useEffect(() => {
@@ -116,113 +199,145 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
   ).length;
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-3.5', className)}>
       {/* Keyboard Shortcuts Bar & Mode Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-[#efe9df]/70 border border-[#1f1b16]/10 text-xs text-[#5e554a]">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="text-[#1f1b16] font-medium">Клавиатурный ввод:</span>
-          <span className="inline-flex items-center gap-1">
-            <kbd className="keycap rounded-[5px] border border-[#1f1b16]/15 bg-[#fdfbf7] px-1.5 py-0.5 font-mono text-[11px] text-[#1f1b16]">
-              1–5
-            </kbd>
-            <span>балл</span>
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <kbd className="keycap rounded-[5px] border border-[#1f1b16]/15 bg-[#fdfbf7] px-1.5 py-0.5 font-mono text-[11px] text-[#1f1b16]">
-              ↑ / ↓
-            </kbd>
-            <span>строка</span>
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <kbd className="keycap rounded-[5px] border border-[#1f1b16]/15 bg-[#fdfbf7] px-1.5 py-0.5 font-mono text-[11px] text-[#1f1b16]">
-              %
-            </kbd>
-            <span>режим шкалы</span>
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3 self-end sm:self-auto">
-          <div className="inline-flex items-center rounded-[6px] border border-[#1f1b16]/10 bg-[#fdfbf7] p-0.5">
-            <button
-              type="button"
-              onClick={() => setGradingMode('keys')}
-              className={cn(
-                'h-6 px-2 rounded-[4px] text-[11px] font-mono tabular-nums transition-colors',
-                gradingMode === 'keys'
-                  ? 'bg-[#1f1b16] text-[#fdfbf7] font-medium'
-                  : 'text-[#5e554a] hover:text-[#1f1b16]'
-              )}
-            >
-              1–5
-            </button>
-            <button
-              type="button"
-              onClick={() => setGradingMode('percent')}
-              className={cn(
-                'h-6 px-2 rounded-[4px] text-[11px] font-mono tabular-nums transition-colors',
-                gradingMode === 'percent'
-                  ? 'bg-[#1f1b16] text-[#fdfbf7] font-medium'
-                  : 'text-[#5e554a] hover:text-[#1f1b16]'
-              )}
-            >
-              %
-            </button>
+      <div className="rounded-lg bg-[#efe9df]/70 border border-[#1f1b16]/10 px-3.5 py-2.5 space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#5e554a]">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="text-[#1f1b16] font-medium">Быстрый ввод:</span>
+            <span className="inline-flex items-center gap-1.5">
+              <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+                1–5
+              </kbd>
+              <span>оценка</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+                ↑ / ↓
+              </kbd>
+              <span>строка</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+                %
+              </kbd>
+              <span>вид шкалы</span>
+            </span>
           </div>
 
-          <span className="font-mono tabular-nums text-xs text-[#1f1b16]">
-            Оценено: <span className="font-medium">{scoredCount}</span> из {skills.length}
-          </span>
+          <div className="flex items-center gap-3 self-end sm:self-auto flex-wrap">
+            <div
+              role="group"
+              aria-label="Режим отображения шкалы оценок"
+              className="inline-flex items-center rounded-[7px] border border-[#1f1b16]/10 bg-[#fffcf8] p-0.5"
+            >
+              <button
+                type="button"
+                onClick={() => setGradingMode('keys')}
+                className={cn(
+                  'h-6 px-2 rounded-[5px] text-[11px] font-mono tabular-nums transition-colors',
+                  gradingMode === 'keys'
+                    ? 'bg-[#1f1b16] text-[#fffcf8] font-medium'
+                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                )}
+              >
+                1–5
+              </button>
+              <button
+                type="button"
+                onClick={() => setGradingMode('percent')}
+                className={cn(
+                  'h-6 px-2 rounded-[5px] text-[11px] font-mono tabular-nums transition-colors',
+                  gradingMode === 'percent'
+                    ? 'bg-[#1f1b16] text-[#fffcf8] font-medium'
+                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                )}
+              >
+                %
+              </button>
+              <button
+                type="button"
+                onClick={() => setGradingMode('degree')}
+                className={cn(
+                  'h-6 px-2 rounded-[5px] text-[11px] font-medium transition-colors',
+                  gradingMode === 'degree'
+                    ? 'bg-[#1f1b16] text-[#fffcf8]'
+                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                )}
+              >
+                Степень
+              </button>
+            </div>
+
+            <span className="font-mono tabular-nums text-xs text-[#1f1b16]">
+              Оценено: <span className="font-medium">{scoredCount}</span> из {skills.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Completion Degrees Reference Legend */}
+        <div className="pt-2 border-t border-[#1f1b16]/10 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#5e554a]">
+          <span className="text-[#7b7266] font-medium">Степень выполнения:</span>
+          {SCORE_LEVELS.map((lvl) => {
+            const info = SCORE_COMPLETION_LABELS[lvl];
+            return (
+              <span key={lvl} className="inline-flex items-center gap-1 font-mono tabular-nums">
+                <span className="font-medium text-[#1f1b16]">{lvl}</span>
+                <span className="font-sans text-[#5e554a]">{info.short}</span>
+                <span className="text-[#7b7266]">· {info.percent}%</span>
+              </span>
+            );
+          })}
         </div>
       </div>
 
       {/* Category Filter Tabs & Bulk Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#1f1b16]/10">
-        <div className="inline-flex items-center gap-1 p-1 bg-[#efe9df]/60 rounded-lg border border-[#1f1b16]/10 text-xs">
+        <div className="inline-flex flex-wrap items-center gap-1 p-1 bg-[#efe9df]/60 rounded-lg border border-[#1f1b16]/10 text-xs">
           <button
             type="button"
             onClick={() => setActiveCategory('all')}
             className={cn(
               'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
               activeCategory === 'all'
-                ? 'bg-[#fdfbf7] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
+                ? 'bg-[#fffcf8] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
                 : 'text-[#5e554a] hover:text-[#1f1b16]'
             )}
           >
             <span>Все дисциплины</span>
-            <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">{skills.length}</span>
+            <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">
+              {skills.length}
+            </span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveCategory('okd')}
-            className={cn(
-              'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
-              activeCategory === 'okd'
-                ? 'bg-[#fdfbf7] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
-                : 'text-[#5e554a] hover:text-[#1f1b16]'
-            )}
-          >
-            <span>Курс ОКД</span>
-            <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">{okdCount}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveCategory('behavior')}
-            className={cn(
-              'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
-              activeCategory === 'behavior'
-                ? 'bg-[#fdfbf7] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
-                : 'text-[#5e554a] hover:text-[#1f1b16]'
-            )}
-          >
-            <span>Коррекция</span>
-            <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">{behCount}</span>
-          </button>
+          {categoryTabs.map((tab) => {
+            const count = skills.filter((s) => s.category === tab.id).length;
+            const isActive = activeCategory === tab.id;
+            return (
+              <button
+                key={String(tab.id)}
+                type="button"
+                onClick={() => setActiveCategory(tab.id)}
+                className={cn(
+                  'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
+                  isActive
+                    ? 'bg-[#fffcf8] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
+                    : count === 0
+                    ? 'text-[#7b7266] hover:text-[#1f1b16]'
+                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                )}
+              >
+                <span>{tab.tabLabel}</span>
+                <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {onSetAllPracticed && (
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-3 text-xs self-end sm:self-auto">
             <button
               type="button"
               onClick={() => onSetAllPracticed(true)}
@@ -243,166 +358,227 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
       </div>
 
       {/* Archival Rows of Skills */}
-      <div className="divide-y divide-[#1f1b16]/10 rounded-xl border border-[#1f1b16]/10 bg-[#fdfbf7] overflow-hidden">
-        {filteredSkills.map((skill, index) => {
-          const isFocused = index === clampedIndex;
-          const isPracticed = practicedSkills.has(skill.id);
-          const currentScore = scores[skill.id] || 0;
-          const isOKD = skill.category === 'okd';
+      <div className="divide-y divide-[#1f1b16]/10 rounded-xl border border-[#1f1b16]/10 bg-[#fffcf8] overflow-hidden">
+        {filteredSkills.length === 0 ? (
+          <div className="px-5 py-8 text-center text-xs text-[#7b7266]">
+            В выбранной категории у ученика пока нет добавленных команд. Используйте кнопку{' '}
+            <span className="text-[#1f1b16] font-medium">«+ Добавить команду из наборов»</span>{' '}
+            выше, чтобы включить упражнения из ОКД, ЗКС, спорта или коррекции.
+          </div>
+        ) : (
+          filteredSkills.map((skill, index) => {
+            const isFocused = index === clampedIndex;
+            const isPracticed = practicedSkills.has(skill.id);
+            const currentScore = scores[skill.id] || 0;
+            const categoryLabel =
+              CATEGORY_BADGE_MAP[String(skill.category)] ?? String(skill.category);
+            const currentDegree = currentScore > 0 ? SCORE_COMPLETION_LABELS[currentScore] : null;
 
-          const previewMastery =
-            currentScore > 0
-              ? calculateNewMastery(skill.mastery, currentScore, distractionLevel)
-              : skill.mastery;
-          const delta = previewMastery - skill.mastery;
+            const previewMastery =
+              currentScore > 0
+                ? calculateNewMastery(skill.mastery, currentScore, distractionLevel)
+                : skill.mastery;
+            const delta = previewMastery - skill.mastery;
 
-          return (
-            <div
-              key={skill.id}
-              ref={(el) => {
-                cardRefs.current[index] = el;
-              }}
-              tabIndex={0}
-              onClick={() => setFocusedIndex(index)}
-              onFocus={() => setFocusedIndex(index)}
-              className={cn(
-                'px-4 py-3 transition-colors outline-hidden cursor-pointer select-none',
-                isFocused
-                  ? 'bg-[#efe9df]/80'
-                  : isPracticed
-                  ? 'bg-[#efe9df]/30 hover:bg-[#efe9df]/50'
-                  : 'bg-[#fdfbf7] hover:bg-[#efe9df]/40'
-              )}
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                {/* Left: Checkbox, Name, Category */}
-                <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTogglePracticed(skill.id);
-                    }}
-                    className={cn(
-                      'mt-0.5 size-4 rounded-[4px] border flex items-center justify-center transition-colors flex-shrink-0',
-                      isPracticed
-                        ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7]'
-                        : 'bg-[#fdfbf7] border-[#1f1b16]/25 text-transparent hover:border-[#1f1b16]/50'
-                    )}
-                    title={isPracticed ? 'Отработано в этой сессии' : 'Отметить отработку'}
-                    aria-label={`Отметить отработку ${skill.name}`}
-                  >
-                    <Check className="size-3 stroke-[2]" />
-                  </button>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-[#1f1b16]">
-                        {skill.name}
-                      </span>
-                      <span className="text-[11px] text-[#7b7266]">
-                        {isOKD ? 'ОКД' : 'Коррекция'}
-                      </span>
-                    </div>
-                    {skill.description && (
-                      <p className="text-xs text-[#7b7266] line-clamp-1 mt-0.5">
-                        {skill.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Middle: Precision Tick-Mark Ruler & Live Delta */}
-                <div className="flex items-center gap-3 lg:w-64 flex-shrink-0">
-                  <div className="relative h-2 flex-1 rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 overflow-hidden">
-                    <div
-                      className="h-full bg-[#1f5c3a] transition-colors"
-                      style={{ width: `${previewMastery}%` }}
-                    />
-                    {RULER_TICKS.map((tick) => (
-                      <div
-                        key={tick}
-                        className="absolute top-0 bottom-0 w-px bg-[#1f1b16]/15 pointer-events-none"
-                        style={{ left: `${tick}%` }}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="w-24 text-right font-mono tabular-nums text-xs flex items-center justify-end gap-1.5">
-                    <span className="text-[#1f1b16] font-medium">{previewMastery}%</span>
-                    {currentScore > 0 && (
-                      <span
-                        className={cn(
-                          'text-[11px]',
-                          delta > 0
-                            ? 'text-[#1f5c3a] font-medium'
-                            : delta < 0
-                            ? 'text-[#b93829] font-medium'
-                            : 'text-[#7b7266]'
-                        )}
-                      >
-                        {delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : '0%'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right: Tactile Physical Keycaps (1–5 or % presets) */}
-                <div className="flex items-center gap-1.5 self-end lg:self-auto flex-shrink-0">
-                  {[1, 2, 3, 4, 5].map((scoreVal) => {
-                    const isSelected = currentScore === scoreVal;
-                    const labelInfo = SCORE_LABELS[scoreVal];
-                    const basePct = SCORE_BASE_PERCENT[scoreVal];
-
-                    return (
-                      <button
-                        key={scoreVal}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onScoreChange(skill.id, scoreVal);
-                          if (!isPracticed) {
-                            onTogglePracticed(skill.id);
-                          }
-                        }}
-                        className={cn(
-                          'h-8 rounded-[6px] border font-mono tabular-nums text-xs font-medium transition-colors inline-flex items-center justify-center',
-                          gradingMode === 'percent' ? 'px-2 min-w-[42px]' : 'w-8',
-                          isSelected
-                            ? scoreVal === 5
-                              ? 'bg-[#1f5c3a] border-[#1f5c3a] text-[#fdfbf7]'
-                              : 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7]'
-                            : 'keycap bg-[#fdfbf7] border-[#1f1b16]/15 text-[#5e554a] hover:bg-[#efe9df] hover:text-[#1f1b16] shadow-[0_1px_0_rgba(31,27,22,0.12)]'
-                        )}
-                        title={`${labelInfo.title}: ${labelInfo.desc}`}
-                        aria-label={labelInfo.title}
-                      >
-                        {gradingMode === 'percent' ? `${basePct}%` : scoreVal}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Active Row Status Bar */}
-              {isFocused && (
-                <div className="mt-2 pt-2 border-t border-[#1f1b16]/10 flex items-center justify-between text-[11px] text-[#5e554a]">
-                  <span>
-                    Строка выбрана — нажмите клавишу{' '}
-                    <kbd className="font-mono text-[#1f1b16] font-medium">1–5</kbd> для оценки
-                  </span>
-                  {currentScore > 0 ? (
-                    <span className="font-mono tabular-nums text-[#1f1b16]">
-                      {SCORE_LABELS[currentScore].title} ({skill.mastery}% → {previewMastery}%)
-                    </span>
-                  ) : (
-                    <span className="text-[#7b7266]">Оценка ещё не выставлена</span>
+            return (
+              <div
+                key={skill.id}
+                ref={(el) => {
+                  cardRefs.current[index] = el;
+                }}
+                tabIndex={0}
+                onClick={() => selectIndex(index)}
+                onFocus={() => selectIndex(index)}
+                className={cn(
+                  'px-4 py-3 transition-colors outline-hidden cursor-pointer select-none',
+                  isFocused
+                    ? 'bg-[#efe9df]/80'
+                    : isPracticed
+                    ? 'bg-[#efe9df]/30 hover:bg-[#efe9df]/50'
+                    : 'bg-[#fffcf8] hover:bg-[#efe9df]/40'
+                )}
+              >
+                <div
+                  className={cn(
+                    'flex flex-col justify-between gap-3',
+                    gradingMode === 'degree'
+                      ? 'xl:flex-row xl:items-center'
+                      : 'lg:flex-row lg:items-center'
                   )}
+                >
+                  {/* Left: Checkbox, Name, Category, Score Status */}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTogglePracticed(skill.id);
+                      }}
+                      className={cn(
+                        'mt-0.5 size-4 rounded-[4px] border flex items-center justify-center transition-colors flex-shrink-0',
+                        isPracticed
+                          ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
+                          : 'bg-[#fffcf8] border-[#1f1b16]/25 text-transparent hover:border-[#1f1b16]/50'
+                      )}
+                      title={
+                        isPracticed
+                          ? 'Команда выбрана в тренировку (нажмите, чтобы исключить)'
+                          : 'Включить команду в эту тренировку'
+                      }
+                      aria-label={`Отметить отработку ${skill.name}`}
+                    >
+                      <Check className="size-3 stroke-[2]" />
+                    </button>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-[#1f1b16]">{skill.name}</span>
+                        <span className="px-1.5 py-0.5 rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 text-[10px] font-medium text-[#5e554a]">
+                          {categoryLabel}
+                        </span>
+                        {currentDegree ? (
+                          <span
+                            className={cn(
+                              'px-1.5 py-0.5 rounded-[4px] text-[10px] font-mono tabular-nums font-medium border',
+                              currentScore === 5
+                                ? 'bg-[#286144]/10 border-[#286144]/25 text-[#286144]'
+                                : currentScore <= 2
+                                ? 'bg-[#b84233]/10 border-[#b84233]/25 text-[#b84233]'
+                                : 'bg-[#1f1b16]/5 border-[#1f1b16]/15 text-[#1f1b16]'
+                            )}
+                          >
+                            {currentScore} {currentDegree.short} · {currentDegree.percent}%
+                          </span>
+                        ) : isPracticed ? (
+                          <span className="px-1.5 py-0.5 rounded-[4px] bg-[#b06728]/10 border border-[#b06728]/25 text-[10px] font-medium text-[#b06728]">
+                            Укажите оценку 1–5
+                          </span>
+                        ) : null}
+                      </div>
+                      {skill.description && (
+                        <p className="text-xs text-[#7b7266] line-clamp-1 mt-0.5">
+                          {skill.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Middle: Precision Tick-Mark Ruler & Live Delta */}
+                  <div className="flex items-center gap-3 lg:w-56 flex-shrink-0">
+                    <div className="relative h-2 flex-1 rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 overflow-hidden">
+                      <div
+                        className="h-full bg-[#286144] transition-colors"
+                        style={{ width: `${previewMastery}%` }}
+                      />
+                      {RULER_TICKS.map((tick) => (
+                        <div
+                          key={tick}
+                          className="absolute top-0 bottom-0 w-px bg-[#1f1b16]/15 pointer-events-none"
+                          style={{ left: `${tick}%` }}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="w-24 text-right font-mono tabular-nums text-xs flex items-center justify-end gap-1.5">
+                      <span className="text-[#1f1b16] font-medium">{previewMastery}%</span>
+                      {currentScore > 0 && (
+                        <span
+                          className={cn(
+                            'text-[11px]',
+                            delta > 0
+                              ? 'text-[#286144] font-medium'
+                              : delta < 0
+                              ? 'text-[#b84233] font-medium'
+                              : 'text-[#7b7266]'
+                          )}
+                        >
+                          {delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : '0%'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Tactile Score Buttons (1–5 / % / Степень) */}
+                  <div className="flex flex-wrap items-center gap-1.5 self-end lg:self-auto flex-shrink-0">
+                    {SCORE_LEVELS.map((scoreVal) => {
+                      const isSelected = currentScore === scoreVal;
+                      const compInfo = SCORE_COMPLETION_LABELS[scoreVal];
+                      const basePct = SCORE_BASE_PERCENT[scoreVal];
+
+                      return (
+                        <button
+                          key={scoreVal}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onScoreChange(skill.id, scoreVal);
+                            if (!isPracticed) {
+                              onTogglePracticed(skill.id);
+                            }
+                          }}
+                          className={cn(
+                            'h-8 rounded-[6px] border font-mono tabular-nums text-xs font-medium transition-colors inline-flex items-center justify-center',
+                            gradingMode === 'degree'
+                              ? 'px-2.5 font-sans'
+                              : gradingMode === 'percent'
+                              ? 'px-2 min-w-[44px]'
+                              : 'w-8',
+                            isSelected
+                              ? scoreVal === 5
+                                ? 'bg-[#286144] border-[#286144] text-[#fffcf8]'
+                                : 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
+                              : 'bg-[#fffcf8] border-[#1f1b16]/15 text-[#221c15] hover:bg-[#efe9df] shadow-[0_1px_0_rgba(31,27,22,0.1)]'
+                          )}
+                          title={`${scoreVal} ${compInfo.short} · ${compInfo.percent}% — ${compInfo.label}`}
+                          aria-label={`${scoreVal} ${compInfo.short} · ${compInfo.percent}%`}
+                        >
+                          {gradingMode === 'percent' ? (
+                            `${basePct}%`
+                          ) : gradingMode === 'degree' ? (
+                            <span className="inline-flex items-center gap-1">
+                              <span
+                                className={cn(
+                                  'font-mono text-[11px]',
+                                  isSelected ? 'text-[#fffcf8]/80' : 'text-[#7b7266]'
+                                )}
+                              >
+                                {scoreVal}
+                              </span>
+                              <span>{compInfo.short}</span>
+                            </span>
+                          ) : (
+                            scoreVal
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+
+                {/* Active Row Status Bar */}
+                {isFocused && (
+                  <div className="mt-2 pt-2 border-t border-[#1f1b16]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[#5e554a]">
+                    <span className="inline-flex items-center gap-1.5 flex-wrap">
+                      <span>Строка выбрана — нажмите</span>
+                      <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[10px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+                        1–5
+                      </kbd>
+                      <span>для степени выполнения</span>
+                    </span>
+                    {currentDegree ? (
+                      <span className="font-mono tabular-nums text-[#1f1b16]">
+                        {currentScore} {currentDegree.short} · {currentDegree.percent}% (
+                        {skill.mastery}% → {previewMastery}%)
+                      </span>
+                    ) : (
+                      <span className="text-[#7b7266]">Степень выполнения ещё не выставлена</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

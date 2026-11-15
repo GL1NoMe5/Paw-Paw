@@ -1,58 +1,100 @@
 import type React from 'react';
-import { Sidebar } from './Sidebar';
-import type { DogFilter } from '../../types';
+import { Compass, Users, Award, Search, Plus } from 'lucide-react';
+import { Sidebar, type AppSection } from './Sidebar';
+import { cn } from '../../utils/cn';
+import { useDogStore } from '../../store/useDogStore';
 
 export interface WorkstationLayoutProps {
   children?: React.ReactNode;
-  searchQuery?: string;
-  onSearchChange?: (q: string) => void;
-  activeFilter?: DogFilter;
-  onFilterChange?: (filter: DogFilter) => void;
+  activeSection?: AppSection;
+  onSectionChange?: (section: AppSection) => void;
   onAddDogClick?: () => void;
   onOpenDatabaseModal?: () => void;
-  dogsCount?: number;
-  topbarMetrics?: {
-    totalDogs: number;
-    activeOkdCount: number;
-    averageIdealIndex: number;
-    issuedCertificatesCount: number;
-  };
   onOpenCommandPalette?: () => void;
-  onOpenCertificate?: () => void;
 }
 
 export const WorkstationLayout: React.FC<WorkstationLayoutProps> = ({
   children,
-  searchQuery,
-  onSearchChange,
-  activeFilter,
-  onFilterChange,
+  activeSection = 'home',
+  onSectionChange,
   onAddDogClick,
   onOpenDatabaseModal,
-  dogsCount,
   onOpenCommandPalette,
-  onOpenCertificate,
 }) => {
+  const dogs = useDogStore((s) => s.dogs);
+  const diplomasCount = dogs.filter((d) => d.certificateIssued === true).length;
+
   return (
-    <div className="flex h-dvh w-screen overflow-hidden bg-[#f2ece4] text-[#221c15] p-2.5 sm:p-3.5 gap-3">
+    <div className="flex flex-col md:flex-row h-dvh w-screen overflow-hidden bg-[#f2ece4] text-[#221c15] p-2 sm:p-3.5 gap-2.5 sm:gap-3">
+      {/* Compact Mobile Header (shown below md breakpoint) */}
+      <header className="flex md:hidden items-center justify-between gap-2 px-2 py-1.5 rounded-[14px] bg-[#fffcf8]/90 border border-[#221c15]/[0.08] flex-shrink-0">
+        <span className="font-serif text-[20px] leading-none text-[#221c15] pl-1">
+          Paw-Paw
+        </span>
+
+        <div className="flex items-center gap-1">
+          {[
+            { id: 'home' as AppSection, label: 'Главная', icon: Compass },
+            { id: 'students' as AppSection, label: `Ученики (${dogs.length})`, icon: Users },
+            {
+              id: 'achievements' as AppSection,
+              label: `Дипломы (${diplomasCount})`,
+              icon: Award,
+            },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onSectionChange?.(tab.id)}
+                className={cn(
+                  'h-8 px-2.5 rounded-[8px] text-[12px] inline-flex items-center gap-1.5 transition-colors',
+                  isActive
+                    ? 'bg-[#221c15] text-[#fffcf8] font-medium'
+                    : 'text-[#655b4e] hover:bg-[#f3ede3]'
+                )}
+              >
+                <Icon strokeWidth={1.5} className="size-3.5" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onOpenCommandPalette}
+            aria-label="Поиск и команды"
+            className="size-8 rounded-[8px] bg-[#f8f3eb] border border-[#221c15]/10 text-[#655b4e] flex items-center justify-center"
+          >
+            <Search strokeWidth={1.5} className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onAddDogClick}
+            aria-label="Добавить ученика"
+            className="size-8 rounded-[8px] bg-[#221c15] text-[#fffcf8] flex items-center justify-center"
+          >
+            <Plus strokeWidth={1.6} className="size-3.5" />
+          </button>
+        </div>
+      </header>
+
       {/* Cozy Craft Sidebar sitting directly on the warm desk surface */}
       <Sidebar
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-        activeFilter={activeFilter}
-        onFilterChange={onFilterChange}
+        activeSection={activeSection}
+        onSectionChange={onSectionChange}
         onAddDogClick={onAddDogClick}
         onOpenDatabaseModal={onOpenDatabaseModal}
         onOpenCommandPalette={onOpenCommandPalette}
-        onOpenCertificate={onOpenCertificate}
-        dogsCount={dogsCount}
       />
 
       {/* Main Craft Document Sheet Viewport */}
       <main className="flex-1 min-w-0 h-full overflow-y-auto craft-sheet">
-        <div className="w-full max-w-[1320px] mx-auto">
-          {children}
-        </div>
+        <div className="w-full max-w-[1320px] mx-auto">{children}</div>
       </main>
     </div>
   );
