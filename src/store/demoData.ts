@@ -1,0 +1,609 @@
+import type { Dog, TrainerProfile, TrainingSession } from '../types';
+import { OKD_PRESETS, BEHAVIOR_PRESETS } from '../types';
+
+export const DEFAULT_TRAINER_PROFILE: TrainerProfile = {
+  name: 'Иванов Алексей Владимирович',
+  centerName: 'Кинологический Центр «Альфа-Дог»',
+  phone: '+7 (999) 000-11-22',
+  telegram: '@alphadog_trainer',
+};
+
+// 1. Rex (German Shepherd, male, 2 y.o., 96% -> 100% demo ready)
+export const DEMO_DOG_REX: Dog = {
+  id: 'dog_rex',
+  name: 'Рекс',
+  gender: 'male',
+  birthDate: '2024-11-10', // 2 years old
+  breed: 'Немецкая овчарка',
+  weight: 34.5,
+  avatar: 'https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?auto=format&fit=crop&w=400&q=80',
+  dailyTrainingTime: 30,
+  motivationType: 'food',
+  favoriteTreats: 'Сушеное говяжье легкое, говяжий рубец, сыр',
+  allergies: 'Куриный белок (краснеют уши)',
+  triggers: 'Бегущие дворовые кошки, велосипедисты на высокой скорости',
+  ownerName: 'Дмитрий Ковалев',
+  ownerPhone: '+7 (916) 123-45-67',
+  ownerTelegram: '@dmitry_rex',
+  notes: 'Отличная пищевая мотивация, высокий драйв к работе. Готов к сдаче норматива ОКД с отличием.',
+  createdAt: '2026-09-01T10:00:00.000Z',
+  updatedAt: '2026-11-10T15:30:00.000Z',
+  certificateIssued: false,
+  skills: [
+    { ...OKD_PRESETS[0], mastery: 98, lastScore: 5, lastUpdated: '2026-11-10T11:00:00.000Z' }, // Сидеть
+    { ...OKD_PRESETS[1], mastery: 96, lastScore: 5, lastUpdated: '2026-11-10T11:00:00.000Z' }, // Лежать
+    { ...OKD_PRESETS[2], mastery: 97, lastScore: 5, lastUpdated: '2026-11-10T11:00:00.000Z' }, // Ко мне
+    { ...OKD_PRESETS[3], mastery: 95, lastScore: 5, lastUpdated: '2026-11-10T11:00:00.000Z' }, // Рядом
+    { ...OKD_PRESETS[4], mastery: 96, lastScore: 5, lastUpdated: '2026-11-05T11:00:00.000Z' }, // Место
+    { ...OKD_PRESETS[5], mastery: 92, lastScore: 4, lastUpdated: '2026-11-10T11:00:00.000Z' }, // Выдержка (требует 5 для перехода в 100%!)
+    { ...OKD_PRESETS[6], mastery: 98, lastScore: 5, lastUpdated: '2026-10-31T11:00:00.000Z' }, // Фу/Нельзя
+    { ...OKD_PRESETS[7], mastery: 95, lastScore: 5, lastUpdated: '2026-10-31T11:00:00.000Z' }, // Апорт
+    { ...OKD_PRESETS[8], mastery: 97, lastScore: 5, lastUpdated: '2026-10-31T11:00:00.000Z' }, // Показ зубов
+  ],
+};
+
+// 2. Bulochka (Welsh Corgi, female, 11 mo., 64% with active homework)
+export const DEMO_DOG_BULOCHKA: Dog = {
+  id: 'dog_bulochka',
+  name: 'Булочка',
+  gender: 'female',
+  birthDate: '2025-12-15', // 11 months old
+  breed: 'Вельш-корги пемброк',
+  weight: 11.2,
+  avatar: 'https://images.unsplash.com/photo-1612536057832-2ff7ead58194?auto=format&fit=crop&w=400&q=80',
+  dailyTrainingTime: 20,
+  motivationType: 'mixed',
+  favoriteTreats: 'Отварная индейка, слайсы зеленого яблока, латексный мяч-пищалка',
+  allergies: 'Нет',
+  triggers: 'Встречные собаки на поводках (тянет и лает от перевозбуждения), гости у входной двери',
+  ownerName: 'Анна Морозова',
+  ownerPhone: '+7 (903) 765-43-21',
+  ownerTelegram: '@anna_corgi',
+  notes: 'Очень эмоциональная и контактная. Быстро перевозбуждается. Приоритет — импульсный контроль и провисший поводок.',
+  createdAt: '2026-10-01T12:00:00.000Z',
+  updatedAt: '2026-11-12T16:00:00.000Z',
+  certificateIssued: false,
+  skills: [
+    { ...OKD_PRESETS[0], mastery: 80, lastScore: 4, lastUpdated: '2026-11-04T15:00:00.000Z' }, // Сидеть
+    { ...OKD_PRESETS[1], mastery: 74, lastScore: 4, lastUpdated: '2026-11-04T15:00:00.000Z' }, // Лежать
+    { ...OKD_PRESETS[2], mastery: 68, lastScore: 3, lastUpdated: '2026-11-12T15:00:00.000Z' }, // Ко мне
+    { ...OKD_PRESETS[3], mastery: 58, lastScore: 3, lastUpdated: '2026-11-12T15:00:00.000Z' }, // Рядом
+    { ...BEHAVIOR_PRESETS[1], mastery: 52, lastScore: 2, lastUpdated: '2026-11-12T15:00:00.000Z' }, // Тянет поводок (проблема!)
+    { ...BEHAVIOR_PRESETS[4], mastery: 55, lastScore: 3, lastUpdated: '2026-11-12T15:00:00.000Z' }, // Прыгает на людей (проблема!)
+    { ...BEHAVIOR_PRESETS[2], mastery: 58, lastScore: 3, lastUpdated: '2026-11-04T15:00:00.000Z' }, // Не слушается при раздражителях
+  ],
+};
+
+// 3. Yuta (Golden Retriever, female, 3 y.o., 100% graduate with certificate)
+export const DEMO_DOG_YUTA: Dog = {
+  id: 'dog_yuta',
+  name: 'Юта',
+  gender: 'female',
+  birthDate: '2023-10-05', // 3 years old
+  breed: 'Золотистый ретривер',
+  weight: 29.0,
+  avatar: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=400&q=80',
+  dailyTrainingTime: 30,
+  motivationType: 'social',
+  favoriteTreats: 'Сушеное говяжье мясо, сухарики из ржаного хлеба',
+  allergies: 'Пшеничный глютен',
+  triggers: 'Водоемы (обожает купаться)',
+  ownerName: 'Елена и Сергей Васильевы',
+  ownerPhone: '+7 (925) 987-65-43',
+  ownerTelegram: '@yuta_retriever',
+  notes: 'Золотой стандарт городской собаки и помощника. Прошла полный курс с отличием. Диплом выдан.',
+  createdAt: '2026-06-10T10:00:00.000Z',
+  updatedAt: '2026-11-05T14:00:00.000Z',
+  certificateIssued: true,
+  certificateIssuedAt: '2026-11-05T14:30:00.000Z',
+  skills: [
+    { ...OKD_PRESETS[0], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[1], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[2], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[3], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[4], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[5], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[6], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[7], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+    { ...OKD_PRESETS[8], mastery: 100, lastScore: 5, lastUpdated: '2026-11-05T10:00:00.000Z' },
+  ],
+};
+
+export const DEMO_DOGS: Dog[] = [DEMO_DOG_REX, DEMO_DOG_BULOCHKA, DEMO_DOG_YUTA];
+
+export const DEMO_SESSIONS: TrainingSession[] = [
+  // Rex Sessions (5 sessions)
+  {
+    id: 'sess_rex_1',
+    dogId: 'dog_rex',
+    date: '2026-10-18T11:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'quiet_yard',
+    timerData: { stayDurationSeconds: 45 },
+    scores: [
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 4 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 4 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 4 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 3 },
+    ],
+    overallIndexSnapshot: 84,
+    okdIndexSnapshot: 84,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [
+        {
+          skillId: 'okd_stay',
+          skillName: 'Выдержка',
+          category: 'okd',
+          score: 3,
+          instruction: 'Увеличивайте время до 20–30 с, не отходите дальше 3 шагов.',
+          recommendedSets: '1 подход по 10 минут',
+        },
+      ],
+      positiveFinisher: {
+        skillName: 'Сидеть',
+        instruction: 'Заканчивайте четкой посадкой и супер-похвалой.',
+      },
+      generalAdvice: 'Используйте сыр перед ужином.',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выдержка'],
+      suggestedDistractionTarget: 'city_street',
+      suggestedChallenges: ['Увеличение дистанции до 5 метров'],
+    },
+    trainerNotes: 'Рекс отлично включился в работу. Выдержка пока требует контроля.',
+  },
+  {
+    id: 'sess_rex_2',
+    dogId: 'dog_rex',
+    date: '2026-10-24T11:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'city_street',
+    timerData: { stayDurationSeconds: 60 },
+    scores: [
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 5 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 4 },
+      { skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 4 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 4 },
+    ],
+    overallIndexSnapshot: 88,
+    okdIndexSnapshot: 88,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Сидеть', instruction: 'Фиксация позитива' },
+      generalAdvice: 'Движение рядом в разном темпе',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Рядом', 'Выдержка'],
+      suggestedDistractionTarget: 'city_street',
+      suggestedChallenges: ['Повороты на 180 градусов'],
+    },
+    trainerNotes: 'Городская улица пройдена уверенно. Собака ориентирована на проводника.',
+  },
+  {
+    id: 'sess_rex_3',
+    dogId: 'dog_rex',
+    date: '2026-10-31T11:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'city_street',
+    timerData: { stayDurationSeconds: 90 },
+    scores: [
+      { skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 5 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 4 },
+      { skillId: 'okd_fetch', skillName: 'Апорт', category: 'okd', score: 4 },
+      { skillId: 'okd_leave', skillName: 'Фу / Нельзя', category: 'okd', score: 5 },
+    ],
+    overallIndexSnapshot: 91,
+    okdIndexSnapshot: 91,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Фу / Нельзя', instruction: 'Идеальный отказ' },
+      generalAdvice: 'Отработка выдержки при броске апорта',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выдержка'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Выход на площадку с собаками'],
+    },
+    trainerNotes: 'Прекрасный прогресс. Готовимся к площадке с собаками.',
+  },
+  {
+    id: 'sess_rex_4',
+    dogId: 'dog_rex',
+    date: '2026-11-05T11:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'dog_park',
+    timerData: { stayDurationSeconds: 120 },
+    scores: [
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 5 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 5 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 5 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 4 },
+      { skillId: 'okd_place', skillName: 'Место', category: 'okd', score: 5 },
+    ],
+    overallIndexSnapshot: 94,
+    okdIndexSnapshot: 94,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Ко мне', instruction: 'Безотказный подзыв' },
+      generalAdvice: 'Финальная полировка выдержки на расстоянии 15 метров',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выдержка'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Финальная аттестация на 100%'],
+    },
+    trainerNotes: 'Рекс проявил потрясающую стабильность в окружении других собак.',
+  },
+  {
+    id: 'sess_rex_5',
+    dogId: 'dog_rex',
+    date: '2026-11-10T11:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'dog_park',
+    timerData: { stayDurationSeconds: 180 },
+    scores: [
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 5 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 5 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 5 },
+      { skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 5 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 4 },
+    ],
+    overallIndexSnapshot: 96,
+    okdIndexSnapshot: 96,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [
+        {
+          skillId: 'okd_stay',
+          skillName: 'Выдержка',
+          category: 'okd',
+          score: 4,
+          instruction: 'Выдержка до 3 минут с отходом на 20 метров. Финальный рывок до 100%!',
+          recommendedSets: '2 подхода по 10 минут',
+        },
+      ],
+      positiveFinisher: {
+        skillName: 'Рядом',
+        instruction: 'Идеальное движение у ноги с поворотами кругом.',
+      },
+      generalAdvice: 'Собака на 96% готова. Следующая оценка 5 по выдержке выдает диплом!',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выдержка'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Финальная сдача курса ОКД на 100%'],
+    },
+    trainerNotes: 'Рекс на пороге выпуска (96%). Отработали 3 минуты выдержки.',
+  },
+
+  // Bulochka Sessions (5 sessions)
+  {
+    id: 'sess_bul_1',
+    dogId: 'dog_bulochka',
+    date: '2026-10-14T15:00:00.000Z',
+    durationMinutes: 30,
+    distractionLevel: 'home',
+    scores: [
+      { skillId: 'beh_leash_pulling', skillName: 'Тянет поводок на улице', category: 'behavior', score: 1 },
+      { skillId: 'beh_jumping_people', skillName: 'Прыгает на людей при встрече', category: 'behavior', score: 2 },
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 3 },
+    ],
+    overallIndexSnapshot: 42,
+    okdIndexSnapshot: 50,
+    behaviorIndexSnapshot: 35,
+    homework: {
+      dailyPlanSummary: '2 подхода по 10 минут в день (всего 20 мин)',
+      exercises: [
+        {
+          skillId: 'beh_leash_pulling',
+          skillName: 'Тянет поводок на улице',
+          category: 'behavior',
+          score: 1,
+          instruction: 'Стоп на месте при любом натяжении. Не тянуть в ответ!',
+          recommendedSets: '1 подход по 10 минут',
+        },
+      ],
+      positiveFinisher: { skillName: 'Сидеть', instruction: 'Посадка за индейку' },
+      generalAdvice: 'Кормить индейкой только с ладони на уровне колена.',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Тянет поводок на улице', 'Прыгает на людей при встрече'],
+      suggestedDistractionTarget: 'quiet_yard',
+      suggestedChallenges: ['Выход в тихий двор на 5-метровом поводке'],
+    },
+    trainerNotes: 'Первичная диагностика: высокий уровень возбуждения, нет торможения.',
+  },
+  {
+    id: 'sess_bul_2',
+    dogId: 'dog_bulochka',
+    date: '2026-10-21T15:00:00.000Z',
+    durationMinutes: 30,
+    distractionLevel: 'quiet_yard',
+    scores: [
+      { skillId: 'beh_leash_pulling', skillName: 'Тянет поводок на улице', category: 'behavior', score: 2 },
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 4 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 3 },
+    ],
+    overallIndexSnapshot: 48,
+    okdIndexSnapshot: 56,
+    behaviorIndexSnapshot: 40,
+    homework: {
+      dailyPlanSummary: '2 подхода по 10 минут в день (всего 20 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Сидеть', instruction: 'Закрепление' },
+      generalAdvice: 'Держать дистанцию от других собак',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Тянет поводок на улице'],
+      suggestedDistractionTarget: 'quiet_yard',
+      suggestedChallenges: ['Повороты от раздражителя'],
+    },
+    trainerNotes: 'Появился контакт глазами при остановке хозяина.',
+  },
+  {
+    id: 'sess_bul_3',
+    dogId: 'dog_bulochka',
+    date: '2026-10-28T15:00:00.000Z',
+    durationMinutes: 30,
+    distractionLevel: 'quiet_yard',
+    scores: [
+      { skillId: 'beh_leash_pulling', skillName: 'Тянет поводок на улице', category: 'behavior', score: 2 },
+      { skillId: 'beh_jumping_people', skillName: 'Прыгает на людей при встрече', category: 'behavior', score: 2 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 3 },
+    ],
+    overallIndexSnapshot: 55,
+    okdIndexSnapshot: 62,
+    behaviorIndexSnapshot: 48,
+    homework: {
+      dailyPlanSummary: '2 подхода по 10 минут в день (всего 20 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Ко мне', instruction: 'Подзыв' },
+      generalAdvice: 'Игнорировать прыжки гостей дома',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Прыгает на людей при встрече', 'Тянет поводок на улице'],
+      suggestedDistractionTarget: 'quiet_yard',
+      suggestedChallenges: ['Упражнение 4 лапы на полу при входе кинолога'],
+    },
+    trainerNotes: 'Хозяева начали правильно применять игнорирование при прыжках.',
+  },
+  {
+    id: 'sess_bul_4',
+    dogId: 'dog_bulochka',
+    date: '2026-11-04T15:00:00.000Z',
+    durationMinutes: 30,
+    distractionLevel: 'city_street',
+    scores: [
+      { skillId: 'beh_leash_pulling', skillName: 'Тянет поводок на улице', category: 'behavior', score: 3 },
+      { skillId: 'beh_jumping_people', skillName: 'Прыгает на людей при встрече', category: 'behavior', score: 3 },
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 4 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 4 },
+    ],
+    overallIndexSnapshot: 60,
+    okdIndexSnapshot: 68,
+    behaviorIndexSnapshot: 52,
+    homework: {
+      dailyPlanSummary: '2 подхода по 10 минут в день (всего 20 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Лежать', instruction: 'Укладка' },
+      generalAdvice: 'Поощрять спокойное сидение при проходе людей мимо',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Тянет поводок на улице'],
+      suggestedDistractionTarget: 'city_street',
+      suggestedChallenges: ['Проход мимо сидящей кошки на расстоянии 10 метров'],
+    },
+    trainerNotes: 'Заметный прогресс: Булочка чаще предлагает автопосадку при остановке.',
+  },
+  {
+    id: 'sess_bul_5',
+    dogId: 'dog_bulochka',
+    date: '2026-11-12T15:00:00.000Z',
+    durationMinutes: 30,
+    distractionLevel: 'city_street',
+    scores: [
+      { skillId: 'beh_leash_pulling', skillName: 'Тянет поводок на улице', category: 'behavior', score: 2 },
+      { skillId: 'beh_jumping_people', skillName: 'Прыгает на людей при встрече', category: 'behavior', score: 3 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 3 },
+      { skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 3 },
+    ],
+    overallIndexSnapshot: 64,
+    okdIndexSnapshot: 70,
+    behaviorIndexSnapshot: 56,
+    homework: {
+      dailyPlanSummary: '2 подхода по 10 минут в день (всего 20 мин)',
+      exercises: [
+        {
+          skillId: 'beh_leash_pulling',
+          skillName: 'Тянет поводок на улице',
+          category: 'behavior',
+          score: 2,
+          instruction: 'Метод красного светофора: натяжение поводка = стоп. Как только поводок провис — клик и кусочек индейки!',
+          recommendedSets: '1 подход по 10 минут',
+        },
+        {
+          skillId: 'beh_jumping_people',
+          skillName: 'Прыгает на людей при встрече',
+          category: 'behavior',
+          score: 3,
+          instruction: 'Правило 4 лап на полу: не гладить и не разговаривать, пока прыгает. Награда выдается только у пола.',
+          recommendedSets: '1 подход по 10 минут',
+        },
+      ],
+      positiveFinisher: {
+        skillName: 'Сидеть',
+        instruction: 'Посадка с выдержкой 10 секунд перед миской.',
+      },
+      generalAdvice: 'Булочка — смешанный тип (индейка + мячик). Занимайтесь короткими сессиями.',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Тянет поводок на улице', 'Прыгает на людей при встрече'],
+      suggestedDistractionTarget: 'city_street',
+      suggestedChallenges: ['Увеличение времени провисшего поводка до 50 метров без натяжения'],
+    },
+    trainerNotes: 'Текущий прогресс 64%. Булочка требует регулярного выполнения домашки!',
+  },
+
+  // Yuta Sessions (6 sessions, ending at 100%)
+  {
+    id: 'sess_yuta_1',
+    dogId: 'dog_yuta',
+    date: '2026-09-15T10:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'city_street',
+    scores: [{ skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 4 }],
+    overallIndexSnapshot: 88,
+    okdIndexSnapshot: 88,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Сидеть', instruction: 'Отлично' },
+      generalAdvice: 'Базовый повтор',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Комплекс'],
+      suggestedDistractionTarget: 'city_street',
+      suggestedChallenges: ['Жесты'],
+    },
+    trainerNotes: 'Юта демонстрирует прекрасную готовность.',
+  },
+  {
+    id: 'sess_yuta_2',
+    dogId: 'dog_yuta',
+    date: '2026-09-25T10:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'city_street',
+    scores: [{ skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 5 }],
+    overallIndexSnapshot: 91,
+    okdIndexSnapshot: 91,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Лежать', instruction: 'Отлично' },
+      generalAdvice: 'Выдержка',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Апорт'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Апорт с земли'],
+    },
+    trainerNotes: 'Безукоризненная работа.',
+  },
+  {
+    id: 'sess_yuta_3',
+    dogId: 'dog_yuta',
+    date: '2026-10-05T10:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'dog_park',
+    scores: [{ skillId: 'okd_fetch', skillName: 'Апорт', category: 'okd', score: 5 }],
+    overallIndexSnapshot: 94,
+    okdIndexSnapshot: 94,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Апорт', instruction: 'Отдача в руку' },
+      generalAdvice: 'Чистота подачи',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Рядом'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Рядом без поводка'],
+    },
+    trainerNotes: 'Поднос предмета без перехватов.',
+  },
+  {
+    id: 'sess_yuta_4',
+    dogId: 'dog_yuta',
+    date: '2026-10-15T10:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'dog_park',
+    scores: [{ skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 5 }],
+    overallIndexSnapshot: 97,
+    okdIndexSnapshot: 97,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Рядом', instruction: 'Супер' },
+      generalAdvice: 'Финальный прогон',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выдержка'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Выдержка 5 минут'],
+    },
+    trainerNotes: 'Идеальное движение без поводка.',
+  },
+  {
+    id: 'sess_yuta_5',
+    dogId: 'dog_yuta',
+    date: '2026-10-25T10:00:00.000Z',
+    durationMinutes: 45,
+    distractionLevel: 'dog_park',
+    scores: [{ skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 5 }],
+    overallIndexSnapshot: 99,
+    okdIndexSnapshot: 99,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: '3 подхода по 10 минут в день (всего 30 мин)',
+      exercises: [],
+      positiveFinisher: { skillName: 'Выдержка', instruction: '5 минут' },
+      generalAdvice: 'Подготовка к экзамену',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Экзамен'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Сдача норматива'],
+    },
+    trainerNotes: 'Юта готова к сдаче норматива на высший балл.',
+  },
+  {
+    id: 'sess_yuta_6',
+    dogId: 'dog_yuta',
+    date: '2026-11-05T10:00:00.000Z',
+    durationMinutes: 60,
+    distractionLevel: 'dog_park',
+    timerData: { stayDurationSeconds: 300 },
+    scores: [
+      { skillId: 'okd_sit', skillName: 'Сидеть', category: 'okd', score: 5 },
+      { skillId: 'okd_down', skillName: 'Лежать', category: 'okd', score: 5 },
+      { skillId: 'okd_come', skillName: 'Ко мне', category: 'okd', score: 5 },
+      { skillId: 'okd_heel', skillName: 'Рядом', category: 'okd', score: 5 },
+      { skillId: 'okd_place', skillName: 'Место', category: 'okd', score: 5 },
+      { skillId: 'okd_stay', skillName: 'Выдержка', category: 'okd', score: 5 },
+      { skillId: 'okd_leave', skillName: 'Фу / Нельзя', category: 'okd', score: 5 },
+      { skillId: 'okd_fetch', skillName: 'Апорт', category: 'okd', score: 5 },
+      { skillId: 'okd_inspection', skillName: 'Показ зубов / Осмотр', category: 'okd', score: 5 },
+    ],
+    overallIndexSnapshot: 100,
+    okdIndexSnapshot: 100,
+    behaviorIndexSnapshot: 0,
+    homework: {
+      dailyPlanSummary: 'Поддерживающие игры и прогулки в удовольствие',
+      exercises: [],
+      positiveFinisher: {
+        skillName: 'Курс ОКД',
+        instruction: 'Курс успешно завершен на 100%! Диплом выдан.',
+      },
+      generalAdvice: 'Поздравляем владельцев и Юту с блестящим окончанием академии!',
+    },
+    nextSessionPlan: {
+      prioritySkills: ['Выпускница'],
+      suggestedDistractionTarget: 'dog_park',
+      suggestedChallenges: ['Поддержание идеального послушания в быту'],
+    },
+    trainerNotes: 'Сдача норматива ОКД на 100 баллов из 100. Сертификат «Самая хорошая девочка» выдан.',
+  },
+];
