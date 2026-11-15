@@ -15,6 +15,7 @@ import {
   UserRound,
   Sun,
   Moon,
+  Leaf,
 } from 'lucide-react';
 import type { AppSection } from './Sidebar';
 import type { SkillCategory } from '../../types';
@@ -52,6 +53,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const activeDogId = useDogStore((s) => s.activeDogId);
   const theme = useDogStore((s) => s.theme);
   const toggleTheme = useDogStore((s) => s.toggleTheme);
+  const cozyAnimations = useDogStore((s) => s.cozyAnimations);
+  const toggleCozyAnimations = useDogStore((s) => s.toggleCozyAnimations);
   const activeDog = dogs.find((d) => d.id === activeDogId) || dogs[0] || null;
 
   useEffect(() => {
@@ -262,6 +265,27 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 </span>
                 <span className="text-[12px] text-[var(--text-muted)]">
                   {theme === 'dark' ? 'Тёмная' : 'Светлая'}
+                </span>
+              </Command.Item>
+
+              <Command.Item
+                value="Включить отключить уютный листопад листья анимации оформление"
+                onSelect={() => runAndClose(toggleCozyAnimations)}
+                className="h-9 px-2.5 rounded-[8px] flex items-center gap-2.5 text-[14px] text-[var(--text-secondary)] data-[selected=true]:bg-[var(--bg-hover)] data-[selected=true]:text-[var(--text-primary)] cursor-pointer transition-colors"
+              >
+                <Leaf
+                  strokeWidth={1.5}
+                  className={
+                    cozyAnimations
+                      ? 'size-4 text-[var(--accent-ochre)] flex-shrink-0'
+                      : 'size-4 text-[var(--text-muted)] flex-shrink-0'
+                  }
+                />
+                <span className="flex-1 text-[var(--text-primary)]">
+                  Включить / отключить уютный листопад
+                </span>
+                <span className="text-[12px] text-[var(--text-muted)]">
+                  {cozyAnimations ? 'Вкл' : 'Выкл'}
                 </span>
               </Command.Item>
             </Command.Group>

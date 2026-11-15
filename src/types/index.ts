@@ -163,6 +163,7 @@ export interface AppExportData {
   disciplineCommands?: Record<string, DisciplineCommandTemplate[]>;
   certificateConfig?: CertificateConfig;
   theme?: ThemeMode;
+  cozyAnimations?: boolean;
 }
 
 export const OKD_PRESETS: DisciplineCommandTemplate[] = [

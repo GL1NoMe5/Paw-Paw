@@ -65,6 +65,10 @@ function normalizeTheme(incoming?: unknown, fallback: ThemeMode = 'light'): Them
     : fallback;
 }
 
+function normalizeCozyAnimations(incoming?: unknown, fallback: boolean = true): boolean {
+  return typeof incoming === 'boolean' ? incoming : fallback;
+}
+
 function normalizeCertificateConfig(
   incoming?: Partial<CertificateConfig> | null,
   fallback: CertificateConfig = DEFAULT_CERTIFICATE_CONFIG
@@ -202,11 +206,14 @@ export interface DogStoreState {
   disciplines: DisciplineInfo[];
   disciplineCommands: Record<string, DisciplineCommandTemplate[]>;
   theme: ThemeMode;
+  cozyAnimations: boolean;
   certificateConfig: CertificateConfig;
 
-  // Actions: Theme & Certificate Preferences
+  // Actions: Theme, Ambience & Certificate Preferences
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
+  setCozyAnimations: (enabled: boolean) => void;
+  toggleCozyAnimations: () => void;
   updateCertificateConfig: (updates: Partial<CertificateConfig>) => void;
 
   // Actions: Navigation & Filter
@@ -279,6 +286,7 @@ export const useDogStore = create<DogStoreState>()(
       disciplines: [...DEFAULT_DISCIPLINES],
       disciplineCommands: createDefaultDisciplineCommands(),
       theme: 'light',
+      cozyAnimations: true,
       certificateConfig: { ...DEFAULT_CERTIFICATE_CONFIG },
 
       setTheme: (theme) => {
@@ -291,6 +299,14 @@ export const useDogStore = create<DogStoreState>()(
         const nextTheme: ThemeMode = get().theme === 'dark' ? 'light' : 'dark';
         applyThemeToDocument(nextTheme);
         set({ theme: nextTheme });
+      },
+
+      setCozyAnimations: (enabled) => {
+        set({ cozyAnimations: normalizeCozyAnimations(enabled, true) });
+      },
+
+      toggleCozyAnimations: () => {
+        set((state) => ({ cozyAnimations: !state.cozyAnimations }));
       },
 
       updateCertificateConfig: (updates) => {
@@ -814,6 +830,7 @@ export const useDogStore = create<DogStoreState>()(
           disciplineCommands: state.disciplineCommands,
           certificateConfig: state.certificateConfig,
           theme: state.theme,
+          cozyAnimations: state.cozyAnimations,
         };
         return JSON.stringify(data, null, 2);
       },
@@ -832,6 +849,10 @@ export const useDogStore = create<DogStoreState>()(
           const nextTheme = parsed.theme
             ? normalizeTheme(parsed.theme, current.theme)
             : current.theme;
+          const nextCozyAnimations = normalizeCozyAnimations(
+            parsed.cozyAnimations,
+            current.cozyAnimations
+          );
           applyThemeToDocument(nextTheme);
           set({
             dogs: nextDogs,
@@ -841,6 +862,7 @@ export const useDogStore = create<DogStoreState>()(
             disciplineCommands: mergeDisciplineCommands(parsed.disciplineCommands),
             certificateConfig: nextCertificateConfig,
             theme: nextTheme,
+            cozyAnimations: nextCozyAnimations,
             activeDogId: nextDogs[0]?.id || null,
           });
           return {
@@ -865,6 +887,7 @@ export const useDogStore = create<DogStoreState>()(
           disciplines: [...DEFAULT_DISCIPLINES],
           disciplineCommands: createDefaultDisciplineCommands(),
           theme: 'light',
+          cozyAnimations: true,
           certificateConfig: { ...DEFAULT_CERTIFICATE_CONFIG },
         });
       },
@@ -891,6 +914,10 @@ export const useDogStore = create<DogStoreState>()(
           disciplines: mergeDisciplines(persisted.disciplines),
           disciplineCommands: mergeDisciplineCommands(persisted.disciplineCommands),
           theme: normalizeTheme(persisted.theme, currentState.theme),
+          cozyAnimations: normalizeCozyAnimations(
+            persisted.cozyAnimations,
+            currentState.cozyAnimations
+          ),
           certificateConfig: normalizeCertificateConfig(
             persisted.certificateConfig,
             currentState.certificateConfig
@@ -901,6 +928,7 @@ export const useDogStore = create<DogStoreState>()(
         if (!state) return;
         const normalizedTheme = normalizeTheme(state.theme);
         state.theme = normalizedTheme;
+        state.cozyAnimations = normalizeCozyAnimations(state.cozyAnimations, true);
         state.certificateConfig = normalizeCertificateConfig(state.certificateConfig);
         applyThemeToDocument(normalizedTheme);
         if (!state.dogs || state.dogs.length === 0) {

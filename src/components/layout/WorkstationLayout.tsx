@@ -1,8 +1,9 @@
 import type React from 'react';
-import { Compass, Users, Award, Search, Plus, Sun, Moon } from 'lucide-react';
+import { Compass, Users, Award, Search, Plus, Sun, Moon, Leaf } from 'lucide-react';
 import { Sidebar, type AppSection } from './Sidebar';
 import { cn } from '../../utils/cn';
 import { useDogStore } from '../../store/useDogStore';
+import { CozyLeafFall } from '../cozy/CozyAmbience';
 
 export interface WorkstationLayoutProps {
   children?: React.ReactNode;
@@ -24,10 +25,15 @@ export const WorkstationLayout: React.FC<WorkstationLayoutProps> = ({
   const dogs = useDogStore((s) => s.dogs);
   const theme = useDogStore((s) => s.theme);
   const toggleTheme = useDogStore((s) => s.toggleTheme);
+  const cozyAnimations = useDogStore((s) => s.cozyAnimations);
+  const toggleCozyAnimations = useDogStore((s) => s.toggleCozyAnimations);
   const diplomasCount = dogs.filter((d) => d.certificateIssued === true).length;
 
   return (
-    <div className="flex flex-col md:flex-row h-dvh w-screen overflow-hidden bg-[var(--bg-desk)] text-[var(--text-primary)] p-2 sm:p-3.5 gap-2.5 sm:gap-3">
+    <div className="relative flex flex-col md:flex-row h-dvh w-screen overflow-hidden bg-[var(--bg-desk)] text-[var(--text-primary)] p-2 sm:p-3.5 gap-2.5 sm:gap-3">
+      {/* Gentle edge-framed autumn leaf fall across workspace */}
+      <CozyLeafFall isDark={theme === 'dark'} className="pointer-events-none z-10" />
+
       {/* Compact Mobile Header (shown below md breakpoint) */}
       <header className="flex md:hidden items-center justify-between gap-2 px-2 py-1.5 rounded-[14px] bg-[var(--bg-sheet)] border border-[var(--border-subtle)] flex-shrink-0">
         <span className="font-serif text-[20px] leading-none text-[var(--text-primary)] pl-1">
@@ -66,6 +72,21 @@ export const WorkstationLayout: React.FC<WorkstationLayoutProps> = ({
         </div>
 
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleCozyAnimations}
+            aria-pressed={cozyAnimations}
+            aria-label={cozyAnimations ? 'Отключить уютный листопад' : 'Включить уютный листопад'}
+            title={cozyAnimations ? 'Уютный листопад: вкл' : 'Уютный листопад: выкл'}
+            className={cn(
+              'size-8 rounded-[8px] bg-[var(--bg-note)] hover:bg-[var(--bg-hover)] border border-[var(--border-subtle)] flex items-center justify-center transition-colors',
+              cozyAnimations
+                ? 'text-[var(--accent-ochre)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+            )}
+          >
+            <Leaf strokeWidth={1.5} className="size-3.5" />
+          </button>
           <button
             type="button"
             onClick={toggleTheme}
