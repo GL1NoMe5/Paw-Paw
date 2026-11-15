@@ -79,21 +79,21 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[#fdfbf7] rounded-2xl border border-[#1f1b16]/15 p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50 text-xs text-[#1f1b16]">
-          <div className="flex items-center justify-between pb-3 border-b border-[#1f1b16]/10">
+        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 dark:bg-black/65 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[var(--bg-sheet)] rounded-2xl border border-[var(--border-strong)] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_56px_rgba(0,0,0,0.65)] z-50 text-xs text-[var(--text-primary)]">
+          <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
             <div>
-              <Dialog.Title className="font-serif text-base font-medium text-[#1f1b16]">
+              <Dialog.Title className="font-serif text-base font-medium text-[var(--text-primary)]">
                 Резервное копирование и база данных
               </Dialog.Title>
-              <Dialog.Description className="text-xs text-[#7b7266] mt-0.5">
+              <Dialog.Description className="text-xs text-[var(--text-muted)] mt-0.5">
                 Экспорт картотеки в JSON, импорт из архива и сброс демо-данных
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="size-8 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] flex items-center justify-center text-[#7b7266] hover:text-[#1f1b16] transition-colors"
+                className="size-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X className="size-4" strokeWidth={1.5} />
               </button>
@@ -102,12 +102,12 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
 
           <div className="space-y-3 pt-4">
             {/* 1. Export */}
-            <div className="p-4 rounded-xl border border-[#1f1b16]/10 bg-[#efe9df]/40 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-note)] flex items-center justify-between gap-4">
               <div>
-                <div className="font-medium text-[#1f1b16] text-xs mb-0.5">
+                <div className="font-medium text-[var(--text-primary)] text-xs mb-0.5">
                   Экспорт всей картотеки
                 </div>
-                <div className="text-xs text-[#5e554a] leading-relaxed">
+                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   Сохранить файл .json со всеми карточками собак и журналом занятий
                 </div>
               </div>
@@ -115,7 +115,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <button
                 type="button"
                 onClick={handleExport}
-                className="h-9 px-3.5 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
+                className="h-9 px-3.5 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
               >
                 <Download className="size-3.5" strokeWidth={1.5} />
                 <span>Скачать JSON</span>
@@ -123,12 +123,12 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             </div>
 
             {/* 2. Import */}
-            <div className="p-4 rounded-xl border border-[#1f1b16]/10 bg-[#efe9df]/40 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-note)] flex items-center justify-between gap-4">
               <div>
-                <div className="font-medium text-[#1f1b16] text-xs mb-0.5">
+                <div className="font-medium text-[var(--text-primary)] text-xs mb-0.5">
                   Импорт из файла JSON
                 </div>
-                <div className="text-xs text-[#5e554a] leading-relaxed">
+                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   Восстановить картотеку из ранее сохранённой резервной копии
                 </div>
               </div>
@@ -144,20 +144,20 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#1f1b16] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
+                className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
               >
-                <Upload className="size-3.5 text-[#5e554a]" strokeWidth={1.5} />
+                <Upload className="size-3.5 text-[var(--text-secondary)]" strokeWidth={1.5} />
                 <span>Выбрать файл</span>
               </button>
             </div>
 
             {/* 3. Reset to Demo Data */}
-            <div className="p-4 rounded-xl border border-[#1f1b16]/10 bg-[#efe9df]/40 flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-note)] flex items-center justify-between gap-4">
               <div>
-                <div className="font-medium text-[#1f1b16] text-xs mb-0.5">
+                <div className="font-medium text-[var(--text-primary)] text-xs mb-0.5">
                   Демонстрационный набор карточек
                 </div>
-                <div className="text-xs text-[#5e554a] leading-relaxed">
+                <div className="text-xs text-[var(--text-secondary)] leading-relaxed">
                   Восстановить исходные профили: Рекс (<span className="font-mono tabular-nums">96%</span>), Булочка (<span className="font-mono tabular-nums">64%</span>), Юта (<span className="font-mono tabular-nums">100%</span>)
                 </div>
               </div>
@@ -165,7 +165,7 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
               <button
                 type="button"
                 onClick={handleResetDemo}
-                className="h-9 px-3.5 rounded-lg border border-[#b93829]/30 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#b93829] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
+                className="h-9 px-3.5 rounded-lg border border-[#b84233]/30 dark:border-[#e37163]/35 bg-[var(--bg-sheet)] hover:bg-[#b84233]/10 dark:hover:bg-[#e37163]/15 text-[var(--accent-terracotta)] font-medium inline-flex items-center gap-1.5 transition-colors flex-shrink-0"
               >
                 <RotateCcw className="size-3.5" strokeWidth={1.5} />
                 <span>Сбросить</span>
@@ -173,11 +173,11 @@ export const ImportExportModal: React.FC<ImportExportModalProps> = ({
             </div>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-[#1f1b16]/10 flex items-center justify-end">
+          <div className="pt-4 mt-4 border-t border-[var(--border-subtle)] flex items-center justify-end">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="h-9 px-4 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#5e554a] font-medium transition-colors"
+              className="h-9 px-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors"
             >
               Закрыть
             </button>

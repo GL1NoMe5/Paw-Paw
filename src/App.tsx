@@ -24,11 +24,16 @@ type StudentSubView = 'directory' | 'dossier' | 'training' | 'analytics';
 export function App() {
   const dogs = useDogStore((s) => s.dogs);
   const activeDogId = useDogStore((s) => s.activeDogId);
+  const theme = useDogStore((s) => s.theme);
   const setActiveDog = useDogStore((s) => s.setActiveDog);
   const setFilter = useDogStore((s) => s.setFilter);
   const resetToDemoData = useDogStore((s) => s.resetToDemoData);
 
   const activeDog = dogs.find((d) => d.id === activeDogId) || dogs[0] || null;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   // Top-level navigation: 'home' | 'students' | 'achievements'
   const [activeSection, setActiveSection] = useState<AppSection>('home');
@@ -145,15 +150,15 @@ export function App() {
 
     if (!activeDog) {
       return (
-        <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-[#1f1b16]/10 bg-[#fdfbf7] my-8 max-w-2xl mx-auto">
-          <div className="size-12 rounded-lg bg-[#efe9df] border border-[#1f1b16]/10 flex items-center justify-center text-[#7b7266] mb-4">
-            <FolderOpen className="size-5 text-[#5e554a]" strokeWidth={1.5} />
+        <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-sheet)] my-8 max-w-2xl mx-auto">
+          <div className="size-12 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] mb-4">
+            <FolderOpen className="size-5 text-[var(--text-secondary)]" strokeWidth={1.5} />
           </div>
 
-          <h2 className="font-serif text-lg font-medium text-[#1f1b16] mb-1">
+          <h2 className="font-serif text-lg font-medium text-[var(--text-primary)] mb-1">
             Картотека учеников пуста
           </h2>
-          <p className="text-xs text-[#5e554a] max-w-md leading-relaxed mb-6">
+          <p className="text-xs text-[var(--text-secondary)] max-w-md leading-relaxed mb-6">
             Заведите первую карточку собаки с кинологическим паспортом или загрузите три демонстрационных профиля: Рекс (<span className="font-mono tabular-nums">96%</span>), Булочка (<span className="font-mono tabular-nums">64%</span>) и Юта (<span className="font-mono tabular-nums">100%</span>)
           </p>
 
@@ -161,7 +166,7 @@ export function App() {
             <button
               type="button"
               onClick={handleOpenAddDog}
-              className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+              className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
             >
               <Plus className="size-4" strokeWidth={1.5} />
               <span>Завести карточку</span>
@@ -174,9 +179,9 @@ export function App() {
                 setStudentSubView('directory');
                 toast.success('Демонстрационные карточки загружены');
               }}
-              className="h-9 px-4 rounded-lg border border-[#1f1b16]/15 bg-[#efe9df] hover:bg-[#e5dec9] text-[#1f1b16] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+              className="h-9 px-4 rounded-lg border border-[var(--border-strong)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-active)] text-[var(--text-primary)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
             >
-              <RotateCcw className="size-3.5 text-[#5e554a]" strokeWidth={1.5} />
+              <RotateCcw className="size-3.5 text-[var(--text-secondary)]" strokeWidth={1.5} />
               <span>Загрузить демо-данные</span>
             </button>
           </div>
@@ -327,9 +332,9 @@ export function App() {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: '#fdfbf7',
-            color: '#1f1b16',
-            border: '1px solid rgba(31, 27, 22, 0.12)',
+            background: 'var(--bg-sheet)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-subtle)',
             fontFamily: 'var(--font-sans)',
           },
         }}

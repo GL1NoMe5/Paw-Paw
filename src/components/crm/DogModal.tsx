@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   Minus,
+  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type {
@@ -49,6 +50,31 @@ const AVATAR_PRESETS = [
 
 const DAILY_TIME_PRESETS = [15, 20, 30, 45, 60, 90, 120] as const;
 
+const PRIOR_COMMAND_SUGGESTIONS = [
+  'Сидеть',
+  'Лежать',
+  'Дай лапу',
+  'Ко мне',
+  'Рядом',
+  'Фу',
+] as const;
+
+function mergeUniqueCommands(existing: string[], incoming: string[]): string[] {
+  const result = [...existing];
+  const seen = new Set(existing.map((cmd) => cmd.trim().toLowerCase()));
+
+  for (const raw of incoming) {
+    const cleaned = raw.trim();
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(cleaned);
+    }
+  }
+  return result;
+}
+
 interface DogFormProps {
   dogToEdit?: Dog | null;
   onClose: () => void;
@@ -89,6 +115,11 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
   const [ownerTelegram, setOwnerTelegram] = useState(dogToEdit?.ownerTelegram ?? '');
   const [notes, setNotes] = useState(dogToEdit?.notes ?? '');
 
+  const [priorKnownCommands, setPriorKnownCommands] = useState<string[]>(() =>
+    dogToEdit?.priorKnownCommands ? [...dogToEdit.priorKnownCommands] : []
+  );
+  const [priorInput, setPriorInput] = useState('');
+
   // Initial command sets selection for new dogs (defaults to OKD commands)
   const [selectedCommandIds, setSelectedCommandIds] = useState<Set<string>>(() => {
     if (dogToEdit) return new Set<string>();
@@ -104,6 +135,57 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
     if (!Number.isFinite(n) || n <= 0) return 0;
     return Math.round(n);
   }, [dailyTimeInput]);
+
+  const priorCommandSet = useMemo(
+    () => new Set(priorKnownCommands.map((c) => c.trim().toLowerCase())),
+    [priorKnownCommands]
+  );
+
+  const commitPriorCommands = (incoming: string[]) => {
+    setPriorKnownCommands((prev) => mergeUniqueCommands(prev, incoming));
+  };
+
+  const handlePriorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val.includes(',')) {
+      const parts = val.split(',');
+      const trailing = parts.pop() ?? '';
+      commitPriorCommands(parts);
+      setPriorInput(trailing.trimStart());
+    } else {
+      setPriorInput(val);
+    }
+  };
+
+  const handlePriorInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (priorInput.trim()) {
+        commitPriorCommands(priorInput.split(','));
+        setPriorInput('');
+      }
+    }
+  };
+
+  const handleAddPriorClick = () => {
+    if (!priorInput.trim()) return;
+    commitPriorCommands(priorInput.split(','));
+    setPriorInput('');
+  };
+
+  const handleTogglePriorSuggestion = (cmd: string) => {
+    const key = cmd.trim().toLowerCase();
+    setPriorKnownCommands((prev) => {
+      if (prev.some((item) => item.trim().toLowerCase() === key)) {
+        return prev.filter((item) => item.trim().toLowerCase() !== key);
+      }
+      return [...prev, cmd];
+    });
+  };
+
+  const handleRemovePriorCommand = (index: number) => {
+    setPriorKnownCommands((prev) => prev.filter((_, idx) => idx !== index));
+  };
 
   const selectBreed = (selected: string) => {
     setBreed(selected);
@@ -223,6 +305,9 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
     }
 
     const safeDailyTime = Math.max(5, Math.min(360, parsedDailyTime || 30));
+    const finalPriorCommands = priorInput.trim()
+      ? mergeUniqueCommands(priorKnownCommands, priorInput.split(','))
+      : priorKnownCommands;
 
     if (dogToEdit) {
       updateDog(dogToEdit.id, {
@@ -241,6 +326,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         ownerPhone: ownerPhone.trim(),
         ownerTelegram: ownerTelegram.trim(),
         notes: notes.trim(),
+        priorKnownCommands: finalPriorCommands,
       });
       toast.success(`Карточка собаки «${name.trim()}» обновлена`);
     } else {
@@ -280,6 +366,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         ownerPhone: ownerPhone.trim(),
         ownerTelegram: ownerTelegram.trim(),
         notes: notes.trim(),
+        priorKnownCommands: finalPriorCommands,
         skills: initialSkills,
         certificateIssued: false,
       });
@@ -291,15 +378,18 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
 
   const showPreviewImage = Boolean(avatar && !imgError);
 
+  const inputClass =
+    'w-full h-9 px-3 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:bg-[var(--bg-sheet)] focus:outline-none focus:border-[var(--border-strong)] transition-colors';
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 pt-4 text-[#1f1b16]">
+    <form onSubmit={handleSubmit} className="space-y-5 pt-4 text-[var(--text-primary)]">
       {/* 1. Avatar & Presets */}
       <div>
-        <label className="block text-xs font-medium text-[#5e554a] mb-2">
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
           Фотография собаки
         </label>
         <div className="flex items-center gap-4">
-          <div className="relative size-16 rounded-lg overflow-hidden border border-[#1f1b16]/15 bg-[#efe9df] flex-shrink-0 flex items-center justify-center">
+          <div className="relative size-16 rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex-shrink-0 flex items-center justify-center">
             {showPreviewImage ? (
               <img
                 src={avatar}
@@ -308,18 +398,18 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                 onError={() => setImgError(true)}
               />
             ) : name.trim() ? (
-              <span className="font-mono text-sm font-medium text-[#5e554a]">
+              <span className="font-mono text-sm font-medium text-[var(--text-secondary)]">
                 {name.trim().slice(0, 2).toUpperCase()}
               </span>
             ) : (
-              <Camera className="size-5 text-[#7b7266]" strokeWidth={1.5} />
+              <Camera className="size-5 text-[var(--text-muted)]" strokeWidth={1.5} />
             )}
           </div>
 
           <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-2">
-              <label className="h-8 px-3 rounded-lg border border-[#1f1b16]/15 bg-[#efe9df] hover:bg-[#e5dec9] text-[#1f1b16] font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors">
-                <Upload className="size-3.5 text-[#5e554a]" strokeWidth={1.5} />
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="h-8 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors">
+                <Upload className="size-3.5 text-[var(--text-secondary)]" strokeWidth={1.5} />
                 <span>Загрузить фото (до 2 МБ)</span>
                 <input
                   type="file"
@@ -335,7 +425,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                     setAvatar('');
                     setImgError(false);
                   }}
-                  className="text-xs text-[#7b7266] hover:text-[#1f1b16] underline"
+                  className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline"
                 >
                   Сбросить
                 </button>
@@ -343,7 +433,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#7b7266]">Шаблоны:</span>
+              <span className="text-xs text-[var(--text-muted)]">Шаблоны:</span>
               <div className="flex items-center gap-1.5">
                 {AVATAR_PRESETS.map((preset) => (
                   <button
@@ -356,8 +446,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                     className={cn(
                       'size-7 rounded-md overflow-hidden border transition-opacity',
                       avatar === preset.url
-                        ? 'border-[#1f1b16] ring-1 ring-[#1f1b16]'
-                        : 'border-[#1f1b16]/15 opacity-60 hover:opacity-100'
+                        ? 'border-[var(--btn-dark-bg)] ring-1 ring-[var(--btn-dark-bg)]'
+                        : 'border-[var(--border-subtle)] opacity-60 hover:opacity-100'
                     )}
                     title={preset.name}
                   >
@@ -375,10 +465,10 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
       </div>
 
       {/* 2. Primary Information */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#1f1b16]/10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[var(--border-hairline)]">
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
-            Кличка <span className="text-[#b93829]">*</span>
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
+            Кличка <span className="text-[var(--accent-terracotta)]">*</span>
           </label>
           <input
             type="text"
@@ -386,12 +476,12 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
             placeholder="Рекс"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">Пол</label>
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">Пол</label>
           <div className="grid grid-cols-2 gap-2 h-9">
             <button
               type="button"
@@ -399,8 +489,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               className={cn(
                 'rounded-lg font-medium border flex items-center justify-center transition-colors',
                 gender === 'male'
-                  ? 'bg-[#1f1b16] text-[#fdfbf7] border-[#1f1b16]'
-                  : 'bg-[#efe9df]/60 text-[#5e554a] border-[#1f1b16]/15 hover:bg-[#efe9df]'
+                  ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] border-[var(--btn-dark-bg)]'
+                  : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
               )}
             >
               Кобель
@@ -411,8 +501,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               className={cn(
                 'rounded-lg font-medium border flex items-center justify-center transition-colors',
                 gender === 'female'
-                  ? 'bg-[#1f1b16] text-[#fdfbf7] border-[#1f1b16]'
-                  : 'bg-[#efe9df]/60 text-[#5e554a] border-[#1f1b16]/15 hover:bg-[#efe9df]'
+                  ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] border-[var(--btn-dark-bg)]'
+                  : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
               )}
             >
               Сука
@@ -422,8 +512,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
 
         {/* Breed Autocomplete */}
         <div ref={breedWrapperRef} className="relative">
-          <label className="block font-medium text-[#5e554a] mb-1">
-            Порода <span className="text-[#b93829]">*</span>
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
+            Порода <span className="text-[var(--accent-terracotta)]">*</span>
           </label>
           <input
             type="text"
@@ -449,13 +539,13 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
             role="combobox"
             aria-expanded={isBreedOpen && breedSuggestions.length > 0}
             aria-autocomplete="list"
-            className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+            className={inputClass}
           />
 
           {isBreedOpen && (
             <div
               role="listbox"
-              className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-xl border border-[#1f1b16]/15 bg-[#fdfbf7] shadow-[0_12px_28px_rgba(31,27,22,0.12)] overflow-hidden max-h-56 overflow-y-auto"
+              className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-sheet)] shadow-[0_12px_28px_rgba(31,27,22,0.12)] dark:shadow-[0_16px_36px_rgba(0,0,0,0.55)] overflow-hidden max-h-56 overflow-y-auto"
             >
               {breedSuggestions.length > 0 ? (
                 <div className="p-1">
@@ -477,20 +567,20 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                         className={cn(
                           'w-full text-left px-2.5 py-2 rounded-lg text-xs flex items-center justify-between gap-2 transition-colors',
                           isHighlighted
-                            ? 'bg-[#efe9df] text-[#1f1b16] font-medium'
-                            : 'text-[#5e554a] hover:bg-[#efe9df]/60 hover:text-[#1f1b16]'
+                            ? 'bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium'
+                            : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                         )}
                       >
                         <span className="truncate">{suggestion}</span>
                         {isExact && (
-                          <Check className="size-3.5 text-[#1f5c3a] flex-shrink-0" strokeWidth={1.75} />
+                          <Check className="size-3.5 text-[var(--accent-forest)] flex-shrink-0" strokeWidth={1.75} />
                         )}
                       </button>
                     );
                   })}
                 </div>
               ) : (
-                <div className="px-3 py-2.5 text-[11.5px] text-[#7b7266]">
+                <div className="px-3 py-2.5 text-[11.5px] text-[var(--text-muted)]">
                   Нет в справочнике — будет сохранена своя порода «{breed.trim()}»
                 </div>
               )}
@@ -499,20 +589,20 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
         </div>
 
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
-            Дата рождения <span className="text-[#b93829]">*</span>
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
+            Дата рождения <span className="text-[var(--accent-terracotta)]">*</span>
           </label>
           <input
             type="date"
             required
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
-            className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+            className={cn(inputClass, 'font-mono tabular-nums')}
           />
         </div>
 
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
             Вес (кг)
           </label>
           <input
@@ -522,17 +612,17 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
             max="120"
             value={weight}
             onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
-            className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+            className={cn(inputClass, 'font-mono tabular-nums')}
           />
         </div>
 
         {/* Free Daily Training Time + Presets */}
         <div className="sm:col-span-2">
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <label className="font-medium text-[#5e554a]">
+            <label className="font-medium text-[var(--text-secondary)]">
               Дневной норматив (мин/день)
             </label>
-            <span className="font-mono text-[11px] tabular-nums text-[#1f5c3a]">
+            <span className="font-mono text-[11px] tabular-nums text-[var(--accent-forest)]">
               {parsedDailyTime > 0 ? formatDurationRussian(parsedDailyTime) : '—'}
             </span>
           </div>
@@ -556,9 +646,9 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                   }
                 }}
                 aria-label="Дневной норматив (мин/день)"
-                className="w-full h-9 pl-3 pr-16 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+                className="w-full h-9 pl-3 pr-16 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] font-mono tabular-nums focus:bg-[var(--bg-sheet)] focus:outline-none focus:border-[var(--border-strong)] transition-colors"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#7b7266] pointer-events-none">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[var(--text-muted)] pointer-events-none">
                 мин/день
               </span>
             </div>
@@ -574,8 +664,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                     className={cn(
                       'h-8 px-2.5 rounded-lg border font-mono text-[11.5px] tabular-nums transition-colors',
                       isSelected
-                        ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7] font-medium'
-                        : 'bg-[#efe9df]/55 border-[#1f1b16]/15 text-[#5e554a] hover:bg-[#efe9df] hover:text-[#1f1b16]'
+                        ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                        : 'bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                     )}
                   >
                     {presetMin} мин
@@ -588,9 +678,9 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
       </div>
 
       {/* 3. Cynological Motivations & Triggers */}
-      <div className="pt-3 border-t border-[#1f1b16]/10 space-y-3">
+      <div className="pt-3 border-t border-[var(--border-hairline)] space-y-3">
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
             Ведущий тип мотивации
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -607,8 +697,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                 className={cn(
                   'h-9 px-3 rounded-lg text-xs font-medium border transition-colors flex items-center justify-center',
                   motivationType === item.id
-                    ? 'bg-[#1f1b16] text-[#fdfbf7] border-[#1f1b16]'
-                    : 'bg-[#efe9df]/60 text-[#5e554a] border-[#1f1b16]/15 hover:bg-[#efe9df]'
+                    ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] border-[var(--btn-dark-bg)]'
+                    : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                 )}
               >
                 {item.label}
@@ -619,7 +709,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Любимые лакомства
             </label>
             <input
@@ -627,12 +717,12 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="Лёгкое, сыр, индейка"
               value={favoriteTreats}
               onChange={(e) => setFavoriteTreats(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Аллергии
             </label>
             <input
@@ -640,12 +730,12 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="Курица, нет"
               value={allergies}
               onChange={(e) => setAllergies(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Триггеры
             </label>
             <input
@@ -653,17 +743,17 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="Кошки, салюты, самокаты"
               value={triggers}
               onChange={(e) => setTriggers(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={inputClass}
             />
           </div>
         </div>
       </div>
 
-      {/* 4. Owner Contacts */}
-      <div className="pt-3 border-t border-[#1f1b16]/10 space-y-3">
+      {/* 4. Owner Contacts & Notes */}
+      <div className="pt-3 border-t border-[var(--border-hairline)] space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Владелец
             </label>
             <input
@@ -671,12 +761,12 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="Иванов Иван"
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Телефон
             </label>
             <input
@@ -684,12 +774,12 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="+7 (999) 000-00-00"
               value={ownerPhone}
               onChange={(e) => setOwnerPhone(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono tabular-nums placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={cn(inputClass, 'font-mono tabular-nums')}
             />
           </div>
 
           <div>
-            <label className="block font-medium text-[#5e554a] mb-1">
+            <label className="block font-medium text-[var(--text-secondary)] mb-1">
               Telegram
             </label>
             <input
@@ -697,13 +787,13 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
               placeholder="@username"
               value={ownerTelegram}
               onChange={(e) => setOwnerTelegram(e.target.value)}
-              className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] font-mono placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+              className={cn(inputClass, 'font-mono')}
             />
           </div>
         </div>
 
         <div>
-          <label className="block font-medium text-[#5e554a] mb-1">
+          <label className="block font-medium text-[var(--text-secondary)] mb-1">
             Заметки кинолога
           </label>
           <textarea
@@ -711,24 +801,110 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
             placeholder="Особенности темперамента, рабочие пометки"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full p-2.5 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40 leading-relaxed resize-none"
+            className="w-full p-2.5 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:bg-[var(--bg-sheet)] focus:outline-none focus:border-[var(--border-strong)] leading-relaxed resize-none transition-colors"
           />
+        </div>
+      </div>
+
+      {/* 4b. Commands Known Before Seeing the Trainer (both create & edit) */}
+      <div className="pt-3 border-t border-[var(--border-hairline)] space-y-2.5">
+        <div className="flex items-baseline justify-between gap-2 flex-wrap">
+          <label
+            htmlFor="prior-commands-input"
+            className="block font-medium text-[var(--text-primary)]"
+          >
+            Команды, которые собака знала до кинолога
+          </label>
+          <span className="text-[11px] text-[var(--text-muted)]">
+            Enter или запятая для добавления
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            id="prior-commands-input"
+            type="text"
+            placeholder="Например: Сидеть, Дай лапу"
+            value={priorInput}
+            onChange={handlePriorInputChange}
+            onKeyDown={handlePriorInputKeyDown}
+            className={cn(inputClass, 'flex-1')}
+          />
+          <button
+            type="button"
+            onClick={handleAddPriorClick}
+            disabled={!priorInput.trim()}
+            className="h-9 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] disabled:opacity-45 disabled:cursor-not-allowed text-[var(--text-primary)] font-medium inline-flex items-center gap-1.5 flex-shrink-0 transition-colors"
+          >
+            <Plus className="size-3.5 text-[var(--accent-forest)]" strokeWidth={1.8} />
+            <span>Добавить</span>
+          </button>
+        </div>
+
+        {/* Removable Tag Chips */}
+        {priorKnownCommands.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {priorKnownCommands.map((cmd, idx) => (
+              <span
+                key={`${cmd}_${idx}`}
+                className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full border border-[#286144]/25 dark:border-[#58b482]/35 bg-[#286144]/10 dark:bg-[#58b482]/15 text-[var(--text-primary)] text-[11.5px] font-medium"
+              >
+                <span>{cmd}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemovePriorCommand(idx)}
+                  aria-label={`Удалить команду ${cmd}`}
+                  className="size-4 rounded-full hover:bg-[#b84233]/15 dark:hover:bg-[#e37163]/20 text-[var(--text-secondary)] hover:text-[var(--accent-terracotta)] inline-flex items-center justify-center transition-colors"
+                >
+                  <X className="size-3" strokeWidth={1.8} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Quick One-Click Suggestions */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] mr-0.5">Частые:</span>
+          {PRIOR_COMMAND_SUGGESTIONS.map((suggestion) => {
+            const isAdded = priorCommandSet.has(suggestion.toLowerCase());
+            return (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => handleTogglePriorSuggestion(suggestion)}
+                className={cn(
+                  'h-6 px-2 rounded-full border text-[11px] inline-flex items-center gap-1 transition-colors',
+                  isAdded
+                    ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                    : 'bg-[var(--bg-note)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                )}
+              >
+                {isAdded ? (
+                  <Check className="size-2.5" strokeWidth={2.2} />
+                ) : (
+                  <Plus className="size-2.5 text-[var(--accent-forest)]" strokeWidth={2} />
+                )}
+                <span>{suggestion}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* 5. Dynamic Discipline Command Set Picker for new dogs */}
       {!dogToEdit && (
-        <div className="pt-3 border-t border-[#1f1b16]/10 space-y-3">
+        <div className="pt-3 border-t border-[var(--border-hairline)] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <span className="block font-medium text-[#1f1b16]">
+              <span className="block font-medium text-[var(--text-primary)]">
                 Стартовые наборы команд и дисциплин
               </span>
-              <span className="text-[11.5px] text-[#7b7266]">
+              <span className="text-[11.5px] text-[var(--text-muted)]">
                 Выберите курсы целиком или раскройте список для точечной настройки команд
               </span>
             </div>
-            <span className="font-mono text-[11.5px] tabular-nums px-2 py-0.5 rounded-[5px] bg-[#efe9df] border border-[#1f1b16]/10 text-[#1f5c3a] font-medium flex-shrink-0">
+            <span className="font-mono text-[11.5px] tabular-nums px-2 py-0.5 rounded-[5px] bg-[var(--bg-subtle)] border border-[var(--border-hairline)] text-[var(--accent-forest)] font-medium flex-shrink-0">
               Выбрано: {selectedCommandIds.size}
             </span>
           </div>
@@ -751,8 +927,8 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                   className={cn(
                     'rounded-xl border transition-colors',
                     selectedCount > 0
-                      ? 'border-[#1f5c3a]/30 bg-[#efe9df]/35'
-                      : 'border-[#1f1b16]/10 bg-[#fdfbf7]'
+                      ? 'border-[#286144]/35 dark:border-[#58b482]/40 bg-[var(--bg-note)]'
+                      : 'border-[var(--border-hairline)] bg-[var(--bg-sheet)]'
                   )}
                 >
                   <div className="px-3 py-2.5 flex items-center justify-between gap-3">
@@ -765,10 +941,10 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                         className={cn(
                           'size-4 rounded-[4px] border flex items-center justify-center flex-shrink-0 transition-colors',
                           allSelected
-                            ? 'bg-[#1f5c3a] border-[#1f5c3a] text-[#fdfbf7]'
+                            ? 'bg-[var(--accent-forest)] border-[var(--accent-forest)] text-[#fffcf8] dark:text-[#12100e]'
                             : someSelected
-                            ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fdfbf7]'
-                            : 'bg-[#fdfbf7] border-[#1f1b16]/25 text-transparent'
+                            ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                            : 'bg-[var(--bg-sheet)] border-[var(--border-strong)] text-transparent'
                         )}
                       >
                         {allSelected ? (
@@ -780,14 +956,14 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-[#1f1b16] truncate">
+                          <span className="font-medium text-[var(--text-primary)] truncate">
                             {disc.title}
                           </span>
-                          <span className="font-mono text-[11px] tabular-nums text-[#7b7266] flex-shrink-0">
+                          <span className="font-mono text-[11px] tabular-nums text-[var(--text-muted)] flex-shrink-0">
                             {selectedCount}/{commands.length}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#7b7266] truncate">
+                        <p className="text-[11px] text-[var(--text-muted)] truncate">
                           {disc.subtitle}
                         </p>
                       </div>
@@ -802,7 +978,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                             [discId]: !prev[discId],
                           }))
                         }
-                        className="h-7 px-2 rounded-lg border border-[#1f1b16]/10 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#5e554a] text-[11px] inline-flex items-center gap-1 flex-shrink-0 transition-colors"
+                        className="h-7 px-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[11px] inline-flex items-center gap-1 flex-shrink-0 transition-colors"
                       >
                         <span>{isExpanded ? 'Свернуть' : 'Команды'}</span>
                         {isExpanded ? (
@@ -815,14 +991,14 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                   </div>
 
                   {isExpanded && commands.length > 0 && (
-                    <div className="px-3 pb-3 pt-2 border-t border-[#1f1b16]/10 space-y-2">
-                      <div className="flex items-center justify-between text-[11px] text-[#7b7266]">
+                    <div className="px-3 pb-3 pt-2 border-t border-[var(--border-hairline)] space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
                         <span>Отметьте нужные команды из набора:</span>
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => selectAllForDiscipline(commands, true)}
-                            className="text-[#1f5c3a] hover:underline font-medium"
+                            className="text-[var(--accent-forest)] hover:underline font-medium"
                           >
                             Выбрать все
                           </button>
@@ -830,7 +1006,7 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                           <button
                             type="button"
                             onClick={() => selectAllForDiscipline(commands, false)}
-                            className="text-[#5e554a] hover:underline"
+                            className="text-[var(--text-secondary)] hover:underline"
                           >
                             Снять все
                           </button>
@@ -847,15 +1023,15 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
                               className={cn(
                                 'flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none transition-colors text-[11.5px]',
                                 checked
-                                  ? 'bg-[#fdfbf7] border-[#1f5c3a]/35 text-[#1f1b16]'
-                                  : 'bg-[#efe9df]/35 border-[#1f1b16]/10 text-[#5e554a] hover:bg-[#efe9df]/70'
+                                  ? 'bg-[var(--bg-sheet)] border-[#286144]/35 dark:border-[#58b482]/40 text-[var(--text-primary)]'
+                                  : 'bg-[var(--bg-subtle)] border-[var(--border-hairline)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                               )}
                             >
                               <input
                                 type="checkbox"
                                 checked={checked}
                                 onChange={() => toggleSingleCommand(cmd.id)}
-                                className="size-3.5 rounded border-[#1f1b16]/25 text-[#1f5c3a] focus:ring-[#1f5c3a]"
+                                className="size-3.5 rounded border-[var(--border-strong)] accent-[#286144] dark:accent-[#58b482]"
                               />
                               <span className="truncate font-medium">{cmd.name}</span>
                             </label>
@@ -872,17 +1048,17 @@ const DogForm: React.FC<DogFormProps> = ({ dogToEdit, onClose }) => {
       )}
 
       {/* Footer Buttons */}
-      <div className="pt-4 border-t border-[#1f1b16]/10 flex items-center justify-end gap-2">
+      <div className="pt-4 border-t border-[var(--border-hairline)] flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={onClose}
-          className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#5e554a] font-medium transition-colors"
+          className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors"
         >
           Отмена
         </button>
         <button
           type="submit"
-          className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] font-medium inline-flex items-center gap-1.5 transition-colors"
+          className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           <Check className="size-3.5" strokeWidth={1.5} />
           <span>{dogToEdit ? 'Сохранить изменения' : 'Добавить собаку'}</span>
@@ -896,21 +1072,22 @@ export const DogModal: React.FC<DogModalProps> = ({ open, onOpenChange, dogToEdi
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#fdfbf7] rounded-2xl border border-[#1f1b16]/15 p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50 text-xs text-[#1f1b16]">
-          <div className="flex items-center justify-between pb-4 border-b border-[#1f1b16]/10">
+        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 dark:bg-black/65 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[var(--bg-sheet)] rounded-2xl border border-[var(--border-subtle)] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-50 text-xs text-[var(--text-primary)]">
+          <div className="flex items-center justify-between pb-4 border-b border-[var(--border-hairline)]">
             <div>
-              <Dialog.Title className="font-serif text-lg font-medium text-[#1f1b16]">
+              <Dialog.Title className="font-serif text-lg font-medium text-[var(--text-primary)]">
                 {dogToEdit ? `Редактирование карточки: ${dogToEdit.name}` : 'Новая карточка в картотеку'}
               </Dialog.Title>
-              <Dialog.Description className="text-xs text-[#7b7266] mt-0.5">
+              <Dialog.Description className="text-xs text-[var(--text-muted)] mt-0.5">
                 Паспортные данные собаки, мотивационный профиль и контакты владельца
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="size-8 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] flex items-center justify-center text-[#7b7266] hover:text-[#1f1b16] transition-colors"
+                aria-label="Закрыть окно"
+                className="size-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X className="size-4" strokeWidth={1.5} />
               </button>

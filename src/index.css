@@ -4,10 +4,13 @@
 
 @layer base {
   :root {
-    /* Craft (Cozy Handmade Paper) × Raycast (Tactile Precision) Palette */
+    color-scheme: light;
+
+    /* Paw-Paw Warm Paper & Graphite Palette */
     --bg-desk: #f2ece4;
     --bg-sheet: #fffcf8;
     --bg-note: #f8f3eb;
+    --bg-subtle: #efe9df;
     --bg-hover: #f3ede3;
     --bg-active: #ebe3d6;
 
@@ -19,9 +22,34 @@
     --text-secondary: #655b4e;
     --text-muted: #94897a;
 
+    --btn-dark-bg: #221c15;
+    --btn-dark-hover: #362d23;
+    --btn-dark-text: #fffcf8;
+
     --accent-forest: #286144;
     --accent-ochre: #b06728;
     --accent-terracotta: #b84233;
+
+    /* Desk & Surface Elevation Variables */
+    --desk-radial-highlight: radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(255, 252, 248, 0.7),
+      transparent
+    );
+
+    --keycap-border: rgba(36, 28, 18, 0.14);
+    --keycap-bg: linear-gradient(180deg, #fffdfa 0%, #f4eee4 100%);
+    --keycap-shadow: 0 1px 0 rgba(36, 28, 18, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --keycap-text: #5c5245;
+
+    --craft-sheet-border: rgba(36, 28, 18, 0.08);
+    --craft-sheet-shadow:
+      0 10px 36px -10px rgba(36, 28, 18, 0.06),
+      0 2px 6px -1px rgba(36, 28, 18, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+    --craft-note-border: rgba(36, 28, 18, 0.06);
+    --raycast-row-hover: var(--bg-hover);
 
     --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -30,10 +58,59 @@
     --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
+  html.dark {
+    color-scheme: dark;
+
+    /* Paw-Paw Warm Espresso Dark Palette */
+    --bg-desk: #12100e;
+    --bg-sheet: #1b1814;
+    --bg-note: #231f1a;
+    --bg-subtle: #2a241e;
+    --bg-hover: #2d2721;
+    --bg-active: #362f28;
+
+    --border-hairline: rgba(242, 235, 225, 0.08);
+    --border-subtle: rgba(242, 235, 225, 0.14);
+    --border-strong: rgba(242, 235, 225, 0.24);
+
+    --text-primary: #f2ebe1;
+    --text-secondary: #b9ae9e;
+    --text-muted: #8a7f71;
+
+    --btn-dark-bg: #ebe3d6;
+    --btn-dark-hover: #fffcf8;
+    --btn-dark-text: #1b1814;
+
+    --accent-forest: #58b482;
+    --accent-ochre: #e19b56;
+    --accent-terracotta: #e37163;
+
+    /* Warm subtle dark desk highlight & elevated surfaces */
+    --desk-radial-highlight: radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(214, 178, 134, 0.08),
+      transparent
+    );
+
+    --keycap-border: rgba(242, 235, 225, 0.16);
+    --keycap-bg: linear-gradient(180deg, #2d2721 0%, #221d18 100%);
+    --keycap-shadow: 0 1px 0 rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(242, 235, 225, 0.07);
+    --keycap-text: #c6bba9;
+
+    --craft-sheet-border: rgba(242, 235, 225, 0.09);
+    --craft-sheet-shadow:
+      0 16px 44px -12px rgba(0, 0, 0, 0.55),
+      0 2px 8px -1px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(242, 235, 225, 0.05);
+
+    --craft-note-border: rgba(242, 235, 225, 0.08);
+    --raycast-row-hover: var(--bg-hover);
+  }
+
   html,
   body {
     background-color: var(--bg-desk);
-    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 252, 248, 0.7), transparent);
+    background-image: var(--desk-radial-highlight);
     color: var(--text-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -49,7 +126,7 @@
 }
 
 @layer components {
-  /* Raycast physical keycap */
+  /* Tactile physical keycap */
   .keycap {
     display: inline-flex;
     align-items: center;
@@ -57,42 +134,39 @@
     min-width: 20px;
     height: 20px;
     border-radius: 5px;
-    border: 1px solid rgba(36, 28, 18, 0.14);
-    background: linear-gradient(180deg, #fffdfa 0%, #f4eee4 100%);
-    box-shadow: 0 1px 0 rgba(36, 28, 18, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--keycap-border);
+    background: var(--keycap-bg);
+    box-shadow: var(--keycap-shadow);
     font-family: var(--font-mono);
     font-size: 11px;
     line-height: 1;
     padding: 0 5px;
-    color: #5c5245;
+    color: var(--keycap-text);
     user-select: none;
   }
 
-  /* Craft floating paper sheet */
+  /* Floating archival paper sheet */
   .craft-sheet {
     background-color: var(--bg-sheet);
     border-radius: 20px;
-    border: 1px solid rgba(36, 28, 18, 0.08);
-    box-shadow:
-      0 10px 36px -10px rgba(36, 28, 18, 0.06),
-      0 2px 6px -1px rgba(36, 28, 18, 0.03),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--craft-sheet-border);
+    box-shadow: var(--craft-sheet-shadow);
   }
 
-  /* Craft soft handmade note block */
+  /* Soft handmade paper note block */
   .craft-note {
     background-color: var(--bg-note);
     border-radius: 16px;
-    border: 1px solid rgba(36, 28, 18, 0.06);
+    border: 1px solid var(--craft-note-border);
   }
 
-  /* Raycast interactive row */
+  /* Tactile interactive list row */
   .raycast-row {
     border-radius: 10px;
-    transition: background-color 140ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background-color 140ms var(--ease-out-quart);
   }
   .raycast-row:hover {
-    background-color: var(--bg-hover);
+    background-color: var(--raycast-row-hover);
   }
 }
 

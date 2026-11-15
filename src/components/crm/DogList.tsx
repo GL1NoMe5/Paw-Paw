@@ -21,7 +21,7 @@ export const DogList: React.FC<DogListProps> = ({
   if (dogs.length === 0) {
     return (
       <div className="py-10 px-3 text-center">
-        <p className="text-[13px] text-[#5e554a]">
+        <p className="text-[13px] text-[var(--text-secondary)]">
           {searchQuery ? 'Ничего не найдено' : 'Тетрадь пуста'}
         </p>
       </div>
@@ -44,12 +44,12 @@ export const DogList: React.FC<DogListProps> = ({
             className={cn(
               'w-full text-left px-2.5 py-2 rounded-[12px] transition-colors flex items-center gap-3 select-none group',
               isSelected
-                ? 'bg-[#fffcf8] text-[#1f1b16] shadow-[0_2px_8px_-2px_rgba(36,28,18,0.07),0_1px_2px_rgba(36,28,18,0.04)] border border-[#1f1b16]/[0.08]'
-                : 'text-[#5e554a] hover:bg-[#efe9df]/70 hover:text-[#1f1b16] border border-transparent'
+                ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] shadow-[0_2px_8px_-2px_rgba(36,28,18,0.07),0_1px_2px_rgba(36,28,18,0.04)] dark:shadow-[0_2px_10px_rgba(0,0,0,0.4)] border border-[var(--border-subtle)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] border border-transparent'
             )}
           >
             {/* Clean Rounded Avatar without overlapping fallback */}
-            <div className="size-9 rounded-[10px] overflow-hidden bg-[#efe9df] border border-[#1f1b16]/10 flex-shrink-0 flex items-center justify-center">
+            <div className="size-9 rounded-[10px] overflow-hidden bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex-shrink-0 flex items-center justify-center">
               {showAvatar ? (
                 <img
                   src={dog.avatar}
@@ -60,7 +60,7 @@ export const DogList: React.FC<DogListProps> = ({
                   }
                 />
               ) : (
-                <span className="font-mono text-[11px] font-medium text-[#5e554a]">
+                <span className="font-mono text-[11px] font-medium text-[var(--text-secondary)]">
                   {dog.name.slice(0, 2).toUpperCase()}
                 </span>
               )}
@@ -72,7 +72,7 @@ export const DogList: React.FC<DogListProps> = ({
                 <span
                   className={cn(
                     'text-[14px] truncate leading-tight',
-                    isSelected ? 'font-medium text-[#1f1b16]' : 'text-[#1f1b16]/90'
+                    isSelected ? 'font-medium text-[var(--text-primary)]' : 'text-[var(--text-primary)] opacity-90'
                   )}
                 >
                   {dog.name}
@@ -81,17 +81,17 @@ export const DogList: React.FC<DogListProps> = ({
                   className={cn(
                     'font-mono text-[12px] tabular-nums flex-shrink-0',
                     overallIndex >= 96
-                      ? 'text-[#1f5c3a] font-medium'
+                      ? 'text-[var(--accent-forest)] font-medium'
                       : isSelected
-                      ? 'text-[#1f1b16]'
-                      : 'text-[#7b7266]'
+                      ? 'text-[var(--text-primary)]'
+                      : 'text-[var(--text-muted)]'
                   )}
                 >
                   {overallIndex}%
                 </span>
               </div>
 
-              <div className="text-[12px] text-[#7b7266] truncate mt-0.5">
+              <div className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">
                 {dog.breed}
               </div>
             </div>

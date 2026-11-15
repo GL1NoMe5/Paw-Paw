@@ -1,3 +1,5 @@
+export type ThemeMode = 'light' | 'dark';
+
 export type Gender = 'male' | 'female';
 
 export type MotivationType = 'food' | 'play' | 'social' | 'mixed';
@@ -7,6 +9,28 @@ export type BuiltinDisciplineId = 'okd' | 'zks' | 'sport' | 'behavior';
 export type SkillCategory = BuiltinDisciplineId | (string & {});
 
 export type DistractionLevel = 'home' | 'quiet_yard' | 'city_street' | 'dog_park';
+
+export interface CustomHomeworkSections {
+  atHome: string;
+  beforeWalk: string;
+  onWalk: string;
+}
+
+export type DiplomaTemplateId = 'archival' | 'minimal' | 'editorial' | 'warm_card';
+
+export type DiplomaPaletteId =
+  | 'sand_gold'
+  | 'forest_sage'
+  | 'graphite_ink'
+  | 'terracotta_rose'
+  | 'indigo_slate';
+
+export interface CertificateConfig {
+  templateId: DiplomaTemplateId;
+  paletteId: DiplomaPaletteId;
+  includeOkdPercent: boolean;
+  includeTrainerName: boolean;
+}
 
 export interface DisciplineCommandTemplate {
   id: string;
@@ -61,6 +85,8 @@ export interface Dog {
   ownerPhone: string;
   ownerTelegram?: string;
   notes: string;
+  priorKnownCommands?: string[];
+  customHomework?: CustomHomeworkSections;
   createdAt: string;
   updatedAt: string;
   skills: DogSkill[];
@@ -85,6 +111,7 @@ export interface GeneratedHomework {
     instruction: string;
   };
   generalAdvice: string;
+  customSections?: CustomHomeworkSections;
 }
 
 export interface NextSessionPlan {
@@ -134,6 +161,8 @@ export interface AppExportData {
   sessions: TrainingSession[];
   disciplines?: DisciplineInfo[];
   disciplineCommands?: Record<string, DisciplineCommandTemplate[]>;
+  certificateConfig?: CertificateConfig;
+  theme?: ThemeMode;
 }
 
 export const OKD_PRESETS: DisciplineCommandTemplate[] = [

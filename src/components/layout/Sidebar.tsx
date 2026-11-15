@@ -6,6 +6,8 @@ import {
   Search,
   Plus,
   Database,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useDogStore } from '../../store/useDogStore';
@@ -29,7 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenCommandPalette,
 }) => {
   const dogs = useDogStore((s) => s.dogs);
-  const trainerProfile = useDogStore((s) => s.trainerProfile);
+  const theme = useDogStore((s) => s.theme);
+  const setTheme = useDogStore((s) => s.setTheme);
 
   const issuedDiplomasCount = dogs.filter((d) => d.certificateIssued === true).length;
 
@@ -70,27 +73,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside className="hidden md:flex w-[248px] lg:w-[260px] h-full flex-col select-none flex-shrink-0 px-1.5 py-2">
-      {/* Craft Cozy Header */}
+      {/* Header */}
       <div className="px-2.5 pt-1 pb-3">
-        <div className="font-serif text-[24px] leading-none text-[#221c15] tracking-tight">
+        <div className="font-serif text-[24px] leading-none text-[var(--text-primary)] tracking-tight">
           Paw-Paw
         </div>
-        <div className="text-[11.5px] text-[#94897a] mt-1.5 font-sans">
+        <div className="text-[11.5px] text-[var(--text-muted)] mt-1.5 font-sans">
           Тетрадь кинолога ·{' '}
-          <span className="font-mono tabular-nums text-[#655b4e]">{avgIndex}%</span> ср.
+          <span className="font-mono tabular-nums text-[var(--text-secondary)]">{avgIndex}%</span> ср.
         </div>
       </div>
 
-      {/* Raycast-style Command Palette Trigger */}
+      {/* Command Palette Trigger */}
       <div className="px-1.5 pb-4">
         <button
           type="button"
           onClick={onOpenCommandPalette}
           title="Открыть поиск и команды (⌘K)"
-          className="w-full h-9 px-2.5 rounded-[10px] bg-[#e9e1d6]/75 hover:bg-[#e9e1d6] border border-[#221c15]/[0.08] text-[13px] text-[#655b4e] hover:text-[#221c15] flex items-center justify-between gap-2 transition-colors"
+          className="w-full h-9 px-2.5 rounded-[10px] bg-[var(--bg-subtle)] hover:bg-[var(--bg-active)] border border-[var(--border-hairline)] text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-between gap-2 transition-colors"
         >
           <span className="inline-flex items-center gap-2 min-w-0">
-            <Search strokeWidth={1.5} className="size-4 text-[#94897a] flex-shrink-0" />
+            <Search strokeWidth={1.5} className="size-4 text-[var(--text-muted)] flex-shrink-0" />
             <span className="truncate">Поиск и команды</span>
           </span>
           <kbd className="keycap flex-shrink-0">⌘K</kbd>
@@ -99,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Top-Level Navigation */}
       <nav aria-label="Основные разделы" className="px-1.5 flex-1">
-        <div className="px-2 pb-1.5 text-[11.5px] font-medium text-[#94897a]">
+        <div className="px-2 pb-1.5 text-[11.5px] font-medium text-[var(--text-muted)]">
           Разделы
         </div>
         <div className="space-y-1">
@@ -115,8 +118,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={cn(
                   'w-full h-9 px-2.5 rounded-[10px] flex items-center justify-between gap-2.5 text-[13.5px] transition-all border',
                   isActive
-                    ? 'bg-[#fffcf8] text-[#221c15] font-medium border-[#221c15]/[0.09] shadow-[0_1px_3px_rgba(36,28,18,0.06)]'
-                    : 'bg-transparent text-[#655b4e] hover:bg-[#e9e1d6]/65 hover:text-[#221c15] border-transparent'
+                    ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] font-medium border-[var(--border-subtle)] shadow-[0_1px_3px_rgba(36,28,18,0.06)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.35)]'
+                    : 'bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] border-transparent'
                 )}
               >
                 <span className="inline-flex items-center gap-2.5 min-w-0">
@@ -124,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     strokeWidth={1.5}
                     className={cn(
                       'size-4 flex-shrink-0 transition-colors',
-                      isActive ? 'text-[#286144]' : 'text-[#94897a]'
+                      isActive ? 'text-[var(--accent-forest)]' : 'text-[var(--text-muted)]'
                     )}
                   />
                   <span className="truncate">{item.label}</span>
@@ -135,10 +138,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       'px-1.5 py-0.5 rounded-[6px] font-mono text-[11px] leading-none tabular-nums flex-shrink-0',
                       isActive
-                        ? 'bg-[#f8f3eb] text-[#221c15]'
+                        ? 'bg-[var(--bg-note)] text-[var(--text-primary)]'
                         : item.countAccent
-                        ? 'bg-[#286144]/10 text-[#286144]'
-                        : 'text-[#94897a]'
+                        ? 'bg-[#286144]/10 dark:bg-[#58b482]/15 text-[var(--accent-forest)]'
+                        : 'text-[var(--text-muted)]'
                     )}
                   >
                     {item.count}
@@ -150,38 +153,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </nav>
 
-      {/* Quiet Trainer Meta & Footer Actions */}
+      {/* Theme Switcher & Footer Actions */}
       <div className="mt-auto px-1.5 pt-3 space-y-2.5">
-        {trainerProfile.centerName && (
-          <div className="px-2 py-2 rounded-[10px] bg-[#e9e1d6]/45 border border-[#221c15]/[0.05]">
-            <div className="text-[11.5px] font-medium text-[#221c15] truncate">
-              {trainerProfile.centerName}
-            </div>
-            {trainerProfile.name && (
-              <div className="text-[11px] text-[#94897a] truncate mt-0.5">
-                {trainerProfile.name}
-              </div>
+        <div
+          role="group"
+          aria-label="Тема оформления"
+          className="grid grid-cols-2 gap-1 p-1 rounded-[10px] bg-[var(--bg-subtle)] border border-[var(--border-hairline)]"
+        >
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            aria-pressed={theme === 'light'}
+            className={cn(
+              'h-7 px-2 rounded-[7px] text-[12px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors border',
+              theme === 'light'
+                ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_1px_2px_rgba(36,28,18,0.06)]'
+                : 'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent'
             )}
-          </div>
-        )}
+          >
+            <Sun strokeWidth={1.6} className="size-3.5" />
+            <span>Светлая</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            aria-pressed={theme === 'dark'}
+            className={cn(
+              'h-7 px-2 rounded-[7px] text-[12px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors border',
+              theme === 'dark'
+                ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] border-[var(--border-subtle)] shadow-[0_1px_2px_rgba(0,0,0,0.35)]'
+                : 'bg-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent'
+            )}
+          >
+            <Moon strokeWidth={1.6} className="size-3.5" />
+            <span>Тёмная</span>
+          </button>
+        </div>
 
-        <div className="pt-2.5 border-t border-[#221c15]/[0.08] space-y-1.5">
+        <div className="pt-2.5 border-t border-[var(--border-hairline)] space-y-1.5">
           <button
             type="button"
             onClick={onAddDogClick}
-            className="w-full h-9 px-3 rounded-[10px] bg-[#fffcf8] hover:bg-[#ebe3d6] border border-[#221c15]/[0.11] text-[#221c15] text-[13px] font-medium inline-flex items-center justify-center gap-2 transition-colors shadow-[0_1px_2px_rgba(36,28,18,0.04)]"
+            className="w-full h-9 px-3 rounded-[10px] bg-[var(--bg-sheet)] hover:bg-[var(--bg-active)] border border-[var(--border-subtle)] text-[var(--text-primary)] text-[13px] font-medium inline-flex items-center justify-center gap-2 transition-colors shadow-[0_1px_2px_rgba(36,28,18,0.04)] dark:shadow-none"
           >
-            <Plus strokeWidth={1.6} className="size-4 text-[#286144]" />
+            <Plus strokeWidth={1.6} className="size-4 text-[var(--accent-forest)]" />
             <span>Новый ученик</span>
           </button>
 
           <button
             type="button"
             onClick={onOpenDatabaseModal}
-            className="w-full h-8 px-2.5 rounded-[8px] hover:bg-[#e9e1d6]/70 text-[12px] text-[#655b4e] hover:text-[#221c15] inline-flex items-center justify-center gap-1.5 transition-colors"
+            className="w-full h-8 px-2.5 rounded-[8px] hover:bg-[var(--bg-hover)] text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center justify-center gap-1.5 transition-colors"
             title="Экспорт и импорт базы JSON"
           >
-            <Database strokeWidth={1.5} className="size-3.5 text-[#94897a]" />
+            <Database strokeWidth={1.5} className="size-3.5 text-[var(--text-muted)]" />
             <span>Архив JSON</span>
           </button>
         </div>

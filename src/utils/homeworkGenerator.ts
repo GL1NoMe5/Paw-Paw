@@ -1,4 +1,5 @@
 import type {
+  CustomHomeworkSections,
   DistractionLevel,
   Dog,
   GeneratedHomework,
@@ -7,6 +8,119 @@ import type {
   SkillScoreRecord,
 } from '../types';
 import { formatDurationRussian, getRussianPlural } from './calculations';
+
+const HOME_EXERCISE_IDS = new Set([
+  'okd_sit',
+  'okd_down',
+  'okd_place',
+  'okd_stay',
+  'okd_leave',
+  'okd_inspection',
+  'beh_separation_anxiety',
+  'beh_loud_noises_fear',
+  'beh_lack_basic_discipline',
+  'sport_balance_fitness',
+]);
+
+const WALK_EXERCISE_IDS = new Set([
+  'okd_come',
+  'okd_heel',
+  'okd_fetch',
+  'beh_leash_pulling',
+  'beh_distraction_ignoring',
+  'beh_ground_scavenging',
+  'beh_dog_aggression',
+]);
+
+function hasNonEmptySection(sections?: CustomHomeworkSections): boolean {
+  return Boolean(
+    sections &&
+      (sections.atHome.trim() || sections.beforeWalk.trim() || sections.onWalk.trim())
+  );
+}
+
+export function buildDefaultHomeworkSections(
+  dog: Dog,
+  homework: Pick<
+    GeneratedHomework,
+    'dailyPlanSummary' | 'exercises' | 'positiveFinisher' | 'generalAdvice'
+  >
+): CustomHomeworkSections {
+  const homeExercises: HomeworkExercise[] = [];
+  const walkExercises: HomeworkExercise[] = [];
+
+  for (const ex of homework.exercises) {
+    if (HOME_EXERCISE_IDS.has(ex.skillId)) {
+      homeExercises.push(ex);
+    } else if (
+      WALK_EXERCISE_IDS.has(ex.skillId) ||
+      ex.category === 'zks' ||
+      ex.category === 'sport'
+    ) {
+      walkExercises.push(ex);
+    } else if (homeExercises.length <= walkExercises.length) {
+      homeExercises.push(ex);
+    } else {
+      walkExercises.push(ex);
+    }
+  }
+
+  const atHomeLines: string[] = [`Режим: ${homework.dailyPlanSummary}.`];
+  if (homeExercises.length > 0) {
+    homeExercises.forEach((ex) => {
+      atHomeLines.push(`• «${ex.skillName}» (${ex.recommendedSets}): ${ex.instruction}`);
+    });
+  } else if (homework.exercises.length > 0) {
+    atHomeLines.push(
+      `• Перед кормлением проведите спокойную 3–5-минутную разминку в комнате без раздражителей (${dog.favoriteTreats || 'привычное угощение'}).`
+    );
+  } else {
+    atHomeLines.push(
+      '• Перед кормлением уделите 3–5 минут повторению базовых позиций («Сидеть», «Лежать», зрительный контакт) в тихой обстановке.'
+    );
+  }
+  atHomeLines.push(
+    `• Закрепление успеха: «${homework.positiveFinisher.skillName}» — похвала и джекпот.`
+  );
+
+  const hasDoorJumping =
+    homework.exercises.some((ex) => ex.skillId === 'beh_jumping_people') ||
+    dog.skills.some((s) => s.id === 'beh_jumping_people' && s.mastery < 85);
+
+  const beforeWalkLines: string[] = [
+    `• Спокойные сборы: пристёгивайте поводок только когда ${dog.name} стоит или сидит на четырёх лапах без суеты.`,
+    '• Выдержка у порога: усадите по команде «Сидеть» на 5–10 секунд перед открытием двери и выходите первыми по разрешающему слову.',
+  ];
+  if (hasDoorJumping) {
+    beforeWalkLines.push(
+      '• Если прыгает или торопит у двери — пауза и шаг назад, пока все четыре лапы снова не окажутся на полу.'
+    );
+  }
+
+  const onWalkLines: string[] = [];
+  if (walkExercises.length > 0) {
+    walkExercises.forEach((ex) => {
+      onWalkLines.push(`• «${ex.skillName}» (${ex.recommendedSets}): ${ex.instruction}`);
+    });
+  } else {
+    onWalkLines.push(
+      '• Первые 5 минут прогулки — контакт по кличке и спокойный шаг на провисшем поводке, затем 2–3 коротких подзыва с щедрой наградой.'
+    );
+  }
+
+  const triggersText = dog.triggers?.trim();
+  if (triggersText && triggersText.toLowerCase() !== 'нет') {
+    onWalkLines.push(
+      `• Раздражители (${triggersText}): держите комфортную дистанцию и переключайте внимание маркером «Да!» до срыва.`
+    );
+  }
+
+  return {
+    atHome: atHomeLines.join('\n'),
+    beforeWalk: beforeWalkLines.join('\n'),
+    onWalk: onWalkLines.join('\n'),
+  };
+}
 
 export const SKILL_METHOD_TIPS: Record<string, string> = {
   okd_stay:
@@ -143,11 +257,28 @@ export function generateSmartHomework(dog: Dog, scores: SkillScoreRecord[]): Gen
       generalAdvice = `💡 Совет: Чередуйте пищевое поощрение за статичные упражнения и игру за активный подзыв.`;
   }
 
-  return {
+  const baseHomework = {
     dailyPlanSummary: setsSummary,
     exercises,
     positiveFinisher,
     generalAdvice,
+  };
+  const defaultSections = buildDefaultHomeworkSections(dog, baseHomework);
+  const customSections: CustomHomeworkSections = {
+    atHome: dog.customHomework?.atHome?.trim()
+      ? dog.customHomework.atHome.trim()
+      : defaultSections.atHome,
+    beforeWalk: dog.customHomework?.beforeWalk?.trim()
+      ? dog.customHomework.beforeWalk.trim()
+      : defaultSections.beforeWalk,
+    onWalk: dog.customHomework?.onWalk?.trim()
+      ? dog.customHomework.onWalk.trim()
+      : defaultSections.onWalk,
+  };
+
+  return {
+    ...baseHomework,
+    customSections,
   };
 }
 
@@ -227,15 +358,36 @@ export function formatReportForClipboard(
     text += `• ${s.skillName}: ${s.score}/5 [${stars}]\n`;
   });
 
+  const custom = hasNonEmptySection(dog.customHomework)
+    ? dog.customHomework
+    : hasNonEmptySection(session.homework.customSections)
+    ? session.homework.customSections
+    : undefined;
+
   text += `\n🎯 ДОМАШНЕЕ ЗАДАНИЕ ДЛЯ ХОЗЯЕВ:\n`;
   text += `⏱ Режим: ${session.homework.dailyPlanSummary}\n\n`;
 
-  session.homework.exercises.forEach((ex, idx) => {
-    text += `${idx + 1}. Команда «${ex.skillName}» (${ex.recommendedSets}):\n`;
-    text += `   👉 ${ex.instruction}\n`;
-  });
+  if (custom) {
+    if (custom.atHome?.trim()) {
+      text += `🏠 ДОМА:\n${custom.atHome.trim()}\n\n`;
+    }
+    if (custom.beforeWalk?.trim()) {
+      text += `🚪 ПЕРЕД ПРОГУЛКОЙ:\n${custom.beforeWalk.trim()}\n\n`;
+    }
+    if (custom.onWalk?.trim()) {
+      text += `🌳 НА ПРОГУЛКЕ:\n${custom.onWalk.trim()}\n\n`;
+    }
+  } else {
+    session.homework.exercises.forEach((ex, idx) => {
+      text += `${idx + 1}. Команда «${ex.skillName}» (${ex.recommendedSets}):\n`;
+      text += `   👉 ${ex.instruction}\n`;
+    });
+    if (session.homework.exercises.length > 0) {
+      text += `\n`;
+    }
+  }
 
-  text += `\n✨ Закрепление успеха: «${session.homework.positiveFinisher.skillName}»\n`;
+  text += `✨ Закрепление успеха: «${session.homework.positiveFinisher.skillName}»\n`;
   text += `   👉 ${session.homework.positiveFinisher.instruction}\n\n`;
 
   text += `${session.homework.generalAdvice}\n\n`;

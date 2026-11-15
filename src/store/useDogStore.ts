@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type {
   AppExportData,
+  CertificateConfig,
+  CustomHomeworkSections,
+  DiplomaPaletteId,
+  DiplomaTemplateId,
   DisciplineCommandTemplate,
   DisciplineInfo,
   DistractionLevel,
@@ -10,6 +14,7 @@ import type {
   DogSkill,
   SkillCategory,
   SkillScoreRecord,
+  ThemeMode,
   TrainerProfile,
   TrainingSession,
 } from '../types';
@@ -31,6 +36,93 @@ import {
   generateNextSessionPlan,
 } from '../utils/homeworkGenerator';
 import { DEMO_DOGS, DEMO_SESSIONS, DEFAULT_TRAINER_PROFILE } from './demoData';
+
+export const DEFAULT_CERTIFICATE_CONFIG: CertificateConfig = {
+  templateId: 'archival',
+  paletteId: 'sand_gold',
+  includeOkdPercent: true,
+  includeTrainerName: false,
+};
+
+const VALID_THEME_MODES = new Set<ThemeMode>(['light', 'dark']);
+const VALID_DIPLOMA_TEMPLATES = new Set<DiplomaTemplateId>([
+  'archival',
+  'minimal',
+  'editorial',
+  'warm_card',
+]);
+const VALID_DIPLOMA_PALETTES = new Set<DiplomaPaletteId>([
+  'sand_gold',
+  'forest_sage',
+  'graphite_ink',
+  'terracotta_rose',
+  'indigo_slate',
+]);
+
+function normalizeTheme(incoming?: unknown, fallback: ThemeMode = 'light'): ThemeMode {
+  return typeof incoming === 'string' && VALID_THEME_MODES.has(incoming as ThemeMode)
+    ? (incoming as ThemeMode)
+    : fallback;
+}
+
+function normalizeCertificateConfig(
+  incoming?: Partial<CertificateConfig> | null,
+  fallback: CertificateConfig = DEFAULT_CERTIFICATE_CONFIG
+): CertificateConfig {
+  if (!incoming || typeof incoming !== 'object') {
+    return { ...fallback };
+  }
+  return {
+    templateId:
+      typeof incoming.templateId === 'string' &&
+      VALID_DIPLOMA_TEMPLATES.has(incoming.templateId as DiplomaTemplateId)
+        ? (incoming.templateId as DiplomaTemplateId)
+        : fallback.templateId,
+    paletteId:
+      typeof incoming.paletteId === 'string' &&
+      VALID_DIPLOMA_PALETTES.has(incoming.paletteId as DiplomaPaletteId)
+        ? (incoming.paletteId as DiplomaPaletteId)
+        : fallback.paletteId,
+    includeOkdPercent:
+      typeof incoming.includeOkdPercent === 'boolean'
+        ? incoming.includeOkdPercent
+        : fallback.includeOkdPercent,
+    includeTrainerName:
+      typeof incoming.includeTrainerName === 'boolean'
+        ? incoming.includeTrainerName
+        : fallback.includeTrainerName,
+  };
+}
+
+function normalizeDog(dog: Dog): Dog {
+  const priorKnownCommands = Array.isArray(dog.priorKnownCommands)
+    ? dog.priorKnownCommands.map((cmd) => String(cmd).trim()).filter(Boolean)
+    : undefined;
+
+  const customHomework =
+    dog.customHomework && typeof dog.customHomework === 'object'
+      ? {
+          atHome: typeof dog.customHomework.atHome === 'string' ? dog.customHomework.atHome : '',
+          beforeWalk:
+            typeof dog.customHomework.beforeWalk === 'string'
+              ? dog.customHomework.beforeWalk
+              : '',
+          onWalk: typeof dog.customHomework.onWalk === 'string' ? dog.customHomework.onWalk : '',
+        }
+      : undefined;
+
+  return {
+    ...dog,
+    skills: Array.isArray(dog.skills) ? dog.skills.map((s) => ({ ...s })) : [],
+    ...(priorKnownCommands !== undefined ? { priorKnownCommands } : {}),
+    ...(customHomework !== undefined ? { customHomework } : {}),
+  };
+}
+
+function applyThemeToDocument(theme: ThemeMode): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+}
 
 function createDefaultDisciplineCommands(): Record<string, DisciplineCommandTemplate[]> {
   return {
@@ -109,6 +201,13 @@ export interface DogStoreState {
   trainerProfile: TrainerProfile;
   disciplines: DisciplineInfo[];
   disciplineCommands: Record<string, DisciplineCommandTemplate[]>;
+  theme: ThemeMode;
+  certificateConfig: CertificateConfig;
+
+  // Actions: Theme & Certificate Preferences
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+  updateCertificateConfig: (updates: Partial<CertificateConfig>) => void;
 
   // Actions: Navigation & Filter
   setActiveDog: (id: string | null) => void;
@@ -120,6 +219,7 @@ export interface DogStoreState {
     dogData: Omit<Dog, 'id' | 'createdAt' | 'updatedAt' | 'skills'> & { skills?: DogSkill[] }
   ) => string;
   updateDog: (id: string, updates: Partial<Dog>) => void;
+  updateDogHomework: (dogId: string, customHomework: CustomHomeworkSections) => void;
   deleteDog: (id: string) => void;
   issueCertificate: (dogId: string) => void;
 
@@ -170,7 +270,7 @@ export interface DogStoreState {
 export const useDogStore = create<DogStoreState>()(
   persist(
     (set, get) => ({
-      dogs: DEMO_DOGS,
+      dogs: DEMO_DOGS.map(normalizeDog),
       sessions: DEMO_SESSIONS,
       activeDogId: 'dog_rex',
       filter: 'all',
@@ -178,14 +278,51 @@ export const useDogStore = create<DogStoreState>()(
       trainerProfile: DEFAULT_TRAINER_PROFILE,
       disciplines: [...DEFAULT_DISCIPLINES],
       disciplineCommands: createDefaultDisciplineCommands(),
+      theme: 'light',
+      certificateConfig: { ...DEFAULT_CERTIFICATE_CONFIG },
+
+      setTheme: (theme) => {
+        const nextTheme = normalizeTheme(theme);
+        applyThemeToDocument(nextTheme);
+        set({ theme: nextTheme });
+      },
+
+      toggleTheme: () => {
+        const nextTheme: ThemeMode = get().theme === 'dark' ? 'light' : 'dark';
+        applyThemeToDocument(nextTheme);
+        set({ theme: nextTheme });
+      },
+
+      updateCertificateConfig: (updates) => {
+        set((state) => ({
+          certificateConfig: normalizeCertificateConfig(
+            { ...state.certificateConfig, ...updates },
+            state.certificateConfig
+          ),
+        }));
+      },
 
       setActiveDog: (id) => set({ activeDogId: id }),
       setFilter: (filter) => set({ filter }),
       setSearchQuery: (searchQuery) => set({ searchQuery }),
 
       addDog: (dogData) => {
-        const newId = `dog_${Date.now()}`;
+        let newId = `dog_${Date.now()}`;
+        if (get().dogs.some((d) => d.id === newId)) {
+          newId = `dog_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        }
         const now = new Date().toISOString();
+        const normalizedPrior = Array.isArray(dogData.priorKnownCommands)
+          ? dogData.priorKnownCommands.map((cmd) => String(cmd).trim()).filter(Boolean)
+          : undefined;
+        const normalizedHomework = dogData.customHomework
+          ? {
+              atHome: dogData.customHomework.atHome ?? '',
+              beforeWalk: dogData.customHomework.beforeWalk ?? '',
+              onWalk: dogData.customHomework.onWalk ?? '',
+            }
+          : undefined;
+
         const newDog: Dog = {
           ...dogData,
           id: newId,
@@ -193,6 +330,8 @@ export const useDogStore = create<DogStoreState>()(
           updatedAt: now,
           skills: dogData.skills || [],
           certificateIssued: false,
+          ...(normalizedPrior !== undefined ? { priorKnownCommands: normalizedPrior } : {}),
+          ...(normalizedHomework !== undefined ? { customHomework: normalizedHomework } : {}),
         };
         set((state) => ({ dogs: [newDog, ...state.dogs], activeDogId: newId }));
         return newId;
@@ -200,8 +339,39 @@ export const useDogStore = create<DogStoreState>()(
 
       updateDog: (id, updates) => {
         const now = new Date().toISOString();
+        const normalizedUpdates: Partial<Dog> = {
+          ...updates,
+          ...(Array.isArray(updates.priorKnownCommands)
+            ? {
+                priorKnownCommands: updates.priorKnownCommands
+                  .map((cmd) => String(cmd).trim())
+                  .filter(Boolean),
+              }
+            : {}),
+        };
         set((state) => ({
-          dogs: state.dogs.map((d) => (d.id === id ? { ...d, ...updates, updatedAt: now } : d)),
+          dogs: state.dogs.map((d) =>
+            d.id === id ? { ...d, ...normalizedUpdates, updatedAt: now } : d
+          ),
+        }));
+      },
+
+      updateDogHomework: (dogId, customHomework) => {
+        const now = new Date().toISOString();
+        set((state) => ({
+          dogs: state.dogs.map((d) =>
+            d.id === dogId
+              ? {
+                  ...d,
+                  customHomework: {
+                    atHome: customHomework.atHome ?? '',
+                    beforeWalk: customHomework.beforeWalk ?? '',
+                    onWalk: customHomework.onWalk ?? '',
+                  },
+                  updatedAt: now,
+                }
+              : d
+          ),
         }));
       },
 
@@ -389,8 +559,13 @@ export const useDogStore = create<DogStoreState>()(
           calculateOverallDogIndex(updatedSkills);
 
         // 3. Generate Smart Homework & Next Session Plan
-        const homework = generateSmartHomework(dog, scores);
-        const nextSessionPlan = generateNextSessionPlan(dog, scores, distractionLevel);
+        const dogWithUpdatedSkills: Dog = { ...dog, skills: updatedSkills };
+        const homework = generateSmartHomework(dogWithUpdatedSkills, scores);
+        const nextSessionPlan = generateNextSessionPlan(
+          dogWithUpdatedSkills,
+          scores,
+          distractionLevel
+        );
 
         const newSession: TrainingSession = {
           id: `session_${Date.now()}`,
@@ -637,6 +812,8 @@ export const useDogStore = create<DogStoreState>()(
           sessions: state.sessions,
           disciplines: state.disciplines,
           disciplineCommands: state.disciplineCommands,
+          certificateConfig: state.certificateConfig,
+          theme: state.theme,
         };
         return JSON.stringify(data, null, 2);
       },
@@ -648,18 +825,28 @@ export const useDogStore = create<DogStoreState>()(
             return { success: false, message: 'Неверный формат файла: отсутствует массив собак' };
           }
           const current = get();
+          const nextDogs = parsed.dogs.map(normalizeDog);
+          const nextCertificateConfig = parsed.certificateConfig
+            ? normalizeCertificateConfig(parsed.certificateConfig, current.certificateConfig)
+            : current.certificateConfig;
+          const nextTheme = parsed.theme
+            ? normalizeTheme(parsed.theme, current.theme)
+            : current.theme;
+          applyThemeToDocument(nextTheme);
           set({
-            dogs: parsed.dogs,
+            dogs: nextDogs,
             sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
             trainerProfile: parsed.trainerProfile || current.trainerProfile,
             disciplines: mergeDisciplines(parsed.disciplines),
             disciplineCommands: mergeDisciplineCommands(parsed.disciplineCommands),
-            activeDogId: parsed.dogs[0]?.id || null,
+            certificateConfig: nextCertificateConfig,
+            theme: nextTheme,
+            activeDogId: nextDogs[0]?.id || null,
           });
           return {
             success: true,
             message: 'База успешно импортирована!',
-            count: parsed.dogs.length,
+            count: nextDogs.length,
           };
         } catch {
           return { success: false, message: 'Ошибка парсинга JSON файла' };
@@ -667,8 +854,9 @@ export const useDogStore = create<DogStoreState>()(
       },
 
       resetToDemoData: () => {
+        applyThemeToDocument('light');
         set({
-          dogs: DEMO_DOGS,
+          dogs: DEMO_DOGS.map(normalizeDog),
           sessions: DEMO_SESSIONS,
           activeDogId: 'dog_rex',
           filter: 'all',
@@ -676,6 +864,8 @@ export const useDogStore = create<DogStoreState>()(
           trainerProfile: DEFAULT_TRAINER_PROFILE,
           disciplines: [...DEFAULT_DISCIPLINES],
           disciplineCommands: createDefaultDisciplineCommands(),
+          theme: 'light',
+          certificateConfig: { ...DEFAULT_CERTIFICATE_CONFIG },
         });
       },
     }),
@@ -695,12 +885,24 @@ export const useDogStore = create<DogStoreState>()(
         return {
           ...currentState,
           ...persisted,
+          dogs: Array.isArray(persisted.dogs)
+            ? persisted.dogs.map(normalizeDog)
+            : currentState.dogs,
           disciplines: mergeDisciplines(persisted.disciplines),
           disciplineCommands: mergeDisciplineCommands(persisted.disciplineCommands),
+          theme: normalizeTheme(persisted.theme, currentState.theme),
+          certificateConfig: normalizeCertificateConfig(
+            persisted.certificateConfig,
+            currentState.certificateConfig
+          ),
         };
       },
       onRehydrateStorage: () => (state) => {
         if (!state) return;
+        const normalizedTheme = normalizeTheme(state.theme);
+        state.theme = normalizedTheme;
+        state.certificateConfig = normalizeCertificateConfig(state.certificateConfig);
+        applyThemeToDocument(normalizedTheme);
         if (!state.dogs || state.dogs.length === 0) {
           state.resetToDemoData();
           return;

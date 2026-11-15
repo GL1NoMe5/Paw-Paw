@@ -201,24 +201,24 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
   return (
     <div className={cn('space-y-3.5', className)}>
       {/* Keyboard Shortcuts Bar & Mode Toggle */}
-      <div className="rounded-lg bg-[#efe9df]/70 border border-[#1f1b16]/10 px-3.5 py-2.5 space-y-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#5e554a]">
+      <div className="rounded-lg bg-[var(--bg-note)] border border-[var(--border-subtle)] px-3.5 py-2.5 space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--text-secondary)]">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <span className="text-[#1f1b16] font-medium">Быстрый ввод:</span>
+            <span className="text-[var(--text-primary)] font-medium">Быстрый ввод:</span>
             <span className="inline-flex items-center gap-1.5">
-              <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+              <kbd className="keycap min-w-[24px] font-medium">
                 1–5
               </kbd>
               <span>оценка</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+              <kbd className="keycap min-w-[24px] font-medium">
                 ↑ / ↓
               </kbd>
               <span>строка</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <kbd className="inline-flex items-center justify-center min-w-[20px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[11px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+              <kbd className="keycap font-medium">
                 %
               </kbd>
               <span>вид шкалы</span>
@@ -229,7 +229,7 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
             <div
               role="group"
               aria-label="Режим отображения шкалы оценок"
-              className="inline-flex items-center rounded-[7px] border border-[#1f1b16]/10 bg-[#fffcf8] p-0.5"
+              className="inline-flex items-center rounded-[7px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] p-0.5"
             >
               <button
                 type="button"
@@ -237,8 +237,8 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                 className={cn(
                   'h-6 px-2 rounded-[5px] text-[11px] font-mono tabular-nums transition-colors',
                   gradingMode === 'keys'
-                    ? 'bg-[#1f1b16] text-[#fffcf8] font-medium'
-                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                    ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 )}
               >
                 1–5
@@ -249,8 +249,8 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                 className={cn(
                   'h-6 px-2 rounded-[5px] text-[11px] font-mono tabular-nums transition-colors',
                   gradingMode === 'percent'
-                    ? 'bg-[#1f1b16] text-[#fffcf8] font-medium'
-                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                    ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 )}
               >
                 %
@@ -261,30 +261,30 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                 className={cn(
                   'h-6 px-2 rounded-[5px] text-[11px] font-medium transition-colors',
                   gradingMode === 'degree'
-                    ? 'bg-[#1f1b16] text-[#fffcf8]'
-                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                    ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 )}
               >
                 Степень
               </button>
             </div>
 
-            <span className="font-mono tabular-nums text-xs text-[#1f1b16]">
+            <span className="font-mono tabular-nums text-xs text-[var(--text-primary)]">
               Оценено: <span className="font-medium">{scoredCount}</span> из {skills.length}
             </span>
           </div>
         </div>
 
         {/* Completion Degrees Reference Legend */}
-        <div className="pt-2 border-t border-[#1f1b16]/10 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#5e554a]">
-          <span className="text-[#7b7266] font-medium">Степень выполнения:</span>
+        <div className="pt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--text-secondary)]">
+          <span className="text-[var(--text-muted)] font-medium">Степень выполнения:</span>
           {SCORE_LEVELS.map((lvl) => {
             const info = SCORE_COMPLETION_LABELS[lvl];
             return (
               <span key={lvl} className="inline-flex items-center gap-1 font-mono tabular-nums">
-                <span className="font-medium text-[#1f1b16]">{lvl}</span>
-                <span className="font-sans text-[#5e554a]">{info.short}</span>
-                <span className="text-[#7b7266]">· {info.percent}%</span>
+                <span className="font-medium text-[var(--text-primary)]">{lvl}</span>
+                <span className="font-sans text-[var(--text-secondary)]">{info.short}</span>
+                <span className="text-[var(--text-muted)]">· {info.percent}%</span>
               </span>
             );
           })}
@@ -292,20 +292,20 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
       </div>
 
       {/* Category Filter Tabs & Bulk Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#1f1b16]/10">
-        <div className="inline-flex flex-wrap items-center gap-1 p-1 bg-[#efe9df]/60 rounded-lg border border-[#1f1b16]/10 text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
+        <div className="inline-flex flex-wrap items-center gap-1 p-1 bg-[var(--bg-note)] rounded-lg border border-[var(--border-subtle)] text-xs">
           <button
             type="button"
             onClick={() => setActiveCategory('all')}
             className={cn(
               'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
               activeCategory === 'all'
-                ? 'bg-[#fffcf8] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
-                : 'text-[#5e554a] hover:text-[#1f1b16]'
+                ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] font-medium border border-[var(--border-subtle)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             )}
           >
             <span>Все дисциплины</span>
-            <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">
+            <span className="font-mono tabular-nums text-[11px] text-[var(--text-muted)]">
               {skills.length}
             </span>
           </button>
@@ -321,14 +321,14 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                 className={cn(
                   'h-7 px-3 rounded-[6px] transition-colors inline-flex items-center gap-1.5',
                   isActive
-                    ? 'bg-[#fffcf8] text-[#1f1b16] font-medium border border-[#1f1b16]/10'
+                    ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] font-medium border border-[var(--border-subtle)]'
                     : count === 0
-                    ? 'text-[#7b7266] hover:text-[#1f1b16]'
-                    : 'text-[#5e554a] hover:text-[#1f1b16]'
+                    ? 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 )}
               >
                 <span>{tab.tabLabel}</span>
-                <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">
+                <span className="font-mono tabular-nums text-[11px] text-[var(--text-muted)]">
                   {count}
                 </span>
               </button>
@@ -341,15 +341,15 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
             <button
               type="button"
               onClick={() => onSetAllPracticed(true)}
-              className="text-[#5e554a] hover:text-[#1f1b16] transition-colors"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               Отметить все
             </button>
-            <span className="text-[#1f1b16]/20">•</span>
+            <span className="text-[var(--text-muted)]">•</span>
             <button
               type="button"
               onClick={() => onSetAllPracticed(false)}
-              className="text-[#7b7266] hover:text-[#1f1b16] transition-colors"
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
               Сбросить отметки
             </button>
@@ -358,11 +358,11 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
       </div>
 
       {/* Archival Rows of Skills */}
-      <div className="divide-y divide-[#1f1b16]/10 rounded-xl border border-[#1f1b16]/10 bg-[#fffcf8] overflow-hidden">
+      <div className="divide-y divide-[var(--border-subtle)] rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-sheet)] overflow-hidden">
         {filteredSkills.length === 0 ? (
-          <div className="px-5 py-8 text-center text-xs text-[#7b7266]">
+          <div className="px-5 py-8 text-center text-xs text-[var(--text-muted)]">
             В выбранной категории у ученика пока нет добавленных команд. Используйте кнопку{' '}
-            <span className="text-[#1f1b16] font-medium">«+ Добавить команду из наборов»</span>{' '}
+            <span className="text-[var(--text-primary)] font-medium">«+ Добавить команду из наборов»</span>{' '}
             выше, чтобы включить упражнения из ОКД, ЗКС, спорта или коррекции.
           </div>
         ) : (
@@ -390,12 +390,12 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                 onClick={() => selectIndex(index)}
                 onFocus={() => selectIndex(index)}
                 className={cn(
-                  'px-4 py-3 transition-colors outline-hidden cursor-pointer select-none',
+                  'px-4 py-3 transition-colors outline-none cursor-pointer select-none',
                   isFocused
-                    ? 'bg-[#efe9df]/80'
+                    ? 'bg-[var(--bg-active)]'
                     : isPracticed
-                    ? 'bg-[#efe9df]/30 hover:bg-[#efe9df]/50'
-                    : 'bg-[#fffcf8] hover:bg-[#efe9df]/40'
+                    ? 'bg-[var(--bg-note)] hover:bg-[var(--bg-hover)]'
+                    : 'bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)]'
                 )}
               >
                 <div
@@ -417,8 +417,8 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                       className={cn(
                         'mt-0.5 size-4 rounded-[4px] border flex items-center justify-center transition-colors flex-shrink-0',
                         isPracticed
-                          ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
-                          : 'bg-[#fffcf8] border-[#1f1b16]/25 text-transparent hover:border-[#1f1b16]/50'
+                          ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                          : 'bg-[var(--bg-sheet)] border-[var(--border-strong)] text-transparent hover:border-[var(--text-secondary)]'
                       )}
                       title={
                         isPracticed
@@ -432,8 +432,8 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-[#1f1b16]">{skill.name}</span>
-                        <span className="px-1.5 py-0.5 rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 text-[10px] font-medium text-[#5e554a]">
+                        <span className="text-sm font-medium text-[var(--text-primary)]">{skill.name}</span>
+                        <span className="px-1.5 py-0.5 rounded-[4px] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[10px] font-medium text-[var(--text-secondary)]">
                           {categoryLabel}
                         </span>
                         {currentDegree ? (
@@ -441,22 +441,22 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                             className={cn(
                               'px-1.5 py-0.5 rounded-[4px] text-[10px] font-mono tabular-nums font-medium border',
                               currentScore === 5
-                                ? 'bg-[#286144]/10 border-[#286144]/25 text-[#286144]'
+                                ? 'bg-[#286144]/10 dark:bg-[#58b482]/15 border-[#286144]/25 dark:border-[#58b482]/35 text-[var(--accent-forest)]'
                                 : currentScore <= 2
-                                ? 'bg-[#b84233]/10 border-[#b84233]/25 text-[#b84233]'
-                                : 'bg-[#1f1b16]/5 border-[#1f1b16]/15 text-[#1f1b16]'
+                                ? 'bg-[#b84233]/10 dark:bg-[#e37163]/15 border-[#b84233]/25 dark:border-[#e37163]/35 text-[var(--accent-terracotta)]'
+                                : 'bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-primary)]'
                             )}
                           >
                             {currentScore} {currentDegree.short} · {currentDegree.percent}%
                           </span>
                         ) : isPracticed ? (
-                          <span className="px-1.5 py-0.5 rounded-[4px] bg-[#b06728]/10 border border-[#b06728]/25 text-[10px] font-medium text-[#b06728]">
+                          <span className="px-1.5 py-0.5 rounded-[4px] bg-[#b06728]/10 dark:bg-[#e19b56]/15 border border-[#b06728]/25 dark:border-[#e19b56]/35 text-[10px] font-medium text-[var(--accent-ochre)]">
                             Укажите оценку 1–5
                           </span>
                         ) : null}
                       </div>
                       {skill.description && (
-                        <p className="text-xs text-[#7b7266] line-clamp-1 mt-0.5">
+                        <p className="text-xs text-[var(--text-muted)] line-clamp-1 mt-0.5">
                           {skill.description}
                         </p>
                       )}
@@ -465,31 +465,31 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
 
                   {/* Middle: Precision Tick-Mark Ruler & Live Delta */}
                   <div className="flex items-center gap-3 lg:w-56 flex-shrink-0">
-                    <div className="relative h-2 flex-1 rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 overflow-hidden">
+                    <div className="relative h-2 flex-1 rounded-[4px] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] overflow-hidden">
                       <div
-                        className="h-full bg-[#286144] transition-colors"
+                        className="h-full bg-[var(--accent-forest)] transition-colors"
                         style={{ width: `${previewMastery}%` }}
                       />
                       {RULER_TICKS.map((tick) => (
                         <div
                           key={tick}
-                          className="absolute top-0 bottom-0 w-px bg-[#1f1b16]/15 pointer-events-none"
+                          className="absolute top-0 bottom-0 w-px bg-[#221c15]/15 dark:bg-[#f2ebe1]/15 pointer-events-none"
                           style={{ left: `${tick}%` }}
                         />
                       ))}
                     </div>
 
                     <div className="w-24 text-right font-mono tabular-nums text-xs flex items-center justify-end gap-1.5">
-                      <span className="text-[#1f1b16] font-medium">{previewMastery}%</span>
+                      <span className="text-[var(--text-primary)] font-medium">{previewMastery}%</span>
                       {currentScore > 0 && (
                         <span
                           className={cn(
                             'text-[11px]',
                             delta > 0
-                              ? 'text-[#286144] font-medium'
+                              ? 'text-[var(--accent-forest)] font-medium'
                               : delta < 0
-                              ? 'text-[#b84233] font-medium'
-                              : 'text-[#7b7266]'
+                              ? 'text-[var(--accent-terracotta)] font-medium'
+                              : 'text-[var(--text-muted)]'
                           )}
                         >
                           {delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : '0%'}
@@ -525,9 +525,9 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                               : 'w-8',
                             isSelected
                               ? scoreVal === 5
-                                ? 'bg-[#286144] border-[#286144] text-[#fffcf8]'
-                                : 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
-                              : 'bg-[#fffcf8] border-[#1f1b16]/15 text-[#221c15] hover:bg-[#efe9df] shadow-[0_1px_0_rgba(31,27,22,0.1)]'
+                                ? 'bg-[#286144] border-[#286144] text-[#fffcf8] dark:bg-[#58b482] dark:border-[#58b482] dark:text-[#12100e]'
+                                : 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                              : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] shadow-[0_1px_0_rgba(31,27,22,0.1)] dark:shadow-[0_1px_0_rgba(0,0,0,0.45)]'
                           )}
                           title={`${scoreVal} ${compInfo.short} · ${compInfo.percent}% — ${compInfo.label}`}
                           aria-label={`${scoreVal} ${compInfo.short} · ${compInfo.percent}%`}
@@ -539,7 +539,7 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
                               <span
                                 className={cn(
                                   'font-mono text-[11px]',
-                                  isSelected ? 'text-[#fffcf8]/80' : 'text-[#7b7266]'
+                                  isSelected ? 'text-current opacity-80' : 'text-[var(--text-muted)]'
                                 )}
                               >
                                 {scoreVal}
@@ -557,21 +557,21 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
 
                 {/* Active Row Status Bar */}
                 {isFocused && (
-                  <div className="mt-2 pt-2 border-t border-[#1f1b16]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[#5e554a]">
+                  <div className="mt-2 pt-2 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-[var(--text-secondary)]">
                     <span className="inline-flex items-center gap-1.5 flex-wrap">
                       <span>Строка выбрана — нажмите</span>
-                      <kbd className="inline-flex items-center justify-center min-w-[24px] h-5 rounded-[5px] border border-[#1f1b16]/20 bg-[#fffcf8] px-1.5 font-mono text-[10px] font-medium text-[#221c15] shadow-[0_1px_0_rgba(36,28,18,0.1)] select-none">
+                      <kbd className="keycap min-w-[24px] text-[10px] font-medium">
                         1–5
                       </kbd>
                       <span>для степени выполнения</span>
                     </span>
                     {currentDegree ? (
-                      <span className="font-mono tabular-nums text-[#1f1b16]">
+                      <span className="font-mono tabular-nums text-[var(--text-primary)]">
                         {currentScore} {currentDegree.short} · {currentDegree.percent}% (
                         {skill.mastery}% → {previewMastery}%)
                       </span>
                     ) : (
-                      <span className="text-[#7b7266]">Степень выполнения ещё не выставлена</span>
+                      <span className="text-[var(--text-muted)]">Степень выполнения ещё не выставлена</span>
                     )}
                   </div>
                 )}

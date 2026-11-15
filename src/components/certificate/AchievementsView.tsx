@@ -33,7 +33,7 @@ const DogAvatarBadge: React.FC<{
   return (
     <div
       className={cn(
-        'overflow-hidden border border-[#221c15]/10 bg-[#f2ece4] flex-shrink-0 flex items-center justify-center',
+        'overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-desk)] flex-shrink-0 flex items-center justify-center',
         sizeClass
       )}
     >
@@ -45,7 +45,7 @@ const DogAvatarBadge: React.FC<{
           onError={() => onImageError(dog.avatar)}
         />
       ) : (
-        <span className={cn('font-mono font-medium text-[#655b4e]', textClass)}>
+        <span className={cn('font-mono font-medium text-[var(--text-secondary)]', textClass)}>
           {monogram}
         </span>
       )}
@@ -145,28 +145,28 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
   ];
 
   return (
-    <div className={cn('px-5 sm:px-9 py-7 space-y-6 text-[#221c15]', className)}>
+    <div className={cn('px-5 sm:px-9 py-7 space-y-6 text-[var(--text-primary)]', className)}>
       {/* 1. Header & Summary Counters */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-[#221c15]/10">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-5 border-b border-[var(--border-subtle)]">
         <div>
-          <h1 className="font-serif text-[28px] leading-tight font-medium text-[#221c15] tracking-[-0.01em]">
+          <h1 className="font-serif text-[28px] leading-tight font-medium text-[var(--text-primary)] tracking-[-0.01em]">
             Достижения и дипломы
           </h1>
-          <p className="text-[13px] text-[#655b4e] mt-1">
-            Выпускная аттестация учеников Paw-Paw, присвоение званий и экспорт архивных дипломов А4
+          <p className="text-[13px] text-[var(--text-secondary)] mt-1">
+            Выпускная аттестация учеников Paw-Paw, оформление и экспорт дипломов А4
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="px-3.5 py-2 rounded-xl bg-[#f8f3eb] border border-[#221c15]/8 flex items-baseline gap-2.5">
-            <span className="text-xs text-[#655b4e]">Выдано дипломов</span>
-            <span className="font-mono text-lg font-medium tabular-nums text-[#286144]">
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-note)] border border-[var(--border-hairline)] flex items-baseline gap-2.5">
+            <span className="text-xs text-[var(--text-secondary)]">Выдано дипломов</span>
+            <span className="font-mono text-lg font-medium tabular-nums text-[var(--accent-forest)]">
               {issuedCount}
             </span>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-[#f8f3eb] border border-[#221c15]/8 flex items-baseline gap-2.5">
-            <span className="text-xs text-[#655b4e]">Учеников в работе</span>
-            <span className="font-mono text-lg font-medium tabular-nums text-[#221c15]">
+          <div className="px-3.5 py-2 rounded-xl bg-[var(--bg-note)] border border-[var(--border-hairline)] flex items-baseline gap-2.5">
+            <span className="text-xs text-[var(--text-secondary)]">Учеников в работе</span>
+            <span className="font-mono text-lg font-medium tabular-nums text-[var(--text-primary)]">
               {inProgressCount}
             </span>
           </div>
@@ -178,7 +178,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         <div
           role="tablist"
           aria-label="Фильтр учеников для диплома"
-          className="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#f8f3eb] border border-[#221c15]/8"
+          className="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-note)] border border-[var(--border-hairline)]"
         >
           {filterTabs.map((tab) => {
             const isActive = filterTab === tab.id;
@@ -192,12 +192,12 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                 className={cn(
                   'h-8 px-3 rounded-[9px] text-xs font-medium inline-flex items-center gap-2 transition-colors',
                   isActive
-                    ? 'bg-[#fffcf8] text-[#221c15] shadow-[0_1px_2px_rgba(36,28,18,0.06)] border border-[#221c15]/10'
-                    : 'text-[#655b4e] hover:text-[#221c15]'
+                    ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] shadow-[0_1px_2px_rgba(0,0,0,0.08)] border border-[var(--border-subtle)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 )}
               >
                 <span>{tab.label}</span>
-                <span className="font-mono text-[11px] tabular-nums text-[#94897a]">
+                <span className="font-mono text-[11px] tabular-nums text-[var(--text-muted)]">
                   {tab.count}
                 </span>
               </button>
@@ -205,7 +205,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
           })}
         </div>
 
-        <span className="text-xs text-[#94897a]">
+        <span className="text-xs text-[var(--text-muted)]">
           Выберите ученика, чтобы настроить и скачать диплом
         </span>
       </div>
@@ -213,18 +213,20 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
       {/* 3. Empty States OR Dog Selector + Embedded Diploma Studio */}
       {dogs.length === 0 ? (
         <div className="craft-note p-10 text-center space-y-2">
-          <Award className="size-6 text-[#94897a] mx-auto" strokeWidth={1.5} />
-          <p className="text-sm font-medium text-[#221c15]">В картотеке пока нет учеников</p>
-          <p className="text-xs text-[#655b4e] max-w-md mx-auto">
-            Добавьте карточку собаки во вкладке «Ученики», чтобы оформлять аттестационные дипломы формата А4
+          <Award className="size-6 text-[var(--text-muted)] mx-auto" strokeWidth={1.5} />
+          <p className="text-sm font-medium text-[var(--text-primary)]">
+            В картотеке пока нет учеников
+          </p>
+          <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
+            Добавьте карточку собаки во вкладке «Ученики», чтобы оформлять дипломы формата А4
           </p>
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="craft-note p-10 text-center space-y-3">
-          <p className="text-sm font-medium text-[#221c15]">
+          <p className="text-sm font-medium text-[var(--text-primary)]">
             В этой категории пока нет учеников
           </p>
-          <p className="text-xs text-[#655b4e] max-w-md mx-auto">
+          <p className="text-xs text-[var(--text-secondary)] max-w-md mx-auto">
             {filterTab === 'issued'
               ? 'Пока не выдан ни один диплом. Переключитесь на всех учеников, чтобы довести курс до 100% и оформить первый выпуск'
               : 'Пока нет учеников с индексом подготовки от 96%. Вы можете выбрать любого ученика из общего списка и подготовить макет диплома'}
@@ -232,7 +234,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
           <button
             type="button"
             onClick={() => setFilterTab('all')}
-            className="h-9 px-3.5 rounded-lg border border-[#221c15]/15 bg-[#fffcf8] hover:bg-[#f3ede3] text-xs font-medium text-[#221c15] inline-flex items-center gap-1.5 transition-colors"
+            className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] text-xs font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors"
           >
             <RotateCcw className="size-3.5" strokeWidth={1.5} />
             <span>Показать всех учеников</span>
@@ -253,8 +255,8 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                   className={cn(
                     'text-left p-3 rounded-xl border transition-all flex items-center gap-3',
                     isSelected
-                      ? 'bg-[#f8f3eb] border-[#221c15]/30 shadow-[0_2px_8px_rgba(36,28,18,0.06)]'
-                      : 'bg-[#fffcf8] border-[#221c15]/10 hover:bg-[#f8f3eb]/60 hover:border-[#221c15]/20'
+                      ? 'bg-[var(--bg-note)] border-[var(--border-strong)] shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+                      : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-strong)]'
                   )}
                 >
                   <DogAvatarBadge
@@ -267,38 +269,38 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
                   <div className="min-w-0 flex-1 space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-[13.5px] font-medium text-[#221c15] truncate">
+                      <span className="text-[13.5px] font-medium text-[var(--text-primary)] truncate">
                         {dog.name}
                       </span>
                       {dog.certificateIssued ? (
-                        <span className="px-2 py-0.5 rounded-full bg-[#286144]/10 border border-[#286144]/20 text-[11px] font-medium text-[#286144] flex-shrink-0">
+                        <span className="px-2 py-0.5 rounded-full bg-[#286144]/10 border border-[#286144]/20 dark:bg-[#58b482]/14 dark:border-[#58b482]/30 text-[11px] font-medium text-[var(--accent-forest)] flex-shrink-0">
                           Выпускник
                         </span>
                       ) : overallIndex >= 96 ? (
-                        <span className="px-2 py-0.5 rounded-full bg-[#b06728]/10 border border-[#b06728]/25 text-[11px] font-medium text-[#b06728] flex-shrink-0 font-mono tabular-nums">
+                        <span className="px-2 py-0.5 rounded-full bg-[#b06728]/10 border border-[#b06728]/25 dark:bg-[#e19b56]/14 dark:border-[#e19b56]/30 text-[11px] font-medium text-[var(--accent-ochre)] flex-shrink-0 font-mono tabular-nums">
                           {overallIndex}%
                         </span>
                       ) : (
-                        <span className="font-mono text-xs tabular-nums text-[#655b4e] flex-shrink-0">
+                        <span className="font-mono text-xs tabular-nums text-[var(--text-secondary)] flex-shrink-0">
                           {overallIndex}%
                         </span>
                       )}
                     </div>
 
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-[#655b4e] truncate">
+                      <span className="text-xs text-[var(--text-secondary)] truncate">
                         {dog.breed}
                       </span>
                       {dog.certificateIssued && (
-                        <span className="font-mono text-[11px] tabular-nums text-[#94897a] flex-shrink-0">
+                        <span className="font-mono text-[11px] tabular-nums text-[var(--text-muted)] flex-shrink-0">
                           {overallIndex}%
                         </span>
                       )}
                     </div>
 
-                    <div className="h-1 w-full rounded-full bg-[#f2ece4] overflow-hidden">
+                    <div className="h-1 w-full rounded-full bg-[var(--bg-subtle)] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#286144] transition-all duration-300"
+                        className="h-full rounded-full bg-[var(--accent-forest)] transition-all duration-300"
                         style={{ width: `${Math.max(0, Math.min(100, overallIndex))}%` }}
                       />
                     </div>
@@ -310,14 +312,14 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
           {/* 4. Full Embedded A4 Diploma Studio */}
           {selectedDog && activeItem && (
-            <div className="rounded-2xl border border-[#221c15]/10 bg-[#fffcf8] overflow-hidden shadow-[0_2px_12px_rgba(36,28,18,0.03)]">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-sheet)] overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <DiplomaStudio
                 dog={selectedDog}
                 idPrefix="view-cert"
                 controlsClassName="p-4 sm:p-5"
-                previewContainerClassName="p-4 sm:p-6 bg-[#f2ece4]/80"
+                previewContainerClassName="p-4 sm:p-6 bg-[var(--bg-desk)]"
                 renderTopBar={({ handleGraduate, officialGenderTitle }) => (
-                  <div className="p-4 sm:p-5 border-b border-[#221c15]/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5 min-w-0">
                       <DogAvatarBadge
                         dog={selectedDog}
@@ -331,23 +333,23 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
 
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2.5">
-                          <h2 className="font-serif text-xl font-medium text-[#221c15]">
+                          <h2 className="font-serif text-xl font-medium text-[var(--text-primary)]">
                             {selectedDog.name}
                           </h2>
                           {selectedDog.certificateIssued ? (
-                            <span className="px-2.5 py-0.5 rounded-full bg-[#286144]/10 border border-[#286144]/20 text-[11px] font-medium text-[#286144]">
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#286144]/10 border border-[#286144]/20 dark:bg-[#58b482]/14 dark:border-[#58b482]/30 text-[11px] font-medium text-[var(--accent-forest)]">
                               Выпускник
                               {formatIssuedAt(selectedDog.certificateIssuedAt)
                                 ? ` · ${formatIssuedAt(selectedDog.certificateIssuedAt)}`
                                 : ''}
                             </span>
                           ) : (
-                            <span className="px-2.5 py-0.5 rounded-full bg-[#f8f3eb] border border-[#221c15]/12 text-[11px] font-mono tabular-nums text-[#655b4e]">
+                            <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-note)] border border-[var(--border-subtle)] text-[11px] font-mono tabular-nums text-[var(--text-secondary)]">
                               Индекс {activeItem.overallIndex}% · {activeItem.rank.title}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[#655b4e] mt-0.5 truncate">
+                        <p className="text-xs text-[var(--text-secondary)] mt-0.5 truncate">
                           {selectedDog.breed} · {formatDogAgeRussian(selectedDog.birthDate)} · Звание:{' '}
                           {officialGenderTitle}
                         </p>
@@ -359,17 +361,20 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
                         <button
                           type="button"
                           onClick={() => onOpenStudent(selectedDog.id)}
-                          className="h-9 px-3.5 rounded-[8px] border border-[#221c15]/15 bg-[#fffcf8] hover:bg-[#f3ede3] text-[#221c15] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+                          className="h-9 px-3.5 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
                         >
                           <span>К профилю ученика</span>
-                          <ArrowUpRight className="size-3.5 text-[#655b4e]" strokeWidth={1.5} />
+                          <ArrowUpRight
+                            className="size-3.5 text-[var(--text-secondary)]"
+                            strokeWidth={1.5}
+                          />
                         </button>
                       )}
 
                       <button
                         type="button"
                         onClick={handleGraduate}
-                        className="h-9 px-3.5 rounded-[8px] border border-[#286144]/30 bg-[#286144]/10 hover:bg-[#286144]/15 text-[#286144] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+                        className="h-9 px-3.5 rounded-[8px] border border-[#286144]/30 bg-[#286144]/10 hover:bg-[#286144]/15 text-[var(--accent-forest)] dark:border-[#58b482]/35 dark:bg-[#58b482]/14 dark:hover:bg-[#58b482]/22 text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
                       >
                         <Check className="size-3.5 stroke-[1.6]" />
                         <span>Довести курс до 100% и выдать диплом</span>

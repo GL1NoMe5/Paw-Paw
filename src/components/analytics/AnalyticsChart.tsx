@@ -13,6 +13,7 @@ import { format, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { Play } from 'lucide-react';
 import type { Dog, TrainingSession } from '../../types';
+import { useDogStore } from '../../store/useDogStore';
 import { DISTRACTION_LABELS } from '../../utils/calculations';
 import { cn } from '../../utils/cn';
 
@@ -42,6 +43,32 @@ export interface ChartDataPoint {
   hasSportSkills: boolean;
 }
 
+interface ChartThemePalette {
+  gridStroke: string;
+  axisStroke: string;
+  tickFill: string;
+  dotFill: string;
+  overall: string;
+  okd: string;
+  zks: string;
+  sport: string;
+  behavior: string;
+}
+
+function getChartPalette(isDark: boolean): ChartThemePalette {
+  return {
+    gridStroke: isDark ? '#322b23' : '#e6dfd4',
+    axisStroke: isDark ? '#322b23' : '#e6dfd4',
+    tickFill: isDark ? '#8a7f71' : '#94897a',
+    dotFill: isDark ? '#1b1814' : '#fffcf8',
+    overall: isDark ? '#58b482' : '#286144',
+    okd: isDark ? '#ebe3d6' : '#221c15',
+    zks: isDark ? '#e19b56' : '#b06728',
+    sport: isDark ? '#7da6c4' : '#4a6b82',
+    behavior: isDark ? '#a69c8e' : '#8a8175',
+  };
+}
+
 interface CustomTooltipProps {
   active?: boolean;
   payload?: Array<{
@@ -51,9 +78,10 @@ interface CustomTooltipProps {
     color: string;
   }>;
   label?: string;
+  palette: ChartThemePalette;
 }
 
-const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, palette }) => {
   if (!active || !payload || !payload.length) return null;
   const data = payload[0]?.payload;
   if (!data) return null;
@@ -70,7 +98,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     {
       key: 'overall',
       label: 'Общий индекс',
-      color: '#286144',
+      color: palette.overall,
       valueText: `${data.overallIndex}%`,
       isPrimary: true,
     },
@@ -80,7 +108,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     rows.push({
       key: 'okd',
       label: 'Курс ОКД',
-      color: '#221c15',
+      color: palette.okd,
       valueText: data.hasOkdSkills ? `${data.okdIndex}%` : '—',
     });
   }
@@ -89,7 +117,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     rows.push({
       key: 'zks',
       label: 'ЗКС',
-      color: '#b06728',
+      color: palette.zks,
       valueText: data.zksIndex !== null ? `${data.zksIndex}%` : '—',
     });
   }
@@ -98,7 +126,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     rows.push({
       key: 'sport',
       label: 'Активный спорт',
-      color: '#4a6b82',
+      color: palette.sport,
       valueText: data.sportIndex !== null ? `${data.sportIndex}%` : '—',
     });
   }
@@ -107,21 +135,21 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
     rows.push({
       key: 'behavior',
       label: 'Коррекция поведения',
-      color: '#8a8175',
+      color: palette.behavior,
       valueText: data.hasBehaviorSkills ? `${data.behaviorIndex}%` : '—',
     });
   }
 
   return (
-    <div className="bg-[#fffcf8] border border-[#221c15]/15 rounded-xl p-3 min-w-[230px] text-[#221c15] shadow-[0_8px_24px_rgba(36,28,18,0.08)] pointer-events-none">
-      <div className="flex items-center justify-between gap-3 border-b border-[#221c15]/10 pb-2 mb-2">
+    <div className="bg-[var(--bg-sheet)] border border-[var(--border-subtle)] rounded-xl p-3 min-w-[230px] text-[var(--text-primary)] shadow-[0_8px_24px_rgba(36,28,18,0.08)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.6)] pointer-events-none">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-2 mb-2">
         <div>
-          <span className="text-xs font-medium text-[#221c15] block">{data.name}</span>
-          <span className="font-mono text-[11px] tabular-nums text-[#94897a] block">
+          <span className="text-xs font-medium text-[var(--text-primary)] block">{data.name}</span>
+          <span className="font-mono text-[11px] tabular-nums text-[var(--text-muted)] block">
             {data.dateFull}
           </span>
         </div>
-        <span className="text-[11px] text-[#655b4e] font-mono tabular-nums">
+        <span className="text-[11px] text-[var(--text-secondary)] font-mono tabular-nums">
           {data.distractionLabel}
         </span>
       </div>
@@ -134,13 +162,19 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
                 className="size-2 rounded-full inline-block"
                 style={{ backgroundColor: row.color }}
               />
-              <span className={row.isPrimary ? 'text-[#221c15] font-medium' : 'text-[#655b4e]'}>
+              <span
+                className={
+                  row.isPrimary
+                    ? 'text-[var(--text-primary)] font-medium'
+                    : 'text-[var(--text-secondary)]'
+                }
+              >
                 {row.label}
               </span>
             </div>
             <span
               className="font-mono font-medium tabular-nums"
-              style={{ color: row.isPrimary ? '#286144' : row.color }}
+              style={{ color: row.isPrimary ? palette.overall : row.color }}
             >
               {row.valueText}
             </span>
@@ -157,6 +191,8 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
   onStartTraining,
   className,
 }) => {
+  const theme = useDogStore((s) => s.theme);
+  const palette = useMemo(() => getChartPalette(theme === 'dark'), [theme]);
   const [hiddenLines, setHiddenLines] = useState<Record<string, boolean>>({});
 
   const dogSessions = useMemo(
@@ -261,33 +297,33 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
     return (
       <div
         className={cn(
-          'bg-[#fffcf8] rounded-2xl border border-[#221c15]/10 p-5 text-[#221c15]',
+          'bg-[var(--bg-sheet)] rounded-2xl border border-[var(--border-subtle)] p-5 text-[var(--text-primary)]',
           className
         )}
       >
         <div className="flex items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-sm font-medium text-[#221c15]">
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">
               Динамика индекса по занятиям
             </h3>
-            <p className="text-xs text-[#655b4e]">
+            <p className="text-xs text-[var(--text-secondary)]">
               График прогресса освоения нормативов
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-[#221c15]/10 bg-[#f8f3eb]/60">
-          <h4 className="text-sm font-medium text-[#221c15] mb-1">
+        <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-note)]">
+          <h4 className="text-sm font-medium text-[var(--text-primary)] mb-1">
             Журнал занятий пока пуст
           </h4>
-          <p className="text-xs text-[#655b4e] max-w-sm mb-4 leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] max-w-sm mb-4 leading-relaxed">
             Проведите первое занятие с оценкой навыков, чтобы зафиксировать исходную точку и построить график динамики
           </p>
           {onStartTraining && (
             <button
               type="button"
               onClick={onStartTraining}
-              className="h-9 px-4 rounded-lg bg-[#221c15] hover:bg-[#362d23] text-[#fffcf8] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+              className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
             >
               <Play className="size-3.5" strokeWidth={1.5} />
               <span>Начать занятие</span>
@@ -319,7 +355,7 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
   return (
     <div
       className={cn(
-        'bg-[#fffcf8] rounded-2xl border border-[#221c15]/10 p-5 space-y-4 text-[#221c15]',
+        'bg-[var(--bg-sheet)] rounded-2xl border border-[var(--border-subtle)] p-5 space-y-4 text-[var(--text-primary)]',
         className
       )}
     >
@@ -327,10 +363,10 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5 mb-0.5">
-            <h3 className="text-sm font-medium text-[#221c15]">
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">
               Динамика индекса по занятиям
             </h3>
-            <span className="font-mono text-xs text-[#94897a] tabular-nums">
+            <span className="font-mono text-xs text-[var(--text-muted)] tabular-nums">
               {chartData.length}{' '}
               {chartData.length === 1
                 ? 'занятие'
@@ -339,20 +375,20 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
                 : 'занятий'}
             </span>
           </div>
-          <p className="text-xs text-[#655b4e]">{subtitleText}</p>
+          <p className="text-xs text-[var(--text-secondary)]">{subtitleText}</p>
         </div>
 
         {chartData.length > 1 && (
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#94897a]">Изменение с первого занятия:</span>
+            <span className="text-[var(--text-muted)]">Изменение с первого занятия:</span>
             <span
               className={cn(
                 'font-mono font-medium tabular-nums',
                 deltaFromStart > 0
-                  ? 'text-[#286144]'
+                  ? 'text-[var(--accent-forest)]'
                   : deltaFromStart < 0
-                  ? 'text-[#b84233]'
-                  : 'text-[#655b4e]'
+                  ? 'text-[var(--accent-terracotta)]'
+                  : 'text-[var(--text-secondary)]'
               )}
             >
               {deltaFromStart > 0 ? `+${deltaFromStart}%` : `${deltaFromStart}%`}
@@ -362,7 +398,7 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
       </div>
 
       {chartData.length === 1 && (
-        <div className="p-3 rounded-xl bg-[#f8f3eb]/70 border border-[#221c15]/10 text-xs text-[#655b4e]">
+        <div className="p-3 rounded-xl bg-[var(--bg-note)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)]">
           Зафиксировано первое занятие ({firstPoint.dateFull}). Линия тренда появится после второго занятия
         </div>
       )}
@@ -374,24 +410,24 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
             data={chartData}
             margin={{ top: 8, right: 12, left: -16, bottom: 4 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e6dfd4" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={palette.gridStroke} vertical={false} />
             <XAxis
               dataKey="dateShort"
-              stroke="#e6dfd4"
-              tick={{ fill: '#94897a', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}
+              stroke={palette.axisStroke}
+              tick={{ fill: palette.tickFill, fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}
               tickLine={false}
               dy={6}
             />
             <YAxis
               domain={[0, 100]}
               ticks={[0, 20, 40, 60, 80, 100]}
-              stroke="#e6dfd4"
-              tick={{ fill: '#94897a', fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}
+              stroke={palette.axisStroke}
+              tick={{ fill: palette.tickFill, fontSize: 11, fontFamily: 'IBM Plex Mono, monospace' }}
               tickFormatter={(v: number) => `${v}%`}
               tickLine={false}
               axisLine={false}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip palette={palette} />} />
             <Legend
               verticalAlign="top"
               align="right"
@@ -408,7 +444,9 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
                   <span
                     className={cn(
                       'text-xs select-none transition-opacity',
-                      isHidden ? 'opacity-40 line-through text-[#94897a]' : 'text-[#655b4e]'
+                      isHidden
+                        ? 'opacity-40 line-through text-[var(--text-muted)]'
+                        : 'text-[var(--text-secondary)]'
                     )}
                   >
                     {value}
@@ -417,76 +455,76 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
               }}
             />
 
-            {/* Primary Accent Line: Общий индекс (#286144) */}
+            {/* Primary Accent Line: Общий индекс */}
             <Line
               type="monotone"
               dataKey="overallIndex"
               name="Общий индекс"
-              stroke="#286144"
+              stroke={palette.overall}
               strokeWidth={2}
               hide={hiddenLines.overallIndex}
-              dot={{ r: 3.5, stroke: '#286144', strokeWidth: 1.5, fill: '#fffcf8' }}
-              activeDot={{ r: 5, fill: '#286144', stroke: '#fffcf8', strokeWidth: 1.5 }}
+              dot={{ r: 3.5, stroke: palette.overall, strokeWidth: 1.5, fill: palette.dotFill }}
+              activeDot={{ r: 5, fill: palette.overall, stroke: palette.dotFill, strokeWidth: 1.5 }}
             />
 
-            {/* Neutral Ramp: Курс ОКД (#221c15) */}
+            {/* Neutral Ramp: Курс ОКД */}
             {(hasOkdSkills || showBaselinePair) && (
               <Line
                 type="monotone"
                 dataKey="okdIndex"
                 name="Курс ОКД"
-                stroke="#221c15"
+                stroke={palette.okd}
                 strokeWidth={1.5}
                 hide={hiddenLines.okdIndex}
-                dot={{ r: 3, stroke: '#221c15', strokeWidth: 1.5, fill: '#fffcf8' }}
-                activeDot={{ r: 4.5, fill: '#221c15', stroke: '#fffcf8', strokeWidth: 1.5 }}
+                dot={{ r: 3, stroke: palette.okd, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.okd, stroke: palette.dotFill, strokeWidth: 1.5 }}
               />
             )}
 
-            {/* ZKS Line: ЗКС (#b06728) */}
+            {/* ZKS Line: ЗКС */}
             {hasZksSkills && (
               <Line
                 type="monotone"
                 dataKey="zksIndex"
                 name="ЗКС"
-                stroke="#b06728"
+                stroke={palette.zks}
                 strokeWidth={1.5}
                 strokeDasharray="6 3"
                 connectNulls
                 hide={hiddenLines.zksIndex}
-                dot={{ r: 3, stroke: '#b06728', strokeWidth: 1.5, fill: '#fffcf8' }}
-                activeDot={{ r: 4.5, fill: '#b06728', stroke: '#fffcf8', strokeWidth: 1.5 }}
+                dot={{ r: 3, stroke: palette.zks, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.zks, stroke: palette.dotFill, strokeWidth: 1.5 }}
               />
             )}
 
-            {/* Sport Line: Активный спорт (#4a6b82) */}
+            {/* Sport Line: Активный спорт */}
             {hasSportSkills && (
               <Line
                 type="monotone"
                 dataKey="sportIndex"
                 name="Активный спорт"
-                stroke="#4a6b82"
+                stroke={palette.sport}
                 strokeWidth={1.5}
                 strokeDasharray="2 3"
                 connectNulls
                 hide={hiddenLines.sportIndex}
-                dot={{ r: 3, stroke: '#4a6b82', strokeWidth: 1.5, fill: '#fffcf8' }}
-                activeDot={{ r: 4.5, fill: '#4a6b82', stroke: '#fffcf8', strokeWidth: 1.5 }}
+                dot={{ r: 3, stroke: palette.sport, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.sport, stroke: palette.dotFill, strokeWidth: 1.5 }}
               />
             )}
 
-            {/* Neutral Ramp: Коррекция поведения (#8a8175 dashed) */}
+            {/* Neutral Ramp: Коррекция поведения */}
             {(hasBehaviorSkills || showBaselinePair) && (
               <Line
                 type="monotone"
                 dataKey="behaviorIndex"
                 name="Коррекция поведения"
-                stroke="#8a8175"
+                stroke={palette.behavior}
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 hide={hiddenLines.behaviorIndex}
-                dot={{ r: 3, stroke: '#8a8175', strokeWidth: 1.5, fill: '#fffcf8' }}
-                activeDot={{ r: 4.5, fill: '#8a8175', stroke: '#fffcf8', strokeWidth: 1.5 }}
+                dot={{ r: 3, stroke: palette.behavior, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.behavior, stroke: palette.dotFill, strokeWidth: 1.5 }}
               />
             )}
           </LineChart>

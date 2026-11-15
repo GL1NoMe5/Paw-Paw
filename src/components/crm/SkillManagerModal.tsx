@@ -135,21 +135,21 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[#fdfbf7] rounded-2xl border border-[#1f1b16]/15 p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] z-50 text-xs text-[#1f1b16]">
-          <div className="flex items-center justify-between pb-3 border-b border-[#1f1b16]/10">
+        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 dark:bg-black/65 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[90vh] overflow-y-auto bg-[var(--bg-sheet)] rounded-2xl border border-[var(--border-strong)] p-6 shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_20px_56px_rgba(0,0,0,0.65)] z-50 text-xs text-[var(--text-primary)]">
+          <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
             <div>
-              <Dialog.Title className="font-serif text-lg font-medium text-[#1f1b16]">
+              <Dialog.Title className="font-serif text-lg font-medium text-[var(--text-primary)]">
                 Добавить навык в ведомость
               </Dialog.Title>
-              <Dialog.Description className="text-xs text-[#7b7266] mt-0.5">
+              <Dialog.Description className="text-xs text-[var(--text-muted)] mt-0.5">
                 Выберите команду из сохранённых наборов или добавьте индивидуальный норматив
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="size-8 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] flex items-center justify-center text-[#7b7266] hover:text-[#1f1b16] transition-colors"
+                className="size-8 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X className="size-4" strokeWidth={1.5} />
               </button>
@@ -159,7 +159,7 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
           <div className="space-y-5 pt-4">
             {/* 4 Discipline Tabs */}
             <div>
-              <label className="block font-medium text-[#5e554a] mb-1.5">
+              <label className="block font-medium text-[var(--text-secondary)] mb-1.5">
                 Раздел ведомости
               </label>
               <div
@@ -185,8 +185,8 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                       className={cn(
                         'min-h-[36px] px-2.5 py-1.5 rounded-lg font-medium border flex items-center justify-center gap-1.5 transition-colors text-center',
                         isActive
-                          ? 'bg-[#1f1b16] text-[#fdfbf7] border-[#1f1b16]'
-                          : 'bg-[#efe9df]/60 text-[#5e554a] border-[#1f1b16]/15 hover:bg-[#efe9df] hover:text-[#1f1b16]'
+                          ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] border-[var(--btn-dark-bg)]'
+                          : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-active)] hover:text-[var(--text-primary)]'
                       )}
                     >
                       <span className="truncate">{label}</span>
@@ -194,7 +194,7 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                         <span
                           className={cn(
                             'font-mono text-[10px] tabular-nums',
-                            isActive ? 'text-[#fdfbf7]/75' : 'text-[#7b7266]'
+                            isActive ? 'text-current opacity-75' : 'text-[var(--text-muted)]'
                           )}
                         >
                           {existingCount}
@@ -205,25 +205,25 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                 })}
               </div>
               {activeDiscInfo && (
-                <p className="text-[11px] text-[#7b7266] mt-1.5">
+                <p className="text-[11px] text-[var(--text-muted)] mt-1.5">
                   {activeDiscInfo.subtitle}
                 </p>
               )}
             </div>
 
             {/* 1-Click Quick-Add Pills from Saved Discipline Command Set */}
-            <div className="rounded-xl border border-[#1f1b16]/10 bg-[#efe9df]/40 p-3.5 space-y-2.5">
+            <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-note)] p-3.5 space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-[#1f1b16]">
+                <span className="font-medium text-[var(--text-primary)]">
                   Быстрое добавление из набора ({availableTemplates.length})
                 </span>
-                <span className="text-[11px] text-[#7b7266]">
+                <span className="text-[11px] text-[var(--text-muted)]">
                   Нажмите, чтобы добавить в 1 клик
                 </span>
               </div>
 
               {availableTemplates.length === 0 ? (
-                <p className="text-[11.5px] text-[#5e554a] py-1">
+                <p className="text-[11.5px] text-[var(--text-secondary)] py-1">
                   Все команды этого набора уже добавлены в карточку собаки.
                 </p>
               ) : (
@@ -234,10 +234,10 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                       type="button"
                       onClick={() => handleQuickAttachTemplate(cmd)}
                       title={cmd.description || cmd.name}
-                      className="h-7 px-2.5 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#1f5c3a] hover:border-[#1f5c3a] hover:text-[#fdfbf7] text-[#1f1b16] text-[11.5px] font-medium inline-flex items-center gap-1 transition-colors group"
+                      className="h-7 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[#286144] hover:border-[#286144] hover:text-[#fffcf8] dark:hover:bg-[#58b482] dark:hover:border-[#58b482] dark:hover:text-[#12100e] text-[var(--text-primary)] text-[11.5px] font-medium inline-flex items-center gap-1 transition-colors group"
                     >
                       <Plus
-                        className="size-3 text-[#1f5c3a] group-hover:text-[#fdfbf7] transition-colors"
+                        className="size-3 text-[var(--accent-forest)] group-hover:text-current transition-colors"
                         strokeWidth={2}
                       />
                       <span>{cmd.name}</span>
@@ -248,14 +248,14 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
             </div>
 
             {/* Custom Command Form */}
-            <form onSubmit={handleSubmit} className="space-y-3.5 pt-2 border-t border-[#1f1b16]/10">
-              <div className="text-[11.5px] font-medium text-[#5e554a]">
+            <form onSubmit={handleSubmit} className="space-y-3.5 pt-2 border-t border-[var(--border-subtle)]">
+              <div className="text-[11.5px] font-medium text-[var(--text-secondary)]">
                 Или введите собственный навык вручную
               </div>
 
               <div>
-                <label className="block font-medium text-[#5e554a] mb-1">
-                  Название навыка или команды <span className="text-[#b93829]">*</span>
+                <label className="block font-medium text-[var(--text-secondary)] mb-1">
+                  Название навыка или команды <span className="text-[var(--accent-terracotta)]">*</span>
                 </label>
                 <input
                   type="text"
@@ -263,12 +263,12 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                   placeholder="Апортировка предмета, спокойное ожидание у двери"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full h-9 px-3 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40"
+                  className="w-full h-9 px-3 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:bg-[var(--bg-sheet)] focus:outline-none focus:border-[var(--border-strong)]"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-[#5e554a] mb-1">
+                <label className="block font-medium text-[var(--text-secondary)] mb-1">
                   Критерий выполнения
                 </label>
                 <textarea
@@ -276,16 +276,16 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                   placeholder="Выполнение по первой команде на дистанции до 5 метров"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2.5 bg-[#efe9df]/60 border border-[#1f1b16]/15 rounded-lg text-[#1f1b16] placeholder:text-[#7b7266] focus:bg-[#fdfbf7] focus:outline-none focus:border-[#1f1b16]/40 resize-none leading-relaxed"
+                  className="w-full p-2.5 bg-[var(--bg-subtle)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:bg-[var(--bg-sheet)] focus:outline-none focus:border-[var(--border-strong)] resize-none leading-relaxed"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="font-medium text-[#5e554a]">
+                  <label className="font-medium text-[var(--text-secondary)]">
                     Исходный уровень освоения
                   </label>
-                  <span className="font-mono font-medium text-[#1f5c3a] tabular-nums">
+                  <span className="font-mono font-medium text-[var(--accent-forest)] tabular-nums">
                     {mastery}%
                   </span>
                 </div>
@@ -296,9 +296,9 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                   step="5"
                   value={mastery}
                   onChange={(e) => setMastery(Number(e.target.value))}
-                  className="w-full h-2 bg-[#efe9df] rounded-lg appearance-none cursor-pointer accent-[#1f5c3a]"
+                  className="w-full h-2 bg-[var(--bg-subtle)] rounded-lg appearance-none cursor-pointer accent-[#286144] dark:accent-[#58b482]"
                 />
-                <div className="flex justify-between font-mono text-[10px] tabular-nums text-[#7b7266] mt-1">
+                <div className="flex justify-between font-mono text-[10px] tabular-nums text-[var(--text-muted)] mt-1">
                   <span>0%</span>
                   <span>20%</span>
                   <span>40%</span>
@@ -308,17 +308,17 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#1f1b16]/10 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
-                  className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/15 bg-[#fdfbf7] hover:bg-[#efe9df] text-[#5e554a] font-medium transition-colors"
+                  className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors"
                 >
                   Закрыть
                 </button>
                 <button
                   type="submit"
-                  className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fdfbf7] font-medium inline-flex items-center gap-1.5 transition-colors"
+                  className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] font-medium inline-flex items-center gap-1.5 transition-colors"
                 >
                   <Check className="size-3.5" strokeWidth={1.5} />
                   <span>Добавить свой навык</span>

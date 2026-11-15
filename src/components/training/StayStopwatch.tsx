@@ -190,7 +190,7 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
       onKeyDown={handleContainerKeyDown}
       aria-label="Секундомер выдержки"
       className={cn(
-        'rounded-xl border border-[#1f1b16]/10 bg-[#fdfbf7] p-5 transition-colors focus:outline-hidden focus:border-[#1f1b16]/30',
+        'rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-sheet)] p-5 transition-colors focus:outline-none focus:border-[var(--border-strong)]',
         className
       )}
     >
@@ -198,14 +198,14 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h3 className="text-sm font-medium text-[#1f1b16]">Фиксация выдержки</h3>
+            <h3 className="text-sm font-medium text-[var(--text-primary)]">Фиксация выдержки</h3>
             {isTargetAchieved && (
-              <span className="text-xs font-mono tabular-nums text-[#286144] font-medium">
+              <span className="text-xs font-mono tabular-nums text-[var(--accent-forest)] font-medium">
                 Норматив выполнен
               </span>
             )}
           </div>
-          <p className="text-xs text-[#7b7266] mt-0.5">
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             {activeMode === 'stopwatch'
               ? 'Живой замер времени сохранения позиции при отходе кинолога'
               : 'Быстрый ввод уже достигнутого времени выдержки без запуска таймера'}
@@ -217,7 +217,7 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
           <div
             role="group"
             aria-label="Режим фиксации выдержки"
-            className="inline-flex items-center rounded-lg border border-[#1f1b16]/10 bg-[#efe9df]/70 p-0.5"
+            className="inline-flex items-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-note)] p-0.5"
           >
             <button
               type="button"
@@ -225,8 +225,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
               className={cn(
                 'h-7 px-2.5 rounded-[6px] text-xs font-medium inline-flex items-center gap-1.5 transition-colors',
                 activeMode === 'stopwatch'
-                  ? 'bg-[#fffcf8] text-[#1f1b16] border border-[#1f1b16]/10 shadow-[0_1px_2px_rgba(31,27,22,0.06)]'
-                  : 'text-[#5e554a] hover:text-[#1f1b16]'
+                  ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-[0_1px_2px_rgba(31,27,22,0.06)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.4)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               )}
             >
               <Timer className="size-3.5 stroke-[1.6]" />
@@ -238,8 +238,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
               className={cn(
                 'h-7 px-2.5 rounded-[6px] text-xs font-medium inline-flex items-center gap-1.5 transition-colors',
                 activeMode === 'manual'
-                  ? 'bg-[#fffcf8] text-[#1f1b16] border border-[#1f1b16]/10 shadow-[0_1px_2px_rgba(31,27,22,0.06)]'
-                  : 'text-[#5e554a] hover:text-[#1f1b16]'
+                  ? 'bg-[var(--bg-sheet)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-[0_1px_2px_rgba(31,27,22,0.06)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.4)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               )}
             >
               <Keyboard className="size-3.5 stroke-[1.6]" />
@@ -252,7 +252,7 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
       {/* Target Goal Selector + Fine Adjust */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-[#7b7266] mr-1">Ориентир:</span>
+          <span className="text-xs text-[var(--text-muted)] mr-1">Ориентир:</span>
           {TARGET_PRESETS.map((preset) => {
             const isSelected = targetSeconds === preset.seconds;
             return (
@@ -263,8 +263,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
                 className={cn(
                   'h-7 px-2.5 rounded-[6px] text-xs font-mono tabular-nums transition-colors border',
                   isSelected
-                    ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8] font-medium'
-                    : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df] text-[#5e554a]'
+                    ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                    : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)]'
                 )}
               >
                 {preset.label}
@@ -278,17 +278,17 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
             type="button"
             onClick={() => handleAdjustSeconds(-5)}
             disabled={currentTotalSeconds < 5}
-            className="size-7 rounded-[6px] border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] disabled:opacity-40 disabled:cursor-not-allowed text-[#5e554a] inline-flex items-center justify-center transition-colors"
+            className="size-7 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--text-secondary)] inline-flex items-center justify-center transition-colors"
             title="Отнять 5 секунд"
             aria-label="Отнять 5 секунд"
           >
             <Minus className="size-3.5 stroke-[1.5]" />
           </button>
-          <span className="text-[11px] font-mono tabular-nums text-[#7b7266] px-0.5">5с</span>
+          <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)] px-0.5">5с</span>
           <button
             type="button"
             onClick={() => handleAdjustSeconds(5)}
-            className="size-7 rounded-[6px] border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] text-[#5e554a] inline-flex items-center justify-center transition-colors"
+            className="size-7 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] inline-flex items-center justify-center transition-colors"
             title="Добавить 5 секунд"
             aria-label="Добавить 5 секунд"
           >
@@ -300,13 +300,13 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
       {/* Mode Content */}
       {activeMode === 'stopwatch' ? (
         /* Live Stopwatch Readout & Controls */
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3.5 px-4 rounded-lg bg-[#efe9df]/60 border border-[#1f1b16]/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3.5 px-4 rounded-lg bg-[var(--bg-note)] border border-[var(--border-subtle)]">
           <div className="flex items-baseline gap-2 select-none">
-            <div className="font-mono tabular-nums text-3xl sm:text-4xl font-medium text-[#1f1b16] tracking-normal">
+            <div className="font-mono tabular-nums text-3xl sm:text-4xl font-medium text-[var(--text-primary)] tracking-normal">
               {formattedMins}:{formattedSecs}
-              <span className="text-xl sm:text-2xl text-[#5e554a]">.{deciseconds}</span>
+              <span className="text-xl sm:text-2xl text-[var(--text-secondary)]">.{deciseconds}</span>
             </div>
-            <span className="text-xs font-mono tabular-nums text-[#7b7266]">
+            <span className="text-xs font-mono tabular-nums text-[var(--text-muted)]">
               ({currentTotalSeconds} с)
             </span>
           </div>
@@ -318,8 +318,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
               className={cn(
                 'h-9 px-3.5 rounded-lg text-xs font-medium inline-flex items-center gap-2 transition-colors border',
                 effectiveIsRunning
-                  ? 'bg-[#efe9df] border-[#1f1b16]/20 text-[#1f1b16] hover:bg-[#e5dec8]'
-                  : 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8] hover:bg-[#332d26]'
+                  ? 'bg-[var(--bg-subtle)] border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--bg-active)]'
+                  : 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] hover:bg-[var(--btn-dark-hover)]'
               )}
               aria-label={effectiveIsRunning ? 'Пауза' : 'Старт'}
             >
@@ -338,14 +338,9 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
                 className={cn(
                   'ml-1 inline-flex items-center justify-center rounded-[5px] border px-1.5 py-0.5 font-mono text-[10px] leading-none select-none',
                   effectiveIsRunning
-                    ? 'border-[#1f1b16]/20 bg-[#fffcf8] text-[#221c15]'
-                    : 'border-[#fffcf8]/25 text-[#fffcf8]'
+                    ? 'border-[var(--border-strong)] bg-[var(--bg-sheet)] text-[var(--text-primary)]'
+                    : 'border-[#fffcf8]/30 bg-[#fffcf8]/15 text-[#fffcf8] dark:border-[#1b1814]/25 dark:bg-[#1b1814]/10 dark:text-[#1b1814]'
                 )}
-                style={
-                  !effectiveIsRunning
-                    ? { backgroundColor: 'rgba(255, 252, 248, 0.16)' }
-                    : undefined
-                }
               >
                 Пробел
               </kbd>
@@ -355,7 +350,7 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
               type="button"
               onClick={handleReset}
               disabled={currentTotalSeconds === 0 && !effectiveIsRunning}
-              className="h-9 px-3 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] disabled:opacity-40 disabled:cursor-not-allowed text-[#5e554a] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+              className="h-9 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--text-secondary)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
               title="Сбросить секундомер"
               aria-label="Сбросить секундомер"
             >
@@ -366,11 +361,11 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
         </div>
       ) : (
         /* Manual Entry Panel */
-        <div className="space-y-3 py-3.5 px-4 rounded-lg bg-[#efe9df]/60 border border-[#1f1b16]/10">
+        <div className="space-y-3 py-3.5 px-4 rounded-lg bg-[var(--bg-note)] border border-[var(--border-subtle)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Numeric Inputs: Минуты + Секунды */}
             <div className="flex flex-wrap items-center gap-2.5">
-              <label className="inline-flex items-center gap-1.5 text-xs text-[#5e554a]">
+              <label className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                 <span>Минуты</span>
                 <input
                   type="number"
@@ -381,13 +376,13 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
                   onChange={(e) => handleManualMinsChange(e.target.value)}
                   onBlur={() => setEditingMins(null)}
                   aria-label="Минуты выдержки"
-                  className="h-9 w-16 px-2.5 rounded-lg border border-[#1f1b16]/15 bg-[#fffcf8] text-sm font-mono tabular-nums font-medium text-[#1f1b16] text-center focus:outline-hidden focus:border-[#1f1b16]"
+                  className="h-9 w-16 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] text-sm font-mono tabular-nums font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--border-strong)]"
                 />
               </label>
 
-              <span className="font-mono text-sm text-[#7b7266] select-none">:</span>
+              <span className="font-mono text-sm text-[var(--text-muted)] select-none">:</span>
 
-              <label className="inline-flex items-center gap-1.5 text-xs text-[#5e554a]">
+              <label className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                 <span>Секунды</span>
                 <input
                   type="number"
@@ -398,11 +393,11 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
                   onChange={(e) => handleManualSecsChange(e.target.value)}
                   onBlur={() => setEditingSecs(null)}
                   aria-label="Секунды выдержки"
-                  className="h-9 w-16 px-2.5 rounded-lg border border-[#1f1b16]/15 bg-[#fffcf8] text-sm font-mono tabular-nums font-medium text-[#1f1b16] text-center focus:outline-hidden focus:border-[#1f1b16]"
+                  className="h-9 w-16 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] text-sm font-mono tabular-nums font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--border-strong)]"
                 />
               </label>
 
-              <span className="text-xs font-mono tabular-nums text-[#5e554a] ml-1">
+              <span className="text-xs font-mono tabular-nums text-[var(--text-secondary)] ml-1">
                 = {formattedMins}:{formattedSecs} ({currentTotalSeconds} с)
               </span>
             </div>
@@ -411,7 +406,7 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
               type="button"
               onClick={handleReset}
               disabled={currentTotalSeconds === 0}
-              className="h-8 px-3 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] disabled:opacity-40 disabled:cursor-not-allowed text-[#5e554a] text-xs font-medium inline-flex items-center gap-1.5 transition-colors self-start sm:self-auto"
+              className="h-8 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--text-secondary)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors self-start sm:self-auto"
               title="Очистить время выдержки"
             >
               <RotateCcw className="size-3.5 stroke-[1.5]" />
@@ -420,8 +415,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
           </div>
 
           {/* Quick Presets: 15с, 30с, 60с, 90с, 120с */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[#1f1b16]/10">
-            <span className="text-xs text-[#7b7266] mr-1">Быстрый выбор:</span>
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--border-subtle)]">
+            <span className="text-xs text-[var(--text-muted)] mr-1">Быстрый выбор:</span>
             {MANUAL_STAY_PRESETS.map((preset) => {
               const isSelected = currentTotalSeconds === preset.seconds;
               return (
@@ -432,8 +427,8 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
                   className={cn(
                     'h-7 px-2.5 rounded-[6px] text-xs font-mono tabular-nums transition-colors border',
                     isSelected
-                      ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8] font-medium'
-                      : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df] text-[#221c15]'
+                      ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                      : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
                   )}
                 >
                   {preset.label}
@@ -446,36 +441,36 @@ export const StayStopwatch: React.FC<StayStopwatchProps> = ({
 
       {/* Precision Ruler Progress (when target is set) */}
       {targetSeconds !== null && (
-        <div className="mt-3 pt-3 border-t border-[#1f1b16]/10">
+        <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-[#5e554a]">
+            <span className="text-[var(--text-secondary)]">
               Целевая выдержка:{' '}
-              <span className="font-mono tabular-nums text-[#1f1b16] font-medium">
+              <span className="font-mono tabular-nums text-[var(--text-primary)] font-medium">
                 {targetSeconds} с
               </span>
             </span>
             <span
               className={cn(
                 'font-mono tabular-nums font-medium',
-                isTargetAchieved ? 'text-[#286144]' : 'text-[#1f1b16]'
+                isTargetAchieved ? 'text-[var(--accent-forest)]' : 'text-[var(--text-primary)]'
               )}
             >
               {progressPercent}%
             </span>
           </div>
 
-          <div className="relative h-2 w-full rounded-[4px] bg-[#efe9df] border border-[#1f1b16]/10 overflow-hidden">
+          <div className="relative h-2 w-full rounded-[4px] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] overflow-hidden">
             <div
               className={cn(
                 'h-full transition-colors',
-                isTargetAchieved ? 'bg-[#286144]' : 'bg-[#1f1b16]'
+                isTargetAchieved ? 'bg-[var(--accent-forest)]' : 'bg-[var(--btn-dark-bg)]'
               )}
               style={{ width: `${progressPercent}%` }}
             />
             {RULER_TICKS.map((tick) => (
               <div
                 key={tick}
-                className="absolute top-0 bottom-0 w-px bg-[#1f1b16]/15 pointer-events-none"
+                className="absolute top-0 bottom-0 w-px bg-[#221c15]/15 dark:bg-[#f2ebe1]/15 pointer-events-none"
                 style={{ left: `${tick}%` }}
               />
             ))}

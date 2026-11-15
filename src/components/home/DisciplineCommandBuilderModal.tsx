@@ -215,7 +215,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
   return (
     <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
       {/* Discipline Tabs */}
-      <div className="px-6 pt-4 pb-3 border-b border-[#221c15]/[0.08] bg-[#f8f3eb]/55 space-y-3">
+      <div className="px-6 pt-4 pb-3 border-b border-[var(--border-hairline)] bg-[var(--bg-note)] space-y-3">
         <div className="flex flex-wrap gap-1.5">
           {disciplines.map((disc) => {
             const isActive = disc.id === selectedCategory;
@@ -230,15 +230,15 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                 className={cn(
                   'h-9 px-3 rounded-[9px] text-[12.5px] font-medium inline-flex items-center gap-2 border transition-colors',
                   isActive
-                    ? 'bg-[#221c15] text-[#fffcf8] border-[#221c15]'
-                    : 'bg-[#fffcf8] text-[#655b4e] border-[#221c15]/10 hover:bg-[#ebe3d6] hover:text-[#221c15]'
+                    ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] border-[var(--btn-dark-bg)]'
+                    : 'bg-[var(--bg-sheet)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-active)] hover:text-[var(--text-primary)]'
                 )}
               >
                 <span>{label}</span>
                 <span
                   className={cn(
                     'font-mono text-[11px] tabular-nums',
-                    isActive ? 'text-[#fffcf8]/75' : 'text-[#94897a]'
+                    isActive ? 'text-current opacity-75' : 'text-[var(--text-muted)]'
                   )}
                 >
                   {count}
@@ -249,15 +249,15 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[12px]">
-          <div className="text-[#655b4e]">
-            <span className="font-medium text-[#221c15]">{currentDiscipline?.title}</span>
+          <div className="text-[var(--text-secondary)]">
+            <span className="font-medium text-[var(--text-primary)]">{currentDiscipline?.title}</span>
             {currentDiscipline?.subtitle ? ` · ${currentDiscipline.subtitle}` : ''}
           </div>
 
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 text-[12px] text-[#655b4e] hover:text-[#221c15] transition-colors"
+            className="self-start sm:self-auto inline-flex items-center gap-1.5 text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             <RotateCcw strokeWidth={1.5} className="size-3.5" />
             <span>Сбросить к стандарту</span>
@@ -270,9 +270,9 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
         {/* Add New Command Form */}
         <form
           onSubmit={handleAddCommand}
-          className="p-4 rounded-[14px] bg-[#f8f3eb] border border-[#221c15]/[0.08] space-y-3"
+          className="p-4 rounded-[14px] bg-[var(--bg-note)] border border-[var(--border-hairline)] space-y-3"
         >
-          <div className="text-[12.5px] font-medium text-[#221c15]">
+          <div className="text-[12.5px] font-medium text-[var(--text-primary)]">
             Добавить новую команду в набор
           </div>
 
@@ -283,7 +283,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                 placeholder="Название команды, например: Барьер 1 м"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="w-full h-9 px-3 rounded-[9px] bg-[#fffcf8] border border-[#221c15]/15 text-[13px] text-[#221c15] placeholder:text-[#94897a] focus:outline-none focus:border-[#221c15]/40"
+                className="w-full h-9 px-3 rounded-[9px] bg-[var(--bg-sheet)] border border-[var(--border-subtle)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-strong)]"
               />
             </div>
             <div className="sm:col-span-5">
@@ -292,13 +292,13 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                 placeholder="Критерий выполнения и подсказка для кинолога"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
-                className="w-full h-9 px-3 rounded-[9px] bg-[#fffcf8] border border-[#221c15]/15 text-[13px] text-[#221c15] placeholder:text-[#94897a] focus:outline-none focus:border-[#221c15]/40"
+                className="w-full h-9 px-3 rounded-[9px] bg-[var(--bg-sheet)] border border-[var(--border-subtle)] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-strong)]"
               />
             </div>
             <div className="sm:col-span-2">
               <button
                 type="submit"
-                className="w-full h-9 px-3 rounded-[9px] bg-[#221c15] hover:bg-[#362d23] text-[#fffcf8] text-[12.5px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full h-9 px-3 rounded-[9px] bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-[12.5px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Plus strokeWidth={1.6} className="size-3.5" />
                 <span>Добавить</span>
@@ -310,23 +310,23 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
         {/* Master Command List */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[12px] font-medium text-[#94897a]">
+            <span className="text-[12px] font-medium text-[var(--text-muted)]">
               Состав набора ({commands.length})
             </span>
           </div>
 
           {commands.length === 0 ? (
-            <div className="py-10 text-center rounded-[14px] border border-dashed border-[#221c15]/15 text-[13px] text-[#655b4e]">
+            <div className="py-10 text-center rounded-[14px] border border-dashed border-[var(--border-subtle)] text-[13px] text-[var(--text-secondary)]">
               В этом направлении пока нет команд. Добавьте первую выше или восстановите стандартный список
             </div>
           ) : (
-            <div className="divide-y divide-[#221c15]/[0.07] border border-[#221c15]/[0.09] rounded-[14px] bg-[#fffcf8] overflow-hidden">
+            <div className="divide-y divide-[var(--border-hairline)] border border-[var(--border-subtle)] rounded-[14px] bg-[var(--bg-sheet)] overflow-hidden">
               {commands.map((cmd, idx) => {
                 const isEditing = editingId === cmd.id;
 
                 if (isEditing) {
                   return (
-                    <div key={cmd.id} className="p-3.5 bg-[#f8f3eb]/70 space-y-2.5">
+                    <div key={cmd.id} className="p-3.5 bg-[var(--bg-note)] space-y-2.5">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <input
                           type="text"
@@ -343,7 +343,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                             }
                           }}
                           placeholder="Название команды"
-                          className="h-9 px-3 rounded-[8px] bg-[#fffcf8] border border-[#221c15]/20 text-[13px] font-medium text-[#221c15] focus:outline-none focus:border-[#221c15]"
+                          className="h-9 px-3 rounded-[8px] bg-[var(--bg-sheet)] border border-[var(--border-strong)] text-[13px] font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
                         />
                         <input
                           type="text"
@@ -359,7 +359,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                             }
                           }}
                           placeholder="Описание / норматив"
-                          className="h-9 px-3 rounded-[8px] bg-[#fffcf8] border border-[#221c15]/20 text-[13px] text-[#221c15] focus:outline-none focus:border-[#221c15]"
+                          className="h-9 px-3 rounded-[8px] bg-[var(--bg-sheet)] border border-[var(--border-strong)] text-[13px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
                         />
                       </div>
 
@@ -367,14 +367,14 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                         <button
                           type="button"
                           onClick={() => setEditingId(null)}
-                          className="h-8 px-3 rounded-[8px] border border-[#221c15]/15 bg-[#fffcf8] hover:bg-[#ebe3d6] text-[12px] text-[#655b4e] font-medium transition-colors"
+                          className="h-8 px-3 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-active)] text-[12px] text-[var(--text-secondary)] font-medium transition-colors"
                         >
                           Отмена
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSaveEdit(cmd.id)}
-                          className="h-8 px-3 rounded-[8px] bg-[#286144] hover:bg-[#1f4f37] text-[#fffcf8] text-[12px] font-medium inline-flex items-center gap-1.5 transition-colors"
+                          className="h-8 px-3 rounded-[8px] bg-[#286144] hover:bg-[#1f4f37] dark:bg-[#58b482] dark:hover:bg-[#4aa373] text-[#fffcf8] dark:text-[#12100e] text-[12px] font-medium inline-flex items-center gap-1.5 transition-colors"
                         >
                           <Check strokeWidth={1.6} className="size-3.5" />
                           <span>Сохранить</span>
@@ -387,25 +387,25 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                 return (
                   <div
                     key={cmd.id}
-                    className="px-4 py-3 flex items-start justify-between gap-3 hover:bg-[#f8f3eb]/50 transition-colors group"
+                    className="px-4 py-3 flex items-start justify-between gap-3 hover:bg-[var(--bg-hover)] transition-colors group"
                   >
                     <div className="min-w-0 flex items-start gap-3 flex-1">
-                      <span className="font-mono text-[11px] tabular-nums text-[#94897a] pt-0.5 w-5 flex-shrink-0">
+                      <span className="font-mono text-[11px] tabular-nums text-[var(--text-muted)] pt-0.5 w-5 flex-shrink-0">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[13.5px] font-medium text-[#221c15]">
+                          <span className="text-[13.5px] font-medium text-[var(--text-primary)]">
                             {cmd.name}
                           </span>
                           {cmd.isCustom && (
-                            <span className="px-1.5 py-0.5 rounded-[5px] bg-[#286144]/10 text-[#286144] text-[10.5px] font-medium">
+                            <span className="px-1.5 py-0.5 rounded-[5px] bg-[#286144]/10 dark:bg-[#58b482]/15 text-[var(--accent-forest)] text-[10.5px] font-medium">
                               Своя
                             </span>
                           )}
                         </div>
                         {cmd.description && (
-                          <p className="text-[12px] text-[#655b4e] mt-0.5 leading-relaxed">
+                          <p className="text-[12px] text-[var(--text-secondary)] mt-0.5 leading-relaxed">
                             {cmd.description}
                           </p>
                         )}
@@ -417,7 +417,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                         type="button"
                         onClick={() => handleStartEdit(cmd)}
                         title="Редактировать команду"
-                        className="size-8 rounded-[8px] hover:bg-[#ebe3d6] text-[#94897a] hover:text-[#221c15] flex items-center justify-center transition-colors"
+                        className="size-8 rounded-[8px] hover:bg-[var(--bg-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors"
                       >
                         <Edit3 strokeWidth={1.5} className="size-3.5" />
                       </button>
@@ -425,7 +425,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
                         type="button"
                         onClick={() => handleDeleteCommand(cmd)}
                         title="Удалить команду из набора"
-                        className="size-8 rounded-[8px] hover:bg-[#b84233]/10 text-[#94897a] hover:text-[#b84233] flex items-center justify-center transition-colors"
+                        className="size-8 rounded-[8px] hover:bg-[#b84233]/10 dark:hover:bg-[#e37163]/15 text-[var(--text-muted)] hover:text-[var(--accent-terracotta)] flex items-center justify-center transition-colors"
                       >
                         <Trash2 strokeWidth={1.5} className="size-3.5" />
                       </button>
@@ -439,17 +439,21 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
       </div>
 
       {/* Footer: Optional Sync to Existing Dog + Close */}
-      <div className="px-6 py-3.5 border-t border-[#221c15]/[0.08] bg-[#f8f3eb]/65 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="px-6 py-3.5 border-t border-[var(--border-hairline)] bg-[var(--bg-note)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {dogs.length > 0 && commands.length > 0 ? (
           <div className="flex items-center gap-2 flex-wrap">
             <select
               value={effectiveSyncDogId}
               onChange={(e) => setSyncDogId(e.target.value)}
               aria-label="Выбрать ученика для добавления набора команд"
-              className="h-8 px-2.5 rounded-[8px] bg-[#fffcf8] border border-[#221c15]/15 text-[12px] text-[#221c15] focus:outline-none focus:border-[#221c15]/40"
+              className="h-8 px-2.5 rounded-[8px] bg-[var(--bg-sheet)] border border-[var(--border-subtle)] text-[12px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-strong)]"
             >
               {dogs.map((dog) => (
-                <option key={dog.id} value={dog.id}>
+                <option
+                  key={dog.id}
+                  value={dog.id}
+                  className="bg-[var(--bg-sheet)] text-[var(--text-primary)]"
+                >
                   {dog.name} ({dog.breed})
                 </option>
               ))}
@@ -457,14 +461,14 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
             <button
               type="button"
               onClick={handleSyncToDog}
-              className="h-8 px-3 rounded-[8px] bg-[#fffcf8] hover:bg-[#ebe3d6] border border-[#221c15]/15 text-[12px] font-medium text-[#221c15] inline-flex items-center gap-1.5 transition-colors"
+              className="h-8 px-3 rounded-[8px] bg-[var(--bg-sheet)] hover:bg-[var(--bg-active)] border border-[var(--border-subtle)] text-[12px] font-medium text-[var(--text-primary)] inline-flex items-center gap-1.5 transition-colors"
             >
-              <UserPlus strokeWidth={1.5} className="size-3.5 text-[#286144]" />
+              <UserPlus strokeWidth={1.5} className="size-3.5 text-[var(--accent-forest)]" />
               <span>Добавить набор ученику</span>
             </button>
           </div>
         ) : (
-          <div className="text-[12px] text-[#94897a]">
+          <div className="text-[12px] text-[var(--text-muted)]">
             Наборы применяются при создании ученика и на тренировке
           </div>
         )}
@@ -472,7 +476,7 @@ const BuilderBody: React.FC<BuilderBodyProps> = ({ initialCategory, onClose }) =
         <button
           type="button"
           onClick={onClose}
-          className="h-9 px-4 rounded-[9px] bg-[#221c15] hover:bg-[#362d23] text-[#fffcf8] text-[13px] font-medium transition-colors self-end sm:self-auto"
+          className="h-9 px-4 rounded-[9px] bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-[13px] font-medium transition-colors self-end sm:self-auto"
         >
           Готово
         </button>
@@ -487,14 +491,14 @@ export const DisciplineCommandBuilderModal: React.FC<
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 backdrop-blur-[2px] z-50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-3xl max-h-[88vh] flex flex-col bg-[#fffcf8] rounded-[18px] border border-[#221c15]/15 shadow-[0_14px_40px_rgba(34,28,21,0.14)] z-50 text-[#221c15] overflow-hidden">
-          <div className="px-6 py-4 flex items-center justify-between border-b border-[#221c15]/[0.08]">
+        <Dialog.Overlay className="fixed inset-0 bg-[#1f1b16]/40 dark:bg-black/65 backdrop-blur-[2px] z-50" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-3xl max-h-[88vh] flex flex-col bg-[var(--bg-sheet)] rounded-[18px] border border-[var(--border-strong)] shadow-[0_14px_40px_rgba(34,28,21,0.14)] dark:shadow-[0_20px_56px_rgba(0,0,0,0.65)] z-50 text-[var(--text-primary)] overflow-hidden">
+          <div className="px-6 py-4 flex items-center justify-between border-b border-[var(--border-hairline)]">
             <div>
-              <Dialog.Title className="font-serif text-[22px] font-medium text-[#221c15] leading-tight">
+              <Dialog.Title className="font-serif text-[22px] font-medium text-[var(--text-primary)] leading-tight">
                 Конструктор наборов команд
               </Dialog.Title>
-              <Dialog.Description className="text-[12.5px] text-[#655b4e] mt-0.5">
+              <Dialog.Description className="text-[12.5px] text-[var(--text-secondary)] mt-0.5">
                 Добавляйте, изменяйте и упорядочивайте команды по всем четырём направлениям
               </Dialog.Description>
             </div>
@@ -503,7 +507,7 @@ export const DisciplineCommandBuilderModal: React.FC<
               <button
                 type="button"
                 aria-label="Закрыть конструктор"
-                className="size-8 rounded-[8px] border border-[#221c15]/15 bg-[#fffcf8] hover:bg-[#f3ede3] flex items-center justify-center text-[#655b4e] hover:text-[#221c15] transition-colors"
+                className="size-8 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X strokeWidth={1.5} className="size-4" />
               </button>

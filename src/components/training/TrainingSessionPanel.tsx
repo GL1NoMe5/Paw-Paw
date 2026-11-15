@@ -477,14 +477,14 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
   const manualDatePreview = formatSessionDateRussian(buildSessionDateIso(manualDate));
 
   return (
-    <div className={cn('space-y-5 pb-16 max-w-5xl mx-auto', className)}>
+    <div className={cn('space-y-5 pb-16 max-w-5xl mx-auto text-[var(--text-primary)]', className)}>
       {/* 1. Archival Session Header */}
-      <div className="bg-[#fdfbf7] rounded-xl border border-[#1f1b16]/10 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-[var(--bg-sheet)] rounded-xl border border-[var(--border-subtle)] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={handleExit}
-            className="size-9 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] text-[#1f1b16] flex items-center justify-center transition-colors flex-shrink-0"
+            className="size-9 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-note)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] flex items-center justify-center transition-colors flex-shrink-0"
             title="Назад к карточке собаки"
             aria-label="Назад к карточке собаки"
           >
@@ -492,7 +492,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
           </button>
 
           <div className="flex items-center gap-3.5">
-            <div className="size-12 rounded-lg overflow-hidden border border-[#1f1b16]/10 bg-[#efe9df] flex-shrink-0 flex items-center justify-center">
+            <div className="size-12 rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-subtle)] flex-shrink-0 flex items-center justify-center">
               {showAvatarImg ? (
                 <img
                   src={dog.avatar}
@@ -501,7 +501,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   onError={() => setFailedAvatar(dog.avatar)}
                 />
               ) : (
-                <span className="font-mono text-xs font-medium text-[#5e554a] select-none">
+                <span className="font-mono text-xs font-medium text-[var(--text-secondary)] select-none">
                   {monogram}
                 </span>
               )}
@@ -509,27 +509,27 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
 
             <div>
               <div className="flex items-baseline gap-2.5 flex-wrap">
-                <h1 className="font-serif text-xl font-medium text-[#1f1b16]">
+                <h1 className="font-serif text-xl font-medium text-[var(--text-primary)]">
                   Тренировка №{sessionNumber}: {dog.name}
                 </h1>
-                <span className="text-xs text-[#7b7266]">
+                <span className="text-xs text-[var(--text-muted)]">
                   {dog.breed} ·{' '}
                   <span className="font-mono tabular-nums">
                     {formatDogAgeRussian(dog.birthDate)}
                   </span>
                 </span>
               </div>
-              <div className="text-xs text-[#5e554a] flex items-center gap-2 mt-0.5 flex-wrap">
+              <div className="text-xs text-[var(--text-secondary)] flex items-center gap-2 mt-0.5 flex-wrap">
                 <span>
                   Мотивация:{' '}
-                  <span className="text-[#1f1b16] font-medium">
+                  <span className="text-[var(--text-primary)] font-medium">
                     {MOTIVATION_LABELS[dog.motivationType] || dog.motivationType}
                   </span>
                 </span>
-                <span className="text-[#1f1b16]/20">•</span>
+                <span className="text-[var(--text-muted)]">•</span>
                 <span>
                   Дневной норматив:{' '}
-                  <span className="font-mono tabular-nums text-[#1f1b16] font-medium">
+                  <span className="font-mono tabular-nums text-[var(--text-primary)] font-medium">
                     {dog.dailyTrainingTime} мин/день
                   </span>
                 </span>
@@ -544,7 +544,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fffcf8] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+              className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
             >
               <Check className="size-4 stroke-[1.5]" />
               <span>Вернуться к досье</span>
@@ -554,7 +554,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               <button
                 type="button"
                 onClick={handleExit}
-                className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] text-[#5e554a] text-xs font-medium inline-flex items-center transition-colors"
+                className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium inline-flex items-center transition-colors"
               >
                 Отмена
               </button>
@@ -562,7 +562,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               <button
                 type="button"
                 onClick={handleSaveSession}
-                className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fffcf8] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+                className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
               >
                 <span>Завершить и сохранить занятие</span>
               </button>
@@ -574,36 +574,36 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
       {/* Completed Session Summary + Homework & Next Session Plan */}
       {completedSession ? (
         <div className="space-y-5">
-          <div className="p-5 rounded-xl bg-[#fdfbf7] border border-[#1f1b16]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-5 rounded-xl bg-[var(--bg-sheet)] border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-[#1f1b16]">
+                <span className="text-sm font-medium text-[var(--text-primary)]">
                   Тренировка №{sessionNumber} внесена в картотеку
                 </span>
-                <span className="px-2 py-0.5 rounded-[5px] bg-[#efe9df] border border-[#1f1b16]/10 text-[11px] font-medium text-[#5e554a]">
+                <span className="px-2 py-0.5 rounded-[5px] bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[11px] font-medium text-[var(--text-secondary)]">
                   {completedSession.timeEntryMode === 'manual' ? 'Вручную' : 'Секундомер'}
                 </span>
               </div>
-              <div className="text-xs text-[#5e554a] flex items-center gap-3 flex-wrap">
+              <div className="text-xs text-[var(--text-secondary)] flex items-center gap-3 flex-wrap">
                 <span>
                   {formatSessionDateRussian(completedSession.date)} ·{' '}
-                  <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                  <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                     {formatDurationRussian(completedSession.durationMinutes)}
                   </span>
                 </span>
-                <span className="text-[#1f1b16]/20">•</span>
+                <span className="text-[var(--text-muted)]">•</span>
                 <span>
                   Общий индекс:{' '}
-                  <span className="font-mono tabular-nums font-medium text-[#286144]">
+                  <span className="font-mono tabular-nums font-medium text-[var(--accent-forest)]">
                     {completedSession.overallIndexSnapshot}%
                   </span>
                 </span>
                 {completedSession.okdIndexSnapshot > 0 && (
                   <>
-                    <span className="text-[#1f1b16]/20">•</span>
+                    <span className="text-[var(--text-muted)]">•</span>
                     <span>
                       ОКД:{' '}
-                      <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                         {completedSession.okdIndexSnapshot}%
                       </span>
                     </span>
@@ -611,10 +611,10 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                 )}
                 {(completedSession.zksIndexSnapshot ?? 0) > 0 && (
                   <>
-                    <span className="text-[#1f1b16]/20">•</span>
+                    <span className="text-[var(--text-muted)]">•</span>
                     <span>
                       ЗКС:{' '}
-                      <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                         {completedSession.zksIndexSnapshot}%
                       </span>
                     </span>
@@ -622,10 +622,10 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                 )}
                 {(completedSession.sportIndexSnapshot ?? 0) > 0 && (
                   <>
-                    <span className="text-[#1f1b16]/20">•</span>
+                    <span className="text-[var(--text-muted)]">•</span>
                     <span>
                       Спорт:{' '}
-                      <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                         {completedSession.sportIndexSnapshot}%
                       </span>
                     </span>
@@ -633,10 +633,10 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                 )}
                 {completedSession.timerData?.stayDurationSeconds ? (
                   <>
-                    <span className="text-[#1f1b16]/20">•</span>
+                    <span className="text-[var(--text-muted)]">•</span>
                     <span>
                       Выдержка:{' '}
-                      <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                         {completedSession.timerData.stayDurationSeconds} с
                       </span>
                     </span>
@@ -648,7 +648,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/10 bg-[#efe9df] hover:bg-[#e5dec8] text-[#1f1b16] text-xs font-medium transition-colors self-start sm:self-center flex-shrink-0"
+              className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-active)] text-[var(--text-primary)] text-xs font-medium transition-colors self-start sm:self-center flex-shrink-0"
             >
               Открыть досье
             </button>
@@ -661,14 +661,14 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
         /* Active Session Execution View */
         <div className="space-y-5">
           {/* 2. Session Parameters Card with Two Time Modes */}
-          <div className="bg-[#fdfbf7] rounded-xl border border-[#1f1b16]/10 p-5 space-y-4">
+          <div className="bg-[var(--bg-sheet)] rounded-xl border border-[var(--border-subtle)] p-5 space-y-4">
             {/* Mode Switch Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[#1f1b16]/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-[var(--border-subtle)]">
               <div>
-                <h2 className="text-sm font-medium text-[#1f1b16]">
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
                   Параметры и время тренировки
                 </h2>
-                <p className="text-xs text-[#7b7266] mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   {timeEntryMode === 'stopwatch'
                     ? 'Засекайте общее время занятия и выдержку прямо на площадке'
                     : 'Внесите дату и длительность уже проведённой тренировки задним числом'}
@@ -678,7 +678,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               <div
                 role="group"
                 aria-label="Режим учёта времени тренировки"
-                className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#1f1b16]/10 bg-[#efe9df]/70 p-1 self-start sm:self-auto"
+                className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-note)] p-1 self-start sm:self-auto"
               >
                 <button
                   type="button"
@@ -686,8 +686,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   className={cn(
                     'h-8 px-3 rounded-[6px] text-xs font-medium inline-flex items-center gap-1.5 transition-colors',
                     timeEntryMode === 'stopwatch'
-                      ? 'bg-[#1f1b16] text-[#fffcf8]'
-                      : 'text-[#5e554a] hover:text-[#1f1b16]'
+                      ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   )}
                 >
                   <Clock className="size-3.5 stroke-[1.6]" />
@@ -699,8 +699,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   className={cn(
                     'h-8 px-3 rounded-[6px] text-xs font-medium inline-flex items-center gap-1.5 transition-colors',
                     timeEntryMode === 'manual'
-                      ? 'bg-[#1f1b16] text-[#fffcf8]'
-                      : 'text-[#5e554a] hover:text-[#1f1b16]'
+                      ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   )}
                 >
                   <Calendar className="size-3.5 stroke-[1.6]" />
@@ -712,23 +712,23 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
             {timeEntryMode === 'stopwatch' ? (
               /* Mode A: Live Workout Timer + Duration Controls */
               <div className="space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-lg bg-[#efe9df]/60 border border-[#1f1b16]/10">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-lg bg-[var(--bg-note)] border border-[var(--border-subtle)]">
                   <div className="flex items-center gap-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-[#5e554a]">
+                        <span className="text-xs font-medium text-[var(--text-secondary)]">
                           Таймер общей тренировки
                         </span>
                         <span
                           className={cn(
                             'inline-flex items-center gap-1 text-[11px] font-medium',
-                            isSessionTimerRunning ? 'text-[#286144]' : 'text-[#7b7266]'
+                            isSessionTimerRunning ? 'text-[var(--accent-forest)]' : 'text-[var(--text-muted)]'
                           )}
                         >
                           <span
                             className={cn(
                               'size-1.5 rounded-full',
-                              isSessionTimerRunning ? 'bg-[#286144]' : 'bg-[#94897a]'
+                              isSessionTimerRunning ? 'bg-[var(--accent-forest)]' : 'bg-[var(--text-muted)]'
                             )}
                           />
                           {isSessionTimerRunning
@@ -738,7 +738,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                             : 'Готов'}
                         </span>
                       </div>
-                      <div className="font-mono tabular-nums text-2xl font-medium text-[#1f1b16] mt-0.5">
+                      <div className="font-mono tabular-nums text-2xl font-medium text-[var(--text-primary)] mt-0.5">
                         {formatElapsedClock(sessionElapsedSeconds)}
                       </div>
                     </div>
@@ -751,8 +751,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                       className={cn(
                         'h-8 px-3 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 border transition-colors',
                         isSessionTimerRunning
-                          ? 'bg-[#fffcf8] border-[#1f1b16]/20 text-[#1f1b16] hover:bg-[#efe9df]'
-                          : 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8] hover:bg-[#332d26]'
+                          ? 'bg-[var(--bg-sheet)] border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+                          : 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] hover:bg-[var(--btn-dark-hover)]'
                       )}
                     >
                       {isSessionTimerRunning ? (
@@ -772,7 +772,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                       type="button"
                       onClick={handleResetSessionTimer}
                       disabled={sessionElapsedSeconds === 0 && !isSessionTimerRunning}
-                      className="h-8 px-2.5 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] disabled:opacity-40 disabled:cursor-not-allowed text-[#5e554a] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+                      className="h-8 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--text-secondary)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
                     >
                       <RotateCcw className="size-3.5 stroke-[1.5]" />
                       <span>Сброс</span>
@@ -782,7 +782,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                       type="button"
                       onClick={handleSyncStopwatchToDuration}
                       disabled={sessionElapsedSeconds === 0}
-                      className="h-8 px-3 rounded-lg border border-[#286144]/25 bg-[#286144]/10 hover:bg-[#286144]/15 disabled:opacity-40 disabled:cursor-not-allowed text-[#286144] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+                      className="h-8 px-3 rounded-lg border border-[#286144]/25 dark:border-[#58b482]/35 bg-[#286144]/10 dark:bg-[#58b482]/15 hover:bg-[#286144]/15 dark:hover:bg-[#58b482]/25 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--accent-forest)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
                     >
                       <span>Записать в длительность</span>
                       {syncedTimerMinutes > 0 && (
@@ -796,7 +796,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
 
                 {/* Editable Duration Presets + Custom Minutes */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-[#5e554a] mr-1">Длительность:</span>
+                  <span className="text-xs font-medium text-[var(--text-secondary)] mr-1">Длительность:</span>
                   {STOPWATCH_DURATION_PRESETS.map((mins) => (
                     <button
                       key={mins}
@@ -805,8 +805,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                       className={cn(
                         'h-8 px-3 rounded-[6px] text-xs font-mono tabular-nums transition-colors border',
                         durationMinutes === mins
-                          ? 'bg-[#efe9df] border-[#1f1b16]/25 text-[#1f1b16] font-medium'
-                          : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df]/50 text-[#5e554a]'
+                          ? 'bg-[var(--bg-active)] border-[var(--border-strong)] text-[var(--text-primary)] font-medium'
+                          : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]'
                       )}
                     >
                       {mins} мин
@@ -827,9 +827,9 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                         if (durationMinutes < 1) applyDurationMinutes(15);
                       }}
                       aria-label="Длительность тренировки в минутах"
-                      className="h-8 w-16 px-2 rounded-[6px] border border-[#1f1b16]/15 bg-[#efe9df]/50 text-xs font-mono tabular-nums font-medium text-[#1f1b16] focus:outline-hidden focus:border-[#1f1b16]"
+                      className="h-8 w-16 px-2 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-note)] text-xs font-mono tabular-nums font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-strong)]"
                     />
-                    <span className="text-xs text-[#7b7266]">
+                    <span className="text-xs text-[var(--text-muted)]">
                       мин ({formatDurationRussian(durationMinutes)})
                     </span>
                   </div>
@@ -841,7 +841,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                 <div className="lg:col-span-4 space-y-1.5">
                   <label
                     htmlFor="manual-session-date"
-                    className="block text-xs font-medium text-[#5e554a]"
+                    className="block text-xs font-medium text-[var(--text-secondary)]"
                   >
                     Дата проведения
                   </label>
@@ -851,24 +851,24 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                       type="date"
                       value={manualDate}
                       onChange={(e) => setManualDate(e.target.value || getTodayLocalDateInput())}
-                      className="h-9 px-3 rounded-lg border border-[#1f1b16]/15 bg-[#fffcf8] text-xs font-mono tabular-nums text-[#1f1b16] focus:outline-hidden focus:border-[#1f1b16]"
+                      className="h-9 px-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] text-xs font-mono tabular-nums text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-strong)]"
                     />
-                    <span className="text-xs text-[#5e554a] font-medium">{manualDatePreview}</span>
+                    <span className="text-xs text-[var(--text-secondary)] font-medium">{manualDatePreview}</span>
                   </div>
                 </div>
 
                 <div className="lg:col-span-8 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[#5e554a]">
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">
                       Длительность (часы и минуты)
                     </span>
-                    <span className="text-xs font-mono tabular-nums text-[#286144] font-medium">
+                    <span className="text-xs font-mono tabular-nums text-[var(--accent-forest)] font-medium">
                       Итого: {formatDurationRussian(durationMinutes)} ({durationMinutes} мин)
                     </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="inline-flex items-center gap-1.5 text-xs text-[#5e554a]">
+                    <label className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                       <input
                         type="number"
                         min={0}
@@ -877,12 +877,12 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                         onChange={(e) => handleHoursDraftChange(e.target.value)}
                         onBlur={handleDurationDraftBlur}
                         aria-label="Часы длительности"
-                        className="h-9 w-16 px-2.5 rounded-lg border border-[#1f1b16]/15 bg-[#fffcf8] text-sm font-mono tabular-nums font-medium text-[#1f1b16] text-center focus:outline-hidden focus:border-[#1f1b16]"
+                        className="h-9 w-16 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] text-sm font-mono tabular-nums font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--border-strong)]"
                       />
                       <span>ч</span>
                     </label>
 
-                    <label className="inline-flex items-center gap-1.5 text-xs text-[#5e554a]">
+                    <label className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
                       <input
                         type="number"
                         min={0}
@@ -891,12 +891,12 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                         onChange={(e) => handleMinsDraftChange(e.target.value)}
                         onBlur={handleDurationDraftBlur}
                         aria-label="Минуты длительности"
-                        className="h-9 w-16 px-2.5 rounded-lg border border-[#1f1b16]/15 bg-[#fffcf8] text-sm font-mono tabular-nums font-medium text-[#1f1b16] text-center focus:outline-hidden focus:border-[#1f1b16]"
+                        className="h-9 w-16 px-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] text-sm font-mono tabular-nums font-medium text-[var(--text-primary)] text-center focus:outline-none focus:border-[var(--border-strong)]"
                       />
                       <span>мин</span>
                     </label>
 
-                    <div className="h-5 w-px bg-[#1f1b16]/10 mx-1 hidden sm:block" />
+                    <div className="h-5 w-px bg-[var(--border-subtle)] mx-1 hidden sm:block" />
 
                     <div className="flex flex-wrap items-center gap-1.5">
                       {MANUAL_DURATION_PRESETS.map((preset) => {
@@ -909,8 +909,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                             className={cn(
                               'h-8 px-2.5 rounded-[6px] text-xs font-medium transition-colors border',
                               isSelected
-                                ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
-                                : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df] text-[#5e554a]'
+                                ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                                : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)]'
                             )}
                           >
                             {preset.label}
@@ -924,8 +924,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
             )}
 
             {/* Distraction Environment Selector */}
-            <div className="pt-3 border-t border-[#1f1b16]/10 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-medium text-[#5e554a] mr-1">Среда:</span>
+            <div className="pt-3 border-t border-[var(--border-subtle)] flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-medium text-[var(--text-secondary)] mr-1">Среда:</span>
               {DISTRACTION_KEYS.map((key) => {
                 const info = DISTRACTION_LABELS[key];
                 const isSelected = distractionLevel === key;
@@ -938,12 +938,12 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                     className={cn(
                       'h-8 px-2.5 rounded-[6px] text-xs transition-colors border inline-flex items-center gap-1.5',
                       isSelected
-                        ? 'bg-[#efe9df] border-[#1f1b16]/25 text-[#1f1b16] font-medium'
-                        : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df]/50 text-[#5e554a]'
+                        ? 'bg-[var(--bg-active)] border-[var(--border-strong)] text-[var(--text-primary)] font-medium'
+                        : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]'
                     )}
                   >
                     <span>{info.label}</span>
-                    <span className="font-mono tabular-nums text-[11px] text-[#7b7266]">
+                    <span className="font-mono tabular-nums text-[11px] text-[var(--text-muted)]">
                       {info.multiplier}x
                     </span>
                   </button>
@@ -960,20 +960,20 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
           />
 
           {/* 4. Command Picker & Rapid Scoring Grid */}
-          <div className="bg-[#fdfbf7] rounded-xl border border-[#1f1b16]/10 p-5 space-y-4">
+          <div className="bg-[var(--bg-sheet)] rounded-xl border border-[var(--border-subtle)] p-5 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-medium text-[#1f1b16]">
+                <h2 className="text-sm font-medium text-[var(--text-primary)]">
                   Ведомость оценки нормативов
                 </h2>
-                <p className="text-xs text-[#7b7266] mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
                   Выбирайте команды тренировки, добавляйте новые из наборов и выставляйте степень выполнения (1–5)
                 </p>
               </div>
 
               <div className="flex items-center gap-2.5 flex-wrap">
                 {Object.keys(scores).length === 0 && (
-                  <span className="text-xs text-[#b84233]">
+                  <span className="text-xs text-[var(--accent-terracotta)]">
                     Оцените минимум 1 команду
                   </span>
                 )}
@@ -984,8 +984,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   className={cn(
                     'h-8 px-3 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 transition-colors',
                     isCommandPickerOpen
-                      ? 'bg-[#1f1b16] border-[#1f1b16] text-[#fffcf8]'
-                      : 'bg-[#fffcf8] border-[#1f1b16]/15 hover:bg-[#efe9df] text-[#1f1b16]'
+                      ? 'bg-[var(--btn-dark-bg)] border-[var(--btn-dark-bg)] text-[var(--btn-dark-text)]'
+                      : 'bg-[var(--bg-sheet)] border-[var(--border-strong)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
                   )}
                 >
                   <Plus className="size-3.5 stroke-[1.6]" />
@@ -1001,9 +1001,9 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
 
             {/* Inline Command Picker Drawer */}
             {isCommandPickerOpen && (
-              <div className="rounded-lg border border-[#1f1b16]/15 bg-[#efe9df]/50 p-4 space-y-3">
+              <div className="rounded-lg border border-[var(--border-strong)] bg-[var(--bg-note)] p-4 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-lg bg-[#fffcf8] border border-[#1f1b16]/10">
+                  <div className="inline-flex flex-wrap items-center gap-1 p-1 rounded-lg bg-[var(--bg-sheet)] border border-[var(--border-subtle)]">
                     {disciplines.map((disc) => {
                       const cmdsCount = (disciplineCommands[String(disc.id)] ?? []).length;
                       const isActive = pickerCategory === disc.id;
@@ -1015,15 +1015,15 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                           className={cn(
                             'h-7 px-2.5 rounded-[5px] text-xs transition-colors inline-flex items-center gap-1.5',
                             isActive
-                              ? 'bg-[#1f1b16] text-[#fffcf8] font-medium'
-                              : 'text-[#5e554a] hover:text-[#1f1b16]'
+                              ? 'bg-[var(--btn-dark-bg)] text-[var(--btn-dark-text)] font-medium'
+                              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                           )}
                         >
                           <span>{disc.shortTitle}</span>
                           <span
                             className={cn(
                               'font-mono tabular-nums text-[10px]',
-                              isActive ? 'text-[#fffcf8]/75' : 'text-[#7b7266]'
+                              isActive ? 'text-current opacity-75' : 'text-[var(--text-muted)]'
                             )}
                           >
                             {cmdsCount}
@@ -1036,14 +1036,14 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsCommandPickerOpen(false)}
-                    className="text-xs text-[#5e554a] hover:text-[#1f1b16] self-end sm:self-auto"
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] self-end sm:self-auto"
                   >
                     Свернуть набор
                   </button>
                 </div>
 
                 {currentPickerCommands.length === 0 ? (
-                  <p className="text-xs text-[#7b7266] py-2">
+                  <p className="text-xs text-[var(--text-muted)] py-2">
                     В этом наборе пока нет команд. Вы можете настроить наборы команд на главной странице.
                   </p>
                 ) : (
@@ -1069,16 +1069,16 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                           className={cn(
                             'text-left p-2.5 rounded-lg border transition-colors flex items-start justify-between gap-2.5',
                             isInWorkout
-                              ? 'bg-[#286144]/10 border-[#286144]/30 text-[#1f1b16]'
-                              : 'bg-[#fffcf8] border-[#1f1b16]/10 hover:bg-[#efe9df] text-[#1f1b16]'
+                              ? 'bg-[#286144]/10 dark:bg-[#58b482]/15 border-[#286144]/30 dark:border-[#58b482]/40 text-[var(--text-primary)]'
+                              : 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)]'
                           )}
                         >
                           <div className="min-w-0">
-                            <div className="text-xs font-medium text-[#1f1b16]">
+                            <div className="text-xs font-medium text-[var(--text-primary)]">
                               {cmd.name}
                             </div>
                             {cmd.description && (
-                              <p className="text-[11px] text-[#7b7266] line-clamp-1 mt-0.5">
+                              <p className="text-[11px] text-[var(--text-muted)] line-clamp-1 mt-0.5">
                                 {cmd.description}
                               </p>
                             )}
@@ -1088,10 +1088,10 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                             className={cn(
                               'px-2 py-0.5 rounded-[5px] text-[10px] font-medium flex-shrink-0 inline-flex items-center gap-1',
                               isInWorkout
-                                ? 'bg-[#286144] text-[#fffcf8]'
+                                ? 'bg-[#286144] dark:bg-[#58b482] text-[#fffcf8] dark:text-[#12100e]'
                                 : isOnDogOnly
-                                ? 'bg-[#efe9df] text-[#5e554a] border border-[#1f1b16]/10'
-                                : 'bg-[#1f1b16]/5 text-[#1f1b16] border border-[#1f1b16]/10'
+                                ? 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
+                                : 'bg-[var(--bg-note)] text-[var(--text-primary)] border border-[var(--border-subtle)]'
                             )}
                           >
                             {isInWorkout ? (
@@ -1115,12 +1115,12 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
 
             {/* Selected Workout Commands Chip Strip */}
             {selectedWorkoutSkills.length > 0 && (
-              <div className="rounded-lg border border-[#1f1b16]/10 bg-[#efe9df]/40 px-3.5 py-2.5 space-y-2">
+              <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-note)] px-3.5 py-2.5 space-y-2">
                 <div className="flex items-center justify-between gap-2 text-xs">
-                  <span className="font-medium text-[#1f1b16]">
+                  <span className="font-medium text-[var(--text-primary)]">
                     Команды в этой тренировке ({selectedWorkoutSkills.length})
                   </span>
-                  <span className="text-[#7b7266] font-mono tabular-nums text-[11px]">
+                  <span className="text-[var(--text-muted)] font-mono tabular-nums text-[11px]">
                     Оценено: {Object.keys(scores).length} из {selectedWorkoutSkills.length}
                   </span>
                 </div>
@@ -1136,8 +1136,8 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                         className={cn(
                           'inline-flex items-center gap-1.5 rounded-[6px] border pl-2.5 pr-1.5 py-1 text-xs',
                           comp
-                            ? 'bg-[#fffcf8] border-[#1f1b16]/15 text-[#1f1b16]'
-                            : 'bg-[#fffcf8] border-[#b06728]/35 text-[#1f1b16]'
+                            ? 'bg-[var(--bg-sheet)] border-[var(--border-subtle)] text-[var(--text-primary)]'
+                            : 'bg-[var(--bg-sheet)] border-[#b06728]/35 dark:border-[#e19b56]/45 text-[var(--text-primary)]'
                         )}
                       >
                         <button
@@ -1150,23 +1150,23 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                           }}
                           className="inline-flex items-center gap-1.5 text-left"
                         >
-                          <span className="text-[10px] text-[#7b7266] font-medium">
+                          <span className="text-[10px] text-[var(--text-muted)] font-medium">
                             {catShort}
                           </span>
                           <span className="font-medium">{skill.name}</span>
                           {comp ? (
-                            <span className="font-mono tabular-nums text-[11px] text-[#286144] font-medium">
+                            <span className="font-mono tabular-nums text-[11px] text-[var(--accent-forest)] font-medium">
                               · {scoreVal} {comp.short} ({comp.percent}%)
                             </span>
                           ) : (
-                            <span className="text-[11px] text-[#b06728]">· оценка 1–5</span>
+                            <span className="text-[11px] text-[var(--accent-ochre)]">· оценка 1–5</span>
                           )}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveSelectedSkill(skill.id)}
                           aria-label={`Убрать команду ${skill.name} из тренировки`}
-                          className="size-4 rounded hover:bg-[#efe9df] text-[#7b7266] hover:text-[#1f1b16] inline-flex items-center justify-center transition-colors"
+                          className="size-4 rounded hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] inline-flex items-center justify-center transition-colors"
                         >
                           <X className="size-3 stroke-[1.8]" />
                         </button>
@@ -1193,10 +1193,10 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
           </div>
 
           {/* 5. Trainer Notes */}
-          <div className="bg-[#fdfbf7] rounded-xl border border-[#1f1b16]/10 p-5 space-y-2.5">
+          <div className="bg-[var(--bg-sheet)] rounded-xl border border-[var(--border-subtle)] p-5 space-y-2.5">
             <label
               htmlFor="trainer-session-notes"
-              className="block text-sm font-medium text-[#1f1b16]"
+              className="block text-sm font-medium text-[var(--text-primary)]"
             >
               Заметки кинолога по занятию
             </label>
@@ -1206,41 +1206,41 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               value={trainerNotes}
               onChange={(e) => setTrainerNotes(e.target.value)}
               placeholder="Особенности концентрации, реакция на фоновые раздражители, комментарии для владельца"
-              className="w-full rounded-lg border border-[#1f1b16]/10 bg-[#efe9df]/40 p-3 text-xs text-[#1f1b16] placeholder-[#7b7266] focus:outline-hidden focus:border-[#1f1b16]/30 transition-colors"
+              className="w-full rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-note)] p-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--border-strong)] transition-colors"
             />
           </div>
 
           {/* 6. Bottom Save Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[#fdfbf7] border border-[#1f1b16]/10">
-            <div className="text-xs text-[#5e554a] flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-[var(--bg-sheet)] border border-[var(--border-subtle)]">
+            <div className="text-xs text-[var(--text-secondary)] flex items-center gap-3 flex-wrap">
               <span>
                 Оценено команд:{' '}
-                <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                   {Object.keys(scores).length}
                 </span>
               </span>
-              <span className="text-[#1f1b16]/20">•</span>
+              <span className="text-[var(--text-muted)]">•</span>
               <span>
                 Длительность:{' '}
-                <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                   {formatDurationRussian(durationMinutes)}
                 </span>
               </span>
               {timeEntryMode === 'manual' && (
                 <>
-                  <span className="text-[#1f1b16]/20">•</span>
+                  <span className="text-[var(--text-muted)]">•</span>
                   <span>
                     Дата:{' '}
-                    <span className="font-medium text-[#1f1b16]">{manualDatePreview}</span>
+                    <span className="font-medium text-[var(--text-primary)]">{manualDatePreview}</span>
                   </span>
                 </>
               )}
               {staySeconds > 0 && (
                 <>
-                  <span className="text-[#1f1b16]/20">•</span>
+                  <span className="text-[var(--text-muted)]">•</span>
                   <span>
                     Выдержка:{' '}
-                    <span className="font-mono tabular-nums font-medium text-[#1f1b16]">
+                    <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
                       {staySeconds} с
                     </span>
                   </span>
@@ -1252,7 +1252,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               <button
                 type="button"
                 onClick={handleExit}
-                className="h-9 px-3.5 rounded-lg border border-[#1f1b16]/10 bg-[#fffcf8] hover:bg-[#efe9df] text-[#5e554a] text-xs font-medium transition-colors"
+                className="h-9 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-sheet)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-colors"
               >
                 Отмена
               </button>
@@ -1260,7 +1260,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
               <button
                 type="button"
                 onClick={handleSaveSession}
-                className="h-9 px-4 rounded-lg bg-[#1f1b16] hover:bg-[#332d26] text-[#fffcf8] text-xs font-medium inline-flex items-center gap-2 transition-colors"
+                className="h-9 px-4 rounded-lg bg-[var(--btn-dark-bg)] hover:bg-[var(--btn-dark-hover)] text-[var(--btn-dark-text)] text-xs font-medium inline-flex items-center gap-2 transition-colors"
               >
                 <span>Завершить и сохранить</span>
               </button>

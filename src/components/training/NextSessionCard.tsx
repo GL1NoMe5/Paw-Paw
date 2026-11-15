@@ -16,20 +16,20 @@ export const NextSessionCard: React.FC<NextSessionCardProps> = ({ plan, classNam
   };
 
   return (
-    <section className={cn('px-2 pt-2 space-y-3.5 text-[#221c15]', className)}>
-      <div className="flex items-baseline justify-between border-b border-[#221c15]/[0.07] pb-2.5">
-        <h4 className="font-serif text-[20px] leading-tight text-[#221c15]">
+    <section className={cn('px-2 pt-2 space-y-3.5 text-[var(--text-primary)]', className)}>
+      <div className="flex items-baseline justify-between border-b border-[var(--border-hairline)] pb-2.5">
+        <h4 className="font-serif text-[20px] leading-tight text-[var(--text-primary)]">
           План следующего урока
         </h4>
-        <span className="text-[12px] text-[#655b4e]">
+        <span className="text-[12px] text-[var(--text-secondary)]">
           {distractionInfo.label} · <span className="font-mono tabular-nums">{distractionInfo.multiplier}x</span>
         </span>
       </div>
 
       {/* Priority focus line */}
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px]">
-        <span className="text-[#94897a]">Фокус:</span>
-        <span className="font-medium text-[#221c15]">
+        <span className="text-[var(--text-muted)]">Фокус:</span>
+        <span className="font-medium text-[var(--text-primary)]">
           {plan.prioritySkills.join(', ')}
         </span>
       </div>
@@ -37,8 +37,8 @@ export const NextSessionCard: React.FC<NextSessionCardProps> = ({ plan, classNam
       {/* Challenges list without boxes */}
       <div className="space-y-2">
         {plan.suggestedChallenges.map((challenge, idx) => (
-          <div key={idx} className="flex items-baseline gap-2.5 text-[13px] text-[#655b4e] leading-relaxed">
-            <span className="font-mono tabular-nums text-[11px] text-[#94897a] flex-shrink-0">
+          <div key={idx} className="flex items-baseline gap-2.5 text-[13px] text-[var(--text-secondary)] leading-relaxed">
+            <span className="font-mono tabular-nums text-[11px] text-[var(--text-muted)] flex-shrink-0">
               {String(idx + 1).padStart(2, '0')}
             </span>
             <span>{challenge}</span>
