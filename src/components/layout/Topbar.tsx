@@ -53,45 +53,45 @@ export const Topbar: React.FC<TopbarProps> = ({
     propsTrainerCenterName || trainerProfile.centerName || 'Кинологический центр «Альфа-Дог»';
 
   return (
-    <header className="h-14 bg-[#fdfbf7] border-b border-[#1f1b16]/10 px-6 flex items-center justify-between select-none z-10 flex-shrink-0">
+    <header className="h-14 bg-[var(--bg-sheet)] border-b border-[var(--border-subtle)] px-6 flex items-center justify-between select-none z-10 flex-shrink-0">
       {/* Compact Typographic Stats (no pastel icon boxes, no uppercase tracked labels) */}
-      <div className="flex items-center gap-6 divide-x divide-[#1f1b16]/10 overflow-x-auto py-1">
+      <div className="flex items-center gap-6 divide-x divide-[var(--border-subtle)] overflow-x-auto py-1">
         {/* Stat 1: Total Dogs */}
         <div className="flex items-baseline gap-2">
-          <span className="text-[12px] leading-4 text-[#7b7266]">
+          <span className="text-[12px] leading-4 text-[var(--text-muted)]">
             Учеников в базе
           </span>
-          <span className="text-[14px] font-medium text-[#1f1b16] font-mono tabular-nums">
+          <span className="text-[14px] font-medium text-[var(--text-primary)] font-mono tabular-nums">
             {totalDogs}
           </span>
         </div>
 
         {/* Stat 2: Active OKD */}
         <div className="flex items-baseline gap-2 pl-6">
-          <span className="text-[12px] leading-4 text-[#7b7266]">
+          <span className="text-[12px] leading-4 text-[var(--text-muted)]">
             Активный курс ОКД
           </span>
-          <span className="text-[14px] font-medium text-[#1f1b16] font-mono tabular-nums">
+          <span className="text-[14px] font-medium text-[var(--text-primary)] font-mono tabular-nums">
             {activeOkdCount}
           </span>
         </div>
 
         {/* Stat 3: Average Index (single accent) */}
         <div className="flex items-baseline gap-2 pl-6">
-          <span className="text-[12px] leading-4 text-[#7b7266]">
+          <span className="text-[12px] leading-4 text-[var(--text-muted)]">
             Средний индекс
           </span>
-          <span className="text-[14px] font-medium text-[#1f5c3a] font-mono tabular-nums">
+          <span className="text-[14px] font-medium text-[var(--accent-forest)] font-mono tabular-nums">
             {averageIdealIndex}%
           </span>
         </div>
 
         {/* Stat 4: Issued Certificates */}
         <div className="flex items-baseline gap-2 pl-6">
-          <span className="text-[12px] leading-4 text-[#7b7266]">
+          <span className="text-[12px] leading-4 text-[var(--text-muted)]">
             Выдано дипломов
           </span>
-          <span className="text-[14px] font-medium text-[#1f1b16] font-mono tabular-nums">
+          <span className="text-[14px] font-medium text-[var(--text-primary)] font-mono tabular-nums">
             {issuedCertificatesCount}
           </span>
         </div>
@@ -99,19 +99,19 @@ export const Topbar: React.FC<TopbarProps> = ({
 
       {/* Right Actions & Quiet Trainer Tag */}
       <div className="flex items-center gap-3 pl-4 flex-shrink-0">
-        <div className="hidden xl:flex items-center gap-2 text-[12px] leading-4 text-[#5e554a] pr-2 border-r border-[#1f1b16]/10">
-          <span className="text-[#1f1b16] font-medium">{trainerCenterName}</span>
-          <span className="text-[#7b7266]">·</span>
-          <span className="text-[#7b7266]">{trainerProfile.name}</span>
+        <div className="hidden xl:flex items-center gap-2 text-[12px] leading-4 text-[var(--text-secondary)] pr-2 border-r border-[var(--border-subtle)]">
+          <span className="text-[var(--text-primary)] font-medium">{trainerCenterName}</span>
+          <span className="text-[var(--text-muted)]">·</span>
+          <span className="text-[var(--text-muted)]">{trainerProfile.name}</span>
         </div>
 
         {onOpenCertificate && (
           <button
             type="button"
             onClick={onOpenCertificate}
-            className="h-8 px-3 rounded-[8px] border border-[#1f1b16]/10 bg-[#efe9df] hover:bg-[#efe9df]/80 text-[#1f1b16] text-[13px] font-medium inline-flex items-center gap-2 transition-colors"
+            className="h-8 px-3 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] text-[13px] font-medium inline-flex items-center gap-2 transition-colors"
           >
-            <FileCheck2 strokeWidth={1.5} className="size-4 text-[#7b7266]" />
+            <FileCheck2 strokeWidth={1.5} className="size-4 text-[var(--text-muted)]" />
             <span>Диплом А4</span>
           </button>
         )}
@@ -119,10 +119,10 @@ export const Topbar: React.FC<TopbarProps> = ({
         <button
           type="button"
           onClick={onOpenCommandPalette}
-          className="h-8 px-3 rounded-[8px] border border-[#1f1b16]/10 bg-[#efe9df] hover:bg-[#efe9df]/80 text-[#1f1b16] text-[13px] font-medium inline-flex items-center gap-2 transition-colors"
+          className="h-8 px-3 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] text-[13px] font-medium inline-flex items-center gap-2 transition-colors"
         >
-          <Search strokeWidth={1.5} className="size-4 text-[#7b7266]" />
-          <span className="hidden sm:inline text-[#5e554a]">Поиск и команды</span>
+          <Search strokeWidth={1.5} className="size-4 text-[var(--text-muted)]" />
+          <span className="hidden sm:inline text-[var(--text-secondary)]">Поиск и команды</span>
           <kbd className="keycap">⌘K</kbd>
         </button>
       </div>
