@@ -799,6 +799,348 @@ export const BehaviorEmblem: React.FC<DisciplineEmblemItemProps> = ({
 };
 
 /**
+ * Внимание: Alert attentive puppy looking toward a warm guiding star above a figure-eight path.
+ */
+export const AttentionEmblem: React.FC<DisciplineEmblemItemProps> = ({
+  size = 84,
+  isDark,
+  className,
+}) => {
+  const storeDark = useDogStore((s) => s.theme === 'dark');
+  const dark = isDark ?? storeDark;
+  const uid = useSafeSvgId('attention');
+
+  const p = dark
+    ? {
+        bg: '#24271e',
+        ring: '#4a523b',
+        innerRing: '#687353',
+        loopPath: '#6b7755',
+        coatMain: '#e5b265',
+        coatLight: '#f8deb0',
+        coatDeep: '#bd8235',
+        collar: '#4b8668',
+        collarHi: '#6fb08f',
+        star: '#f4c668',
+        starGlow: '#f4c668',
+        blush: '#ee8e7e',
+        ink: '#2d1c13',
+      }
+    : {
+        bg: '#f4f5e8',
+        ring: '#d3d9b8',
+        innerRing: '#b3bc8e',
+        loopPath: '#bcc49a',
+        coatMain: '#eab668',
+        coatLight: '#fbe4b8',
+        coatDeep: '#c5883b',
+        collar: '#3e7355',
+        collarHi: '#659e7d',
+        star: '#e7a338',
+        starGlow: '#f6cb6f',
+        blush: '#f19484',
+        ink: '#432a1d',
+      };
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 92 92"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className={cn('flex-shrink-0', className)}
+    >
+      <defs>
+        <clipPath id={`${uid}-clip`}>
+          <circle cx="46" cy="46" r="40.5" />
+        </clipPath>
+        <linearGradient id={`${uid}-coat`} x1="24" y1="24" x2="62" y2="76" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={p.coatLight} />
+          <stop offset="55%" stopColor={p.coatMain} />
+          <stop offset="100%" stopColor={p.coatDeep} />
+        </linearGradient>
+      </defs>
+
+      {/* Medallion Backdrop */}
+      <circle cx="46" cy="46" r="42" fill={p.bg} stroke={p.ring} strokeWidth="1.6" />
+      <circle
+        cx="46"
+        cy="46"
+        r="37"
+        stroke={p.innerRing}
+        strokeWidth="1"
+        strokeDasharray="2.5 3.5"
+        opacity="0.7"
+      />
+
+      {/* Subtle figure-eight / snake ribbon behind dog */}
+      <path
+        d="M17 65 C22 52, 34 54, 46 62 C58 70, 70 71, 75 58 C78 50, 69 44, 59 50"
+        stroke={p.loopPath}
+        strokeWidth="1.5"
+        strokeDasharray="3 3"
+        strokeLinecap="round"
+        opacity="0.85"
+      />
+
+      {/* Guiding Attention Star & Eye-Contact Beam */}
+      <circle cx="66" cy="25" r="10.5" fill={p.starGlow} opacity={dark ? 0.16 : 0.24} />
+      <path
+        d="M66 15.5 L68.3 22 L75 24.3 L68.3 26.6 L66 33 L63.7 26.6 L57 24.3 L63.7 22 Z"
+        fill={p.star}
+        stroke={p.ink}
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+      />
+      <circle cx="74.5" cy="17.5" r="1.4" fill={p.star} opacity="0.85" />
+      <path
+        d="M52 33 L58.5 28"
+        stroke={p.star}
+        strokeWidth="1.35"
+        strokeDasharray="2 2.4"
+        strokeLinecap="round"
+        opacity="0.85"
+      />
+
+      <g clipPath={`url(#${uid}-clip)`}>
+        {/* Cozy Neck & Collar */}
+        <path
+          d="M23 86 C25 69, 31 59, 38 56 L51 56 C57 60, 62 70, 63 86 Z"
+          fill={`url(#${uid}-coat)`}
+          stroke={p.ink}
+          strokeWidth="1.55"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M29 61 Q43 68 57 61 L59 66.5 Q43 74 27 66.5 Z"
+          fill={p.collar}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path d="M31 63.8 Q43 69.5 55 63.8" stroke={p.collarHi} strokeWidth="1.1" opacity="0.85" />
+
+        {/* Back Upright Alert Ear */}
+        <path
+          d="M42 29 L49.5 16 C50.8 14, 53.5 14.8, 53.4 17.4 L52 33 Z"
+          fill={p.coatDeep}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Attentive Puppy Head Looking Gently Right-Upward */}
+        <path
+          d="M24 44 C23.5 33, 29 25, 39 24.5 C47.5 24, 54 28.5, 56 36 L63 39 C65.2 40, 65.2 43.8, 62.6 45.4 C59.4 47.4, 54.5 48.2, 51.5 48.5 C50 53.2, 46.5 57, 41 58 C31 59.5, 24.5 52.5, 24 44 Z"
+          fill={`url(#${uid}-coat)`}
+          stroke={p.ink}
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+
+        {/* Cream Snout Highlight */}
+        <ellipse cx="53.5" cy="43" rx="7.5" ry="5" fill={p.coatLight} opacity="0.9" />
+
+        {/* Front Perked Alert Ear */}
+        <path
+          d="M27.5 34.5 L24 18 C23.5 15.6, 26.2 14.6, 28 16.5 L37.5 27.5 Z"
+          fill={p.coatMain}
+          stroke={p.ink}
+          strokeWidth="1.55"
+          strokeLinejoin="round"
+        />
+        <path d="M28.5 31.5 L26.5 20 L34 27.5 Z" fill={p.coatLight} opacity="0.8" />
+
+        {/* Bright Attentive Eye Locked on Star + Nose & Smile */}
+        <ellipse cx="45" cy="36.5" rx="2.7" ry="2.8" fill={p.ink} />
+        <circle cx="45.9" cy="35.5" r="0.95" fill="#fffcf8" />
+        <ellipse cx="38" cy="43.5" rx="3" ry="1.8" fill={p.blush} opacity="0.52" />
+        <path
+          d="M61 39.2 C62.8 38.8, 64.6 40.1, 64.2 41.8 C63.8 43, 61.8 43.2, 60.5 42.1 C59.6 41.1, 59.9 39.5, 61 39.2 Z"
+          fill={p.ink}
+        />
+        <path
+          d="M59 45 Q55.2 47 52 45"
+          stroke={p.ink}
+          strokeWidth="1.25"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+/**
+ * Доверие: Calm trusting dog gently cradled by a caring hand beneath a warm coral heart.
+ */
+export const TrustEmblem: React.FC<DisciplineEmblemItemProps> = ({
+  size = 84,
+  isDark,
+  className,
+}) => {
+  const storeDark = useDogStore((s) => s.theme === 'dark');
+  const dark = isDark ?? storeDark;
+  const uid = useSafeSvgId('trust');
+
+  const p = dark
+    ? {
+        bg: '#2c201e',
+        ring: '#563f3b',
+        innerRing: '#795a54',
+        heartHalo: '#e8786d',
+        heartTop: '#f28275',
+        heartBot: '#c94c40',
+        coatMain: '#e8c494',
+        coatLight: '#faebd1',
+        ear: '#bc7d49',
+        blush: '#ec8c80',
+        skin: '#f2c1a4',
+        sleeve: '#497d60',
+        sleeveFold: '#6aa183',
+        ink: '#2d1c13',
+      }
+    : {
+        bg: '#f9eee9',
+        ring: '#e4c8bc',
+        innerRing: '#cca495',
+        heartHalo: '#f2958b',
+        heartTop: '#f07b6d',
+        heartBot: '#c94a3d',
+        coatMain: '#ecd0a5',
+        coatLight: '#fdf0d9',
+        ear: '#c2834f',
+        blush: '#f19388',
+        skin: '#f8cfb4',
+        sleeve: '#3e7355',
+        sleeveFold: '#629a7b',
+        ink: '#432a1d',
+      };
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 92 92"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className={cn('flex-shrink-0', className)}
+    >
+      <defs>
+        <clipPath id={`${uid}-clip`}>
+          <circle cx="46" cy="46" r="40.5" />
+        </clipPath>
+        <linearGradient id={`${uid}-heart`} x1="38" y1="15" x2="54" y2="33" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={p.heartTop} />
+          <stop offset="100%" stopColor={p.heartBot} />
+        </linearGradient>
+      </defs>
+
+      {/* Medallion Backdrop */}
+      <circle cx="46" cy="46" r="42" fill={p.bg} stroke={p.ring} strokeWidth="1.6" />
+      <circle
+        cx="46"
+        cy="46"
+        r="37"
+        stroke={p.innerRing}
+        strokeWidth="1"
+        strokeDasharray="2.5 3.5"
+        opacity="0.7"
+      />
+
+      {/* Warm Trust Heart Above */}
+      <circle cx="46" cy="23.5" r="10.5" fill={p.heartHalo} opacity={dark ? 0.16 : 0.24} />
+      <path
+        d="M46 31.5 C40.2 27.3, 37 23.8, 37 20.5 C37 17.8, 39.2 15.8, 41.8 15.8 C43.7 15.8, 45.2 17, 46 18.6 C46.8 17, 48.3 15.8, 50.2 15.8 C52.8 15.8, 55 17.8, 55 20.5 C55 23.8, 51.8 27.3, 46 31.5 Z"
+        fill={`url(#${uid}-heart)`}
+        stroke={p.ink}
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
+
+      <g clipPath={`url(#${uid}-clip)`}>
+        {/* Soft Floppy Ears */}
+        <path
+          d="M27 39 C20 41, 18.5 53, 23 56.5 C26.5 58.5, 30 52, 30 42 Z"
+          fill={p.ear}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M65 39 C72 41, 73.5 53, 69 56.5 C65.5 58.5, 62 52, 62 42 Z"
+          fill={p.ear}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Calm Trusting Dog Head */}
+        <path
+          d="M28 46 C28 33.5, 35.5 29, 46 29 C56.5 29, 64 33.5, 64 46 C64 56.5, 56.5 64, 46 64 C35.5 64, 28 56.5, 28 46 Z"
+          fill={p.coatMain}
+          stroke={p.ink}
+          strokeWidth="1.6"
+        />
+
+        {/* Cream Muzzle & Gentle Smile */}
+        <ellipse cx="46" cy="54" rx="11.5" ry="7.8" fill={p.coatLight} />
+        <ellipse cx="34.5" cy="50.5" rx="3.2" ry="1.9" fill={p.blush} opacity="0.55" />
+        <ellipse cx="57.5" cy="50.5" rx="3.2" ry="1.9" fill={p.blush} opacity="0.55" />
+
+        {/* Calm Closed Happy Trusting Eyes */}
+        <path
+          d="M36 44 Q38.5 41.5 41 44 M51 44 Q53.5 41.5 56 44"
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        {/* Shiny Nose & Relaxed Smile */}
+        <ellipse cx="46" cy="49.5" rx="3.2" ry="2.2" fill={p.ink} />
+        <path
+          d="M41.5 54 Q43.8 56.5 46 54.5 Q48.2 56.5 50.5 54"
+          stroke={p.ink}
+          strokeWidth="1.35"
+          strokeLinecap="round"
+        />
+        {/* Tiny clean white teeth peek hint */}
+        <path
+          d="M43.2 55.2 L44.3 57 L45.5 55.2 M46.5 55.2 L47.7 57 L48.8 55.2"
+          fill="#fffcf8"
+          stroke={p.ink}
+          strokeWidth="0.95"
+          strokeLinejoin="round"
+        />
+
+        {/* Gentle Caring Human Hand Cradling Chin from Below-Left */}
+        <path
+          d="M17 75 L30 63 C33.5 60.5, 38 61.5, 42.5 63 L52.5 62.5 C55.2 62.5, 56 66.2, 53 67.5 L42 70.5 C38 71.5, 34 73, 29 76.5 L21 84 Z"
+          fill={p.skin}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 79 L21 67 L30 76 L18 88 Z"
+          fill={p.sleeve}
+          stroke={p.ink}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M19 69.5 L27 77.5"
+          stroke={p.sleeveFold}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+/**
  * Custom / Unknown Discipline: Warm glowing paw-with-heart medallion.
  */
 export const CustomDisciplineEmblem: React.FC<DisciplineEmblemItemProps> = ({
@@ -968,6 +1310,10 @@ export const DisciplineEmblem: React.FC<DisciplineEmblemProps> = ({
       return <SportEmblem size={size} isDark={isDark} className={className} />;
     case 'behavior':
       return <BehaviorEmblem size={size} isDark={isDark} className={className} />;
+    case 'attention':
+      return <AttentionEmblem size={size} isDark={isDark} className={className} />;
+    case 'trust':
+      return <TrustEmblem size={size} isDark={isDark} className={className} />;
     default:
       return <CustomDisciplineEmblem size={size} isDark={isDark} className={className} />;
   }

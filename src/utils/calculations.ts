@@ -169,11 +169,15 @@ export function calculateOverallDogIndex(skills: DogSkill[]): {
   behaviorIndex: number;
   zksIndex: number;
   sportIndex: number;
+  attentionIndex: number;
+  trustIndex: number;
 } {
   const okdIndex = calculateCategoryProgress(skills, 'okd');
   const behaviorIndex = calculateCategoryProgress(skills, 'behavior');
   const zksIndex = calculateCategoryProgress(skills, 'zks');
   const sportIndex = calculateCategoryProgress(skills, 'sport');
+  const attentionIndex = calculateCategoryProgress(skills, 'attention');
+  const trustIndex = calculateCategoryProgress(skills, 'trust');
 
   const behSkills = skills.filter((s) => s.category === 'behavior');
   const trainingCategories = Array.from(
@@ -196,7 +200,15 @@ export function calculateOverallDogIndex(skills: DogSkill[]): {
     overallIndex = behaviorIndex;
   }
 
-  return { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex };
+  return {
+    overallIndex,
+    okdIndex,
+    behaviorIndex,
+    zksIndex,
+    sportIndex,
+    attentionIndex,
+    trustIndex,
+  };
 }
 
 export interface DogRank {
@@ -277,6 +289,12 @@ export function filterDogByCategory(dog: Dog, activeFilter: DogFilter): boolean 
   }
   if (activeFilter === 'sport') {
     return dog.skills.some((s) => s.category === 'sport');
+  }
+  if (activeFilter === 'attention') {
+    return dog.skills.some((s) => s.category === 'attention');
+  }
+  if (activeFilter === 'trust') {
+    return dog.skills.some((s) => s.category === 'trust');
   }
   if (activeFilter === 'behavior') {
     const behSkills = dog.skills.filter((s) => s.category === 'behavior');

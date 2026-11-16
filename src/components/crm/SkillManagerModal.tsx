@@ -18,6 +18,8 @@ const DISCIPLINE_TAB_LABELS: Record<string, string> = {
   zks: 'ЗКС',
   sport: 'Активный спорт',
   behavior: 'Коррекция поведения',
+  attention: 'Внимание',
+  trust: 'Доверие',
 };
 
 export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
@@ -163,7 +165,7 @@ export const SkillManagerModal: React.FC<SkillManagerModalProps> = ({
                 Раздел ведомости
               </label>
               <div
-                className="grid grid-cols-2 sm:grid-cols-4 gap-1.5"
+                className="grid grid-cols-2 sm:grid-cols-3 gap-1.5"
                 role="tablist"
                 aria-label="Дисциплины"
               >

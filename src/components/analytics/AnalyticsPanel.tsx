@@ -23,6 +23,8 @@ const DISCIPLINE_DISPLAY_LABELS: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Активный спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Поведение',
 };
 
@@ -40,8 +42,15 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({
   }
 
   const sessions = useDogStore((s) => s.sessions);
-  const { overallIndex, okdIndex, zksIndex, sportIndex, behaviorIndex } =
-    calculateOverallDogIndex(dog.skills);
+  const {
+    overallIndex,
+    okdIndex,
+    zksIndex,
+    sportIndex,
+    attentionIndex,
+    trustIndex,
+    behaviorIndex,
+  } = calculateOverallDogIndex(dog.skills);
   const currentRank = getDogRank(overallIndex);
   const ageString = formatDogAgeRussian(dog.birthDate);
   const showAvatar = Boolean(dog.avatar && !imgError);
@@ -50,10 +59,20 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({
     okd: okdIndex,
     zks: zksIndex,
     sport: sportIndex,
+    attention: attentionIndex,
+    trust: trustIndex,
     behavior: behaviorIndex,
   };
 
-  const activeDisciplines = DEFAULT_DISCIPLINES.map((disc) => ({
+  const canonicalOrder = ['okd', 'zks', 'sport', 'attention', 'trust', 'behavior'];
+  const orderedDisciplines = [
+    ...canonicalOrder
+      .map((id) => DEFAULT_DISCIPLINES.find((d) => d.id === id))
+      .filter((d): d is (typeof DEFAULT_DISCIPLINES)[number] => Boolean(d)),
+    ...DEFAULT_DISCIPLINES.filter((d) => !canonicalOrder.includes(String(d.id))),
+  ];
+
+  const activeDisciplines = orderedDisciplines.map((disc) => ({
     id: disc.id,
     label: DISCIPLINE_DISPLAY_LABELS[String(disc.id)] ?? disc.shortTitle,
     count: dog.skills.filter((s) => s.category === disc.id).length,

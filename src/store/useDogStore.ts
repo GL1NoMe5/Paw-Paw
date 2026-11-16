@@ -19,10 +19,12 @@ import type {
   TrainingSession,
 } from '../types';
 import {
+  ATTENTION_PRESETS,
   BEHAVIOR_PRESETS,
   DEFAULT_DISCIPLINES,
   OKD_PRESETS,
   SPORT_PRESETS,
+  TRUST_PRESETS,
   ZKS_PRESETS,
 } from '../types';
 import {
@@ -134,6 +136,8 @@ function createDefaultDisciplineCommands(): Record<string, DisciplineCommandTemp
     zks: [...ZKS_PRESETS],
     sport: [...SPORT_PRESETS],
     behavior: [...BEHAVIOR_PRESETS],
+    attention: [...ATTENTION_PRESETS],
+    trust: [...TRUST_PRESETS],
   };
 }
 
@@ -571,8 +575,15 @@ export const useDogStore = create<DogStoreState>()(
         const updatedSkills = [...mappedSkills, ...newSkills];
 
         // 2. Compute snapshots
-        const { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex } =
-          calculateOverallDogIndex(updatedSkills);
+        const {
+          overallIndex,
+          okdIndex,
+          behaviorIndex,
+          zksIndex,
+          sportIndex,
+          attentionIndex,
+          trustIndex,
+        } = calculateOverallDogIndex(updatedSkills);
 
         // 3. Generate Smart Homework & Next Session Plan
         const dogWithUpdatedSkills: Dog = { ...dog, skills: updatedSkills };
@@ -598,6 +609,8 @@ export const useDogStore = create<DogStoreState>()(
           behaviorIndexSnapshot: behaviorIndex,
           zksIndexSnapshot: zksIndex,
           sportIndexSnapshot: sportIndex,
+          attentionIndexSnapshot: attentionIndex,
+          trustIndexSnapshot: trustIndex,
           homework,
           nextSessionPlan,
           trainerNotes: trainerNotes || '',
@@ -722,14 +735,23 @@ export const useDogStore = create<DogStoreState>()(
             }
 
             const updatedSkills = [...mappedSkills, ...extraSkills];
-            const { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex } =
-              calculateOverallDogIndex(updatedSkills);
+            const {
+              overallIndex,
+              okdIndex,
+              behaviorIndex,
+              zksIndex,
+              sportIndex,
+              attentionIndex,
+              trustIndex,
+            } = calculateOverallDogIndex(updatedSkills);
 
             nextSession.overallIndexSnapshot = overallIndex;
             nextSession.okdIndexSnapshot = okdIndex;
             nextSession.behaviorIndexSnapshot = behaviorIndex;
             nextSession.zksIndexSnapshot = zksIndex;
             nextSession.sportIndexSnapshot = sportIndex;
+            nextSession.attentionIndexSnapshot = attentionIndex;
+            nextSession.trustIndexSnapshot = trustIndex;
 
             updatedDog = {
               ...dog,
@@ -763,6 +785,11 @@ export const useDogStore = create<DogStoreState>()(
             const nextBeh = updateCategorySnapshot(existing.behaviorIndexSnapshot, 'behavior');
             const nextZks = updateCategorySnapshot(existing.zksIndexSnapshot ?? 0, 'zks');
             const nextSport = updateCategorySnapshot(existing.sportIndexSnapshot ?? 0, 'sport');
+            const nextAttention = updateCategorySnapshot(
+              existing.attentionIndexSnapshot ?? 0,
+              'attention'
+            );
+            const nextTrust = updateCategorySnapshot(existing.trustIndexSnapshot ?? 0, 'trust');
 
             const activeTraining: number[] = [];
             if (nextOkd > 0 || nextSession.scores.some((s) => s.category === 'okd')) {
@@ -773,6 +800,12 @@ export const useDogStore = create<DogStoreState>()(
             }
             if (nextSport > 0 || nextSession.scores.some((s) => s.category === 'sport')) {
               activeTraining.push(nextSport);
+            }
+            if (nextAttention > 0 || nextSession.scores.some((s) => s.category === 'attention')) {
+              activeTraining.push(nextAttention);
+            }
+            if (nextTrust > 0 || nextSession.scores.some((s) => s.category === 'trust')) {
+              activeTraining.push(nextTrust);
             }
 
             const hasBeh = nextBeh > 0 || nextSession.scores.some((s) => s.category === 'behavior');
@@ -791,6 +824,8 @@ export const useDogStore = create<DogStoreState>()(
             nextSession.behaviorIndexSnapshot = nextBeh;
             nextSession.zksIndexSnapshot = nextZks;
             nextSession.sportIndexSnapshot = nextSport;
+            nextSession.attentionIndexSnapshot = nextAttention;
+            nextSession.trustIndexSnapshot = nextTrust;
             nextSession.overallIndexSnapshot = nextOverall;
           }
         }
@@ -935,12 +970,19 @@ export const useDogStore = create<DogStoreState>()(
           state.resetToDemoData();
           return;
         }
+        const hasAllBuiltinDisciplines =
+          Array.isArray(state.disciplines) &&
+          DEFAULT_DISCIPLINES.every((d) =>
+            state.disciplines.some((item) => item.id === d.id)
+          );
         const hasAllBuiltinCmds =
           Boolean(state.disciplineCommands?.okd) &&
           Boolean(state.disciplineCommands?.zks) &&
           Boolean(state.disciplineCommands?.sport) &&
-          Boolean(state.disciplineCommands?.behavior);
-        if (!state.disciplines || state.disciplines.length === 0 || !hasAllBuiltinCmds) {
+          Boolean(state.disciplineCommands?.behavior) &&
+          Boolean(state.disciplineCommands?.attention) &&
+          Boolean(state.disciplineCommands?.trust);
+        if (!hasAllBuiltinDisciplines || !hasAllBuiltinCmds) {
           state.disciplines = mergeDisciplines(state.disciplines);
           state.disciplineCommands = mergeDisciplineCommands(state.disciplineCommands);
         }

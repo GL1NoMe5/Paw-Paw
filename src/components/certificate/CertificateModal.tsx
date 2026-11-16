@@ -159,6 +159,7 @@ const DIPLOMA_COURSE_OPTIONS = [
   'Общий курс дрессировки (ОКД)',
   'Защитно-караульная служба (ЗКС)',
   'Курс «Активный спорт»',
+  'Курс «Контакт, внимание и доверие»',
   'Курс городской управляемости и коррекции поведения',
 ] as const;
 
@@ -166,7 +167,10 @@ function getDefaultCourseForDog(dog: Dog): string {
   if (dog.skills.some((s) => s.category === 'okd')) return DIPLOMA_COURSE_OPTIONS[0];
   if (dog.skills.some((s) => s.category === 'zks')) return DIPLOMA_COURSE_OPTIONS[1];
   if (dog.skills.some((s) => s.category === 'sport')) return DIPLOMA_COURSE_OPTIONS[2];
-  if (dog.skills.some((s) => s.category === 'behavior')) return DIPLOMA_COURSE_OPTIONS[3];
+  if (dog.skills.some((s) => s.category === 'attention' || s.category === 'trust')) {
+    return DIPLOMA_COURSE_OPTIONS[3];
+  }
+  if (dog.skills.some((s) => s.category === 'behavior')) return DIPLOMA_COURSE_OPTIONS[4];
   return DIPLOMA_COURSE_OPTIONS[0];
 }
 
@@ -1332,6 +1336,7 @@ export const DiplomaStudio: React.FC<DiplomaStudioProps> = ({
   const certificateRef = useRef<HTMLDivElement | null>(null);
 
   const selectedCourse = courseByDogId[dog.id] ?? getDefaultCourseForDog(dog);
+  const hasOkdSkills = dog.skills.some((s) => s.category === 'okd');
   const officialGenderTitle = getOfficialGenderTitle(dog.gender);
   const activePalette =
     DIPLOMA_PALETTES[certificateConfig.paletteId] ?? DIPLOMA_PALETTES.sand_gold;
@@ -1498,7 +1503,11 @@ export const DiplomaStudio: React.FC<DiplomaStudioProps> = ({
             id={`${idPrefix}-include-okd`}
             checked={certificateConfig.includeOkdPercent}
             onChange={(checked) => updateCertificateConfig({ includeOkdPercent: checked })}
-            label="Показывать процент сдачи ОКД"
+            label={
+              hasOkdSkills
+                ? 'Показывать процент сдачи ОКД'
+                : 'Показывать результат аттестации'
+            }
           />
 
           <DiplomaCheckbox

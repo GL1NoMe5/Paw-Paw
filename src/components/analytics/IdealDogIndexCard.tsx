@@ -28,8 +28,15 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
   className,
   onNavigateToAnalytics,
 }) => {
-  const { overallIndex, okdIndex, behaviorIndex, zksIndex, sportIndex } =
-    calculateOverallDogIndex(dog.skills);
+  const {
+    overallIndex,
+    okdIndex,
+    behaviorIndex,
+    zksIndex,
+    sportIndex,
+    attentionIndex,
+    trustIndex,
+  } = calculateOverallDogIndex(dog.skills);
   const currentRank = getDogRank(overallIndex);
 
   const currentRankIndex = DOG_RANKS.findIndex((r) => r.title === currentRank.title);
@@ -61,6 +68,18 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
       value: sportIndex,
     },
     {
+      id: 'attention',
+      label: 'Внимание',
+      count: dog.skills.filter((s) => s.category === 'attention').length,
+      value: attentionIndex,
+    },
+    {
+      id: 'trust',
+      label: 'Доверие',
+      count: dog.skills.filter((s) => s.category === 'trust').length,
+      value: trustIndex,
+    },
+    {
       id: 'behavior',
       label: 'Поведение',
       count: dog.skills.filter((s) => s.category === 'behavior').length,
@@ -72,7 +91,7 @@ export const IdealDogIndexCard: React.FC<IdealDogIndexCardProps> = ({
   const visibleMetrics =
     activeDisciplineMetrics.length > 0
       ? activeDisciplineMetrics
-      : [allDisciplineMetrics[0], allDisciplineMetrics[3]];
+      : [allDisciplineMetrics[0], allDisciplineMetrics[allDisciplineMetrics.length - 1]];
 
   return (
     <div

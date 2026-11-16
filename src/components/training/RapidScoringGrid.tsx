@@ -33,6 +33,8 @@ const BUILTIN_CATEGORY_TABS: ReadonlyArray<{
   { id: 'okd', tabLabel: 'ОКД', badgeLabel: 'ОКД' },
   { id: 'zks', tabLabel: 'ЗКС', badgeLabel: 'ЗКС' },
   { id: 'sport', tabLabel: 'Спорт', badgeLabel: 'Спорт' },
+  { id: 'attention', tabLabel: 'Внимание', badgeLabel: 'Внимание' },
+  { id: 'trust', tabLabel: 'Доверие', badgeLabel: 'Доверие' },
   { id: 'behavior', tabLabel: 'Коррекция', badgeLabel: 'Коррекция' },
 ];
 
@@ -40,6 +42,8 @@ const CATEGORY_BADGE_MAP: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Коррекция',
 };
 
@@ -363,7 +367,7 @@ export const RapidScoringGrid: React.FC<RapidScoringGridProps> = ({
           <div className="px-5 py-8 text-center text-xs text-[var(--text-muted)]">
             В выбранной категории у ученика пока нет добавленных команд. Используйте кнопку{' '}
             <span className="text-[var(--text-primary)] font-medium">«+ Добавить команду из наборов»</span>{' '}
-            выше, чтобы включить упражнения из ОКД, ЗКС, спорта или коррекции.
+            выше, чтобы включить упражнения из ОКД, ЗКС, спорта, внимания, доверия или коррекции.
           </div>
         ) : (
           filteredSkills.map((skill, index) => {

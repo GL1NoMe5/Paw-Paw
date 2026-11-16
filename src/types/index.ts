@@ -4,7 +4,7 @@ export type Gender = 'male' | 'female';
 
 export type MotivationType = 'food' | 'play' | 'social' | 'mixed';
 
-export type BuiltinDisciplineId = 'okd' | 'zks' | 'sport' | 'behavior';
+export type BuiltinDisciplineId = 'okd' | 'zks' | 'sport' | 'behavior' | 'attention' | 'trust';
 
 export type SkillCategory = BuiltinDisciplineId | (string & {});
 
@@ -138,6 +138,8 @@ export interface TrainingSession {
   behaviorIndexSnapshot: number;
   zksIndexSnapshot?: number;
   sportIndexSnapshot?: number;
+  attentionIndexSnapshot?: number;
+  trustIndexSnapshot?: number;
   homework: GeneratedHomework;
   nextSessionPlan: NextSessionPlan;
   trainerNotes: string;
@@ -150,7 +152,15 @@ export interface TrainerProfile {
   telegram?: string;
 }
 
-export type DogFilter = 'all' | 'active_okd' | 'zks' | 'sport' | 'behavior' | 'graduates';
+export type DogFilter =
+  | 'all'
+  | 'active_okd'
+  | 'zks'
+  | 'sport'
+  | 'behavior'
+  | 'attention'
+  | 'trust'
+  | 'graduates';
 
 export interface AppExportData {
   version: '1.0.0';
@@ -388,6 +398,44 @@ export const BEHAVIOR_PRESETS: DisciplineCommandTemplate[] = [
   },
 ];
 
+export const ATTENTION_PRESETS: DisciplineCommandTemplate[] = [
+  {
+    id: 'att_hook',
+    name: 'Крючок',
+    category: 'attention',
+    description:
+      'Плавный обход и переключение внимания на проводника с возвратом в рабочую позицию без натяжения поводка',
+    isCustom: false,
+  },
+  {
+    id: 'att_figure_eight',
+    name: 'Восьмерка',
+    category: 'attention',
+    description:
+      'Прохождение собаки по траектории восьмёрки вокруг ног проводника с непрерывным удержанием фокуса и контакта',
+    isCustom: false,
+  },
+  {
+    id: 'att_snake',
+    name: 'Змейка',
+    category: 'attention',
+    description:
+      'Движение змейкой между ног проводника на каждом шаге с высокой концентрацией на жестах и темпе ведущего',
+    isCustom: false,
+  },
+];
+
+export const TRUST_PRESETS: DisciplineCommandTemplate[] = [
+  {
+    id: 'trust_teeth',
+    name: 'Зубы',
+    category: 'trust',
+    description:
+      'Спокойный и доверительный показ зубов и прикуса по команде «Зубы» без зажима, рывков и сопротивления',
+    isCustom: false,
+  },
+];
+
 export const DEFAULT_DISCIPLINES: DisciplineInfo[] = [
   {
     id: 'okd',
@@ -428,5 +476,25 @@ export const DEFAULT_DISCIPLINES: DisciplineInfo[] = [
       'Системная работа с нежелательными реакциями в быту и на прогулке: натяжение поводка, реактивность на сородичей, подбор с земли, прыжки на людей, шумовые фобии и тревога расставания.',
     normsSummary:
       '8 ключевых паттернов · Снижение реактивности при плавном повышении уровня раздражителей среды.',
+  },
+  {
+    id: 'attention',
+    title: 'Команды для внимания',
+    shortTitle: 'Внимание',
+    subtitle: 'Контакт с проводником, фокус и синхронная работа в движении',
+    description:
+      'Упражнения на концентрацию и переключение внимания собаки на проводника: работа по дуге, проходы и движение в связке с человеком без потери фокуса.',
+    normsSummary:
+      '3 базовые команды · Плавное наведение, удержание зрительного контакта и чёткое следование за жестом проводника.',
+  },
+  {
+    id: 'trust',
+    title: 'Команды для доверия',
+    shortTitle: 'Доверие',
+    subtitle: 'Спокойный тактильный контакт, осмотр и уверенность рядом с человеком',
+    description:
+      'Упражнения на формирование доверия собаки к рукам проводника и специалиста: спокойное принятие прикосновений, осмотра пасти и близкого контакта без напряжения.',
+    normsSummary:
+      '1 базовый норматив · Доверительный показ зубов по команде «Зубы» без зажима, рывков и сопротивления.',
   },
 ];

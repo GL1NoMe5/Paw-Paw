@@ -35,6 +35,8 @@ const FILTER_TABS: Array<{ id: DogFilter; label: string }> = [
   { id: 'active_okd', label: 'ОКД' },
   { id: 'zks', label: 'ЗКС' },
   { id: 'sport', label: 'Активный спорт' },
+  { id: 'attention', label: 'Внимание' },
+  { id: 'trust', label: 'Доверие' },
   { id: 'behavior', label: 'Коррекция' },
   { id: 'graduates', label: 'Выпуск' },
 ];
@@ -43,6 +45,8 @@ const DISCIPLINE_SHORT_LABELS: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Коррекция',
 };
 
@@ -79,6 +83,8 @@ export const StudentsDirectoryView: React.FC<StudentsDirectoryViewProps> = ({
       active_okd: 0,
       zks: 0,
       sport: 0,
+      attention: 0,
+      trust: 0,
       behavior: 0,
       graduates: 0,
     };
@@ -86,6 +92,8 @@ export const StudentsDirectoryView: React.FC<StudentsDirectoryViewProps> = ({
       if (filterDogByCategory(dog, 'active_okd')) counts.active_okd += 1;
       if (filterDogByCategory(dog, 'zks')) counts.zks += 1;
       if (filterDogByCategory(dog, 'sport')) counts.sport += 1;
+      if (filterDogByCategory(dog, 'attention')) counts.attention += 1;
+      if (filterDogByCategory(dog, 'trust')) counts.trust += 1;
       if (filterDogByCategory(dog, 'behavior')) counts.behavior += 1;
       if (filterDogByCategory(dog, 'graduates')) counts.graduates += 1;
     }
@@ -291,7 +299,7 @@ export const StudentsDirectoryView: React.FC<StudentsDirectoryViewProps> = ({
             // Collect present discipline indicators in canonical order first
             const presentCategories: SkillCategory[] = [];
             const seen = new Set<string>();
-            for (const preferred of ['okd', 'zks', 'sport', 'behavior']) {
+            for (const preferred of ['okd', 'zks', 'sport', 'attention', 'trust', 'behavior']) {
               if (dog.skills.some((s) => s.category === preferred)) {
                 presentCategories.push(preferred);
                 seen.add(preferred);

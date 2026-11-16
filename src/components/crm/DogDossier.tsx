@@ -72,6 +72,8 @@ const DISCIPLINE_TITLES: Record<string, string> = {
   okd: 'Общий курс дрессировки (ОКД)',
   zks: 'Защитно-караульная служба (ЗКС)',
   sport: 'Активный спорт и ноузворк',
+  attention: 'Команды для внимания',
+  trust: 'Команды для доверия',
   behavior: 'Коррекция поведения',
 };
 
@@ -79,6 +81,8 @@ const DISCIPLINE_SHORT_LABELS: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Коррекция',
 };
 
@@ -586,7 +590,7 @@ const SessionInlineEditor: React.FC<SessionInlineEditorProps> = ({
             <span>
               {showLibraryPicker
                 ? 'Скрыть наборы команд'
-                : 'Добавить из наборов (ОКД / ЗКС / Спорт / Коррекция)'}
+                : 'Добавить из наборов дисциплин'}
             </span>
           </button>
         </div>
@@ -903,9 +907,16 @@ export const DogDossier: React.FC<DogDossierProps> = ({
   const dogRank = getDogRank(overallIndex);
   const motivationLabel = MOTIVATION_LABELS[dog.motivationType] || MOTIVATION_LABELS.food;
 
-  // Group dog skills across ALL 4 disciplines + any custom category, hiding empty sections
+  // Group dog skills across ALL disciplines + any custom category, hiding empty sections
   const skillGroups = useMemo(() => {
-    const canonicalOrder: SkillCategory[] = ['okd', 'zks', 'sport', 'behavior'];
+    const canonicalOrder: SkillCategory[] = [
+      'okd',
+      'zks',
+      'sport',
+      'attention',
+      'trust',
+      'behavior',
+    ];
     for (const d of disciplines) {
       if (!canonicalOrder.includes(d.id)) {
         canonicalOrder.push(d.id);

@@ -30,6 +30,8 @@ const TAB_LABELS: Record<string, string> = {
   zks: 'ЗКС',
   sport: 'Активный спорт',
   behavior: 'Коррекция поведения',
+  attention: 'Для внимания',
+  trust: 'Для доверия',
 };
 
 interface BuilderBodyProps {
@@ -499,7 +501,7 @@ export const DisciplineCommandBuilderModal: React.FC<
                 Конструктор наборов команд
               </Dialog.Title>
               <Dialog.Description className="text-[12.5px] text-[var(--text-secondary)] mt-0.5">
-                Добавляйте, изменяйте и упорядочивайте команды по всем четырём направлениям
+                Добавляйте, изменяйте и упорядочивайте команды по всем направлениям
               </Dialog.Description>
             </div>
 

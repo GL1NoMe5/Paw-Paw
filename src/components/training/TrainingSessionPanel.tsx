@@ -68,6 +68,8 @@ const SHORT_CATEGORY_LABELS: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Коррекция',
 };
 
@@ -631,6 +633,28 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                     </span>
                   </>
                 )}
+                {(completedSession.attentionIndexSnapshot ?? 0) > 0 && (
+                  <>
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span>
+                      Внимание:{' '}
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
+                        {completedSession.attentionIndexSnapshot}%
+                      </span>
+                    </span>
+                  </>
+                )}
+                {(completedSession.trustIndexSnapshot ?? 0) > 0 && (
+                  <>
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span>
+                      Доверие:{' '}
+                      <span className="font-mono tabular-nums font-medium text-[var(--text-primary)]">
+                        {completedSession.trustIndexSnapshot}%
+                      </span>
+                    </span>
+                  </>
+                )}
                 {completedSession.timerData?.stayDurationSeconds ? (
                   <>
                     <span className="text-[var(--text-muted)]">•</span>
@@ -989,7 +1013,7 @@ export const TrainingSessionPanel: React.FC<TrainingSessionPanelProps> = ({
                   )}
                 >
                   <Plus className="size-3.5 stroke-[1.6]" />
-                  <span>Добавить команду из наборов (ОКД / ЗКС / Спорт / Поведение)</span>
+                  <span>Добавить команду из наборов дисциплин</span>
                   {isCommandPickerOpen ? (
                     <ChevronUp className="size-3.5 stroke-[1.5]" />
                   ) : (

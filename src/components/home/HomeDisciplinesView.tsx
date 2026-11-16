@@ -24,6 +24,8 @@ function mapDisciplineToStudentFilter(disciplineId: SkillCategory): DogFilter {
   if (disciplineId === 'zks') return 'zks';
   if (disciplineId === 'sport') return 'sport';
   if (disciplineId === 'behavior') return 'behavior';
+  if (disciplineId === 'attention') return 'attention';
+  if (disciplineId === 'trust') return 'trust';
   return 'all';
 }
 
@@ -31,7 +33,7 @@ function getDisciplineDotTone(disciplineId: SkillCategory): string {
   if (disciplineId === 'okd' || disciplineId === 'behavior') {
     return 'bg-[var(--accent-forest)]';
   }
-  if (disciplineId === 'sport') {
+  if (disciplineId === 'sport' || disciplineId === 'trust') {
     return 'bg-[var(--accent-terracotta)]';
   }
   return 'bg-[var(--accent-ochre)]';

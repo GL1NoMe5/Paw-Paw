@@ -109,7 +109,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
               className="[&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:pt-1 [&_[cmdk-group-heading]]:text-[12px] [&_[cmdk-group-heading]]:text-[var(--text-muted)]"
             >
               <Command.Item
-                value="Главная направления дрессировки ОКД ЗКС спорт коррекция"
+                value="Главная направления дрессировки ОКД ЗКС спорт внимание доверие коррекция"
                 onSelect={() => runAndClose(() => onNavigateSection('home'))}
                 className="h-9 px-2.5 rounded-[8px] flex items-center gap-2.5 text-[14px] text-[var(--text-secondary)] data-[selected=true]:bg-[var(--bg-hover)] data-[selected=true]:text-[var(--text-primary)] cursor-pointer transition-colors"
               >
@@ -143,7 +143,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
               {onOpenCommandBuilder && (
                 <Command.Item
-                  value="Настроить набор команд конструктор ОКД ЗКС спорт поведение"
+                  value="Настроить набор команд конструктор ОКД ЗКС спорт внимание доверие поведение"
                   onSelect={() => runAndClose(() => onOpenCommandBuilder('okd'))}
                   className="h-9 px-2.5 rounded-[8px] flex items-center gap-2.5 text-[14px] text-[var(--text-secondary)] data-[selected=true]:bg-[var(--bg-hover)] data-[selected=true]:text-[var(--text-primary)] cursor-pointer transition-colors"
                 >

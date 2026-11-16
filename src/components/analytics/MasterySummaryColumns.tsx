@@ -12,6 +12,8 @@ const CATEGORY_SHORT_LABELS: Record<string, string> = {
   okd: 'ОКД',
   zks: 'ЗКС',
   sport: 'Спорт',
+  attention: 'Внимание',
+  trust: 'Доверие',
   behavior: 'Поведение',
 };
 

@@ -37,10 +37,14 @@ export interface ChartDataPoint {
   behaviorIndex: number;
   zksIndex: number | null;
   sportIndex: number | null;
+  attentionIndex: number | null;
+  trustIndex: number | null;
   hasBehaviorSkills: boolean;
   hasOkdSkills: boolean;
   hasZksSkills: boolean;
   hasSportSkills: boolean;
+  hasAttentionSkills: boolean;
+  hasTrustSkills: boolean;
 }
 
 interface ChartThemePalette {
@@ -52,6 +56,8 @@ interface ChartThemePalette {
   okd: string;
   zks: string;
   sport: string;
+  attention: string;
+  trust: string;
   behavior: string;
 }
 
@@ -65,6 +71,8 @@ function getChartPalette(isDark: boolean): ChartThemePalette {
     okd: isDark ? '#ebe3d6' : '#221c15',
     zks: isDark ? '#e19b56' : '#b06728',
     sport: isDark ? '#7da6c4' : '#4a6b82',
+    attention: isDark ? '#b590bf' : '#765480',
+    trust: isDark ? '#d98d83' : '#a85247',
     behavior: isDark ? '#a69c8e' : '#8a8175',
   };
 }
@@ -86,7 +94,11 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, palette 
   const data = payload[0]?.payload;
   if (!data) return null;
 
-  const showBaselinePair = !data.hasZksSkills && !data.hasSportSkills;
+  const showBaselinePair =
+    !data.hasZksSkills &&
+    !data.hasSportSkills &&
+    !data.hasAttentionSkills &&
+    !data.hasTrustSkills;
 
   const rows: Array<{
     key: string;
@@ -128,6 +140,24 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, palette 
       label: 'Активный спорт',
       color: palette.sport,
       valueText: data.sportIndex !== null ? `${data.sportIndex}%` : '—',
+    });
+  }
+
+  if (data.hasAttentionSkills) {
+    rows.push({
+      key: 'attention',
+      label: 'Команды для внимания',
+      color: palette.attention,
+      valueText: data.attentionIndex !== null ? `${data.attentionIndex}%` : '—',
+    });
+  }
+
+  if (data.hasTrustSkills) {
+    rows.push({
+      key: 'trust',
+      label: 'Команды для доверия',
+      color: palette.trust,
+      valueText: data.trustIndex !== null ? `${data.trustIndex}%` : '—',
     });
   }
 
@@ -228,6 +258,27 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
     [dog.skills, dogSessions]
   );
 
+  const hasAttentionSkills = useMemo(
+    () =>
+      dog.skills.some((s) => s.category === 'attention') ||
+      dogSessions.some(
+        (s) =>
+          (s.attentionIndexSnapshot ?? 0) > 0 ||
+          s.scores.some((sc) => sc.category === 'attention')
+      ),
+    [dog.skills, dogSessions]
+  );
+
+  const hasTrustSkills = useMemo(
+    () =>
+      dog.skills.some((s) => s.category === 'trust') ||
+      dogSessions.some(
+        (s) =>
+          (s.trustIndexSnapshot ?? 0) > 0 || s.scores.some((sc) => sc.category === 'trust')
+      ),
+    [dog.skills, dogSessions]
+  );
+
   const hasBehaviorSkills = useMemo(
     () =>
       dog.skills.some((s) => s.category === 'behavior') ||
@@ -264,6 +315,14 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
         session.sportIndexSnapshot !== undefined &&
         (session.sportIndexSnapshot > 0 ||
           session.scores.some((sc) => sc.category === 'sport'));
+      const hasSessionAttention =
+        session.attentionIndexSnapshot !== undefined &&
+        (session.attentionIndexSnapshot > 0 ||
+          session.scores.some((sc) => sc.category === 'attention'));
+      const hasSessionTrust =
+        session.trustIndexSnapshot !== undefined &&
+        (session.trustIndexSnapshot > 0 ||
+          session.scores.some((sc) => sc.category === 'trust'));
 
       return {
         id: session.id,
@@ -278,13 +337,25 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
         behaviorIndex: session.behaviorIndexSnapshot,
         zksIndex: hasSessionZks ? (session.zksIndexSnapshot ?? 0) : null,
         sportIndex: hasSessionSport ? (session.sportIndexSnapshot ?? 0) : null,
+        attentionIndex: hasSessionAttention ? (session.attentionIndexSnapshot ?? 0) : null,
+        trustIndex: hasSessionTrust ? (session.trustIndexSnapshot ?? 0) : null,
         hasBehaviorSkills,
         hasOkdSkills,
         hasZksSkills,
         hasSportSkills,
+        hasAttentionSkills,
+        hasTrustSkills,
       };
     });
-  }, [dogSessions, hasBehaviorSkills, hasOkdSkills, hasZksSkills, hasSportSkills]);
+  }, [
+    dogSessions,
+    hasBehaviorSkills,
+    hasOkdSkills,
+    hasZksSkills,
+    hasSportSkills,
+    hasAttentionSkills,
+    hasTrustSkills,
+  ]);
 
   const toggleLine = (dataKey: string) => {
     setHiddenLines((prev) => ({
@@ -337,13 +408,16 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
   const latestPoint = chartData[chartData.length - 1];
   const firstPoint = chartData[0];
   const deltaFromStart = latestPoint.overallIndex - firstPoint.overallIndex;
-  const showBaselinePair = !hasZksSkills && !hasSportSkills;
+  const showBaselinePair =
+    !hasZksSkills && !hasSportSkills && !hasAttentionSkills && !hasTrustSkills;
 
   const activeSeriesLabels = [
     'Общий индекс',
     ...(hasOkdSkills || showBaselinePair ? ['курс ОКД'] : []),
     ...(hasZksSkills ? ['ЗКС'] : []),
     ...(hasSportSkills ? ['активный спорт'] : []),
+    ...(hasAttentionSkills ? ['команды для внимания'] : []),
+    ...(hasTrustSkills ? ['команды для доверия'] : []),
     ...(hasBehaviorSkills || showBaselinePair ? ['коррекция поведения'] : []),
   ];
 
@@ -510,6 +584,38 @@ export const AnalyticsChart: React.FC<AnalyticsChartProps> = ({
                 hide={hiddenLines.sportIndex}
                 dot={{ r: 3, stroke: palette.sport, strokeWidth: 1.5, fill: palette.dotFill }}
                 activeDot={{ r: 4.5, fill: palette.sport, stroke: palette.dotFill, strokeWidth: 1.5 }}
+              />
+            )}
+
+            {/* Attention Line: Команды для внимания */}
+            {hasAttentionSkills && (
+              <Line
+                type="monotone"
+                dataKey="attentionIndex"
+                name="Команды для внимания"
+                stroke={palette.attention}
+                strokeWidth={1.5}
+                strokeDasharray="5 2"
+                connectNulls
+                hide={hiddenLines.attentionIndex}
+                dot={{ r: 3, stroke: palette.attention, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.attention, stroke: palette.dotFill, strokeWidth: 1.5 }}
+              />
+            )}
+
+            {/* Trust Line: Команды для доверия */}
+            {hasTrustSkills && (
+              <Line
+                type="monotone"
+                dataKey="trustIndex"
+                name="Команды для доверия"
+                stroke={palette.trust}
+                strokeWidth={1.5}
+                strokeDasharray="3 2"
+                connectNulls
+                hide={hiddenLines.trustIndex}
+                dot={{ r: 3, stroke: palette.trust, strokeWidth: 1.5, fill: palette.dotFill }}
+                activeDot={{ r: 4.5, fill: palette.trust, stroke: palette.dotFill, strokeWidth: 1.5 }}
               />
             )}
 
